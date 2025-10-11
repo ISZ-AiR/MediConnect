@@ -1,0 +1,22 @@
+FROM node:24-alpine
+
+WORKDIR /frontend
+
+# Copy package files first for better layer caching
+COPY package*.json ./
+
+# Install dependencies properly for Alpine Linux
+RUN npm ci --include=optional
+
+# Copy application files (excluding node_modules via .dockerignore)
+COPY . .
+
+# Accept build arguments for Vite environment variables
+ARG VITE_APP_API_URL
+
+# Set them as environment variables
+ENV VITE_APP_API_URL=$VITE_APP_API_URL
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host"]
