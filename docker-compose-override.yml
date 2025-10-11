@@ -1,0 +1,19 @@
+name: medi-connect-dev
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: backend-dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/backend/app
+    networks:
+      - med-network
+
+
+networks:
+  med-network:
+    driver: bridge
