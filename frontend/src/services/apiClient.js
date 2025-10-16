@@ -1,5 +1,76 @@
 import { API_BASE_URL } from "../constants";
 
+// --- Authentication Helper Functions ---
+
+/**
+ * Get the authentication token from localStorage
+ * @returns {string|null} The auth token or null if not found
+ */
+const getAuthToken = () => {
+  try {
+    return localStorage.getItem("authToken") || localStorage.getItem("token");
+  } catch (error) {
+    console.error("Error reading auth token:", error);
+    return null;
+  }
+};
+
+/**
+ * Check if a JWT token is expired
+ * @param {string} token - The JWT token to check
+ * @returns {boolean} True if expired, false otherwise
+ */
+const isTokenExpired = (token) => {
+  try {
+    // JWT tokens have 3 parts separated by dots
+    const parts = token.split(".");
+    if (parts.length !== 3) return true;
+
+    // Decode the payload (second part)
+    const payload = JSON.parse(atob(parts[1]));
+
+    // Check expiration (exp is in seconds, Date.now() is in milliseconds)
+    if (!payload.exp) return false; // No expiration claim
+
+    return payload.exp * 1000 < Date.now();
+  } catch (error) {
+    console.error("Error checking token expiration:", error);
+    return true; // Treat as expired if we can't parse it
+  }
+};
+
+/**
+ * Clear all authentication data from localStorage
+ * Removes tokens and any user-related data
+ */
+const clearAuthData = () => {
+  try {
+    // Remove common auth-related items
+    const authKeys = [
+      "authToken",
+      "token",
+      "accessToken",
+      "refreshToken",
+      "user",
+      "userData",
+      "userProfile",
+    ];
+
+    authKeys.forEach((key) => {
+      localStorage.removeItem(key);
+    });
+
+    // Also clear sessionStorage if you use it
+    sessionStorage.clear();
+
+    if (isDevelopment) {
+      console.log("🧹 Auth data cleared from storage");
+    }
+  } catch (error) {
+    console.error("Error clearing auth data:", error);
+  }
+};
+
 // Helper function to get default headers
 export const getHeaders = (includeAuth = true, isFormData = false) => {
   const headers = {};
