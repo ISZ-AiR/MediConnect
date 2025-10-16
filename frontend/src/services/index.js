@@ -1,10 +1,10 @@
-export { healthService } from "./healthService";
-
-// Export core utilities if needed elsewhere
-export { apiRequest } from "./apiClient";
-
 import { healthService } from "./healthService";
+import { apiRequest } from "./apiClient";
 
+// Named exports
+export { healthService, apiRequest };
+
+// Default export
 export default {
   health: healthService,
 };
