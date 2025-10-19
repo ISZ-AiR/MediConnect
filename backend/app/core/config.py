@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file="../../../.env")
 
     DATABASE_URL: str
+    FRONTEND_URL: str
+    VITE_APP_API_URL: str
 
 
 settings = Settings()
