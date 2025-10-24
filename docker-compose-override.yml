@@ -33,12 +33,12 @@ services:
       - med-network
 
   med-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: postgres-dev
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: medicconnect
+      POSTGRES_DB: mediconnect
     ports:
       - "5432:5432"
     volumes:
