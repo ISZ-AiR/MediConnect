@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from user_schema import UserBase
+from schemas.user_schema import UserBase
 
 # ----- NURSE -----
 
