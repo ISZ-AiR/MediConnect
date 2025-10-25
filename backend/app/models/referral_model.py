@@ -18,3 +18,4 @@ class Referral(Base):
     visit = relationship("Visit", back_populates="referral")
     patient = relationship("Patient", back_populates="referral")
     examination = relationship("Examination", back_populates="referral")
+    doctor = relationship("Doctor", back_populates="referral")

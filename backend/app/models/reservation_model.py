@@ -16,3 +16,4 @@ class Reservation(Base):
     patient = relationship("Patient", back_populates="reservation")
     doctor = relationship("Doctor", back_populates="reservation")
     nurse = relationship("Nurse", back_populates="reservation")
+    visit = relationship("Visit", back_populates="reservation")

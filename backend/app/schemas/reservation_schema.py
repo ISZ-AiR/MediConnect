@@ -33,4 +33,4 @@ class ReservationModel(ReservationBase):
                           description="ID of the nurse assisting with the appointment")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

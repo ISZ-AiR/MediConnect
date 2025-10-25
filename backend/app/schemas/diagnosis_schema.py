@@ -32,4 +32,4 @@ class DiagnosisModel(DiagnosisBase):
                             description="ID of the disease that was diagnosed")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

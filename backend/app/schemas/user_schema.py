@@ -29,4 +29,4 @@ class UserModel(UserBase):
     user_id: int = Field(..., description="Unique identifier for the user")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

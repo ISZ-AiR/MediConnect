@@ -13,6 +13,7 @@ class Doctor(Base):
 
     user = relationship("User", back_populates="doctor")
     reservation = relationship("Reservation", back_populates="doctor")
+    referral = relationship("Referral", back_populates="doctor")
 
 
 

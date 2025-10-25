@@ -24,4 +24,4 @@ class NurseModel(NurseBase):
     user_id: int = Field(..., description="ID of the associated user account")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

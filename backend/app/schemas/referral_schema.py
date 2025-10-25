@@ -37,4 +37,4 @@ class ReferralModel(ReferralBase):
                            description="ID of the doctor who issued the referral")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

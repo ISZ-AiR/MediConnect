@@ -27,4 +27,4 @@ class DiseaseModel(DiseaseBase):
                             description="Unique identifier for the disease")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

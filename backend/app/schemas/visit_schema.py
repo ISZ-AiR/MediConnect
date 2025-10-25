@@ -27,4 +27,4 @@ class VisitModel(VisitBase):
         ..., description="ID of the reservation that was converted to this visit")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

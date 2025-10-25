@@ -29,4 +29,4 @@ class PrescriptionModel(PrescriptionBase):
                           description="ID of the visit during which prescription was issued")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -27,4 +27,4 @@ class ExaminationModel(ExaminationBase):
                                 description="Unique identifier for the examination")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
