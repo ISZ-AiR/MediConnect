@@ -10,6 +10,10 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/app:/backend/app
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - VITE_APP_API_URL=${VITE_APP_API_URL}
     networks:
       - med-network
 
@@ -29,12 +33,12 @@ services:
       - med-network
 
   med-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: postgres-dev
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: medicconnect
+      POSTGRES_DB: mediconnect
     ports:
       - "5432:5432"
     volumes:

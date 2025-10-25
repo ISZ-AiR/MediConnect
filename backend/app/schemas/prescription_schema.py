@@ -1,0 +1,32 @@
+from pydantic import BaseModel, Field
+
+# ----- PRESCRIPTION -----
+
+
+class PrescriptionBase(BaseModel):
+    """
+    Base schema for prescription information.
+
+    Contains medication details and usage instructions prescribed by a doctor.
+    """
+    medication: str = Field(..., description="Name of the prescribed medication",
+                            example="Amoxicillin")
+    dosage: str = Field(..., description="Dosage and frequency",
+                        example="500mg twice daily")
+    instruction: str = Field(..., description="Detailed instructions for taking the medication",
+                             example="Take with food, complete full course")
+
+
+class PrescriptionModel(PrescriptionBase):
+    """
+    Complete prescription schema including database identifiers.
+
+    Used for retrieving prescription information from the database.
+    """
+    prescription_id: int = Field(...,
+                                 description="Unique identifier for the prescription")
+    visit_id: int = Field(...,
+                          description="ID of the visit during which prescription was issued")
+
+    class Config:
+        from_attributes = True
