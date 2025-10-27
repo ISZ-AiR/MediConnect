@@ -16,6 +16,7 @@ class User(Base):
     doctor = relationship("Doctor", back_populates="user", uselist=False)
     nurse = relationship("Nurse", back_populates="user", uselist=False)
     patient = relationship("Patient", back_populates="user", uselist=False)
+    receptionist = relationship("Receptionist", back_populates="user", uselist=False)
 
 
 
