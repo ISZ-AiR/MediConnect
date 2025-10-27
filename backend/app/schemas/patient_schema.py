@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import date
+from schemas.user_schema import UserBase
 
 
 # ----- PATIENT -----
@@ -27,3 +28,7 @@ class PatientModel(PatientBase):
 
     class Config:
         from_attributes = True
+
+
+class PatientCreate(UserBase, PatientBase):
+    password: str = Field(..., description="Password for patient account", example="user123")
