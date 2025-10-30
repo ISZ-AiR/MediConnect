@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from schemas.user_schema import UserBase
 
 # ----- NURSE -----
 
@@ -25,3 +26,11 @@ class NurseModel(NurseBase):
 
     class Config:
         from_attributes = True
+
+
+class NurseCreate(UserBase):
+    """
+    Data required for Nurse creation
+    Includes nurse-specific credentials.
+    """
+    password: str = Field(..., description="Password for user account", example="secret123")

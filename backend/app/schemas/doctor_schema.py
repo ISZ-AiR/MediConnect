@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from schemas.user_schema import UserBase
 
 
 # ----- DOCTOR -----
@@ -26,3 +27,12 @@ class DoctorModel(DoctorBase):
 
     class Config:
         from_attributes = True
+
+
+class DoctorCreate(UserBase, DoctorBase):
+    """
+    Data needed to create a new doctor information.
+    Includes professional credentials and specialization details.
+    Additionally, a password to be hashed.
+    """
+    password: str = Field(..., description="Password for user account", example="secret123")
