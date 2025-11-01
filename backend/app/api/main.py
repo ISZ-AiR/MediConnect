@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-from .routers import (health_router, doctor_router, nurse_router, referral_router, visit_router)
+from .routers import (health_router, doctor_router, nurse_router,
+                      referral_router, visit_router, prescription_router)
 
 api_router = APIRouter()
 
@@ -11,3 +12,5 @@ api_router.include_router(nurse_router.router)
 api_router.include_router(referral_router.router)
 
 api_router.include_router(visit_router.router)
+
+api_router.include_router(prescription_router.router)
