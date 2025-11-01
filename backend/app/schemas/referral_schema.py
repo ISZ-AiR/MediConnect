@@ -38,3 +38,14 @@ class ReferralModel(ReferralBase):
 
     class Config:
         from_attributes = True
+
+
+class ReferralCreate(ReferralBase):
+    """
+    Schema used when creating a new referral.
+    Excludes the referral_id, which is generated automatically.
+    """
+    visit_id: int
+    patient_id: int
+    examination_id: int
+    doctor_id: int

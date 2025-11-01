@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from core import Base
+from core.database import Base
 
 
 class Nurse(Base):
@@ -11,3 +11,4 @@ class Nurse(Base):
 
     user = relationship("User", back_populates="nurse")
     reservation = relationship("Reservation", back_populates="nurse")
+    visits = relationship("Visit", back_populates="nurse")
