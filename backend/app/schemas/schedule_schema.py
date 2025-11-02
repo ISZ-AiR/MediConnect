@@ -19,3 +19,11 @@ class ScheduleModel(ScheduleBase):
 
     class Config:
         from_attributes = True
+
+class ScheduleUpdate(BaseModel):
+    """Schema for updating an existing schedule."""
+    schedule_date: date | None = None
+    start_time: time | None = None
+    end_time: time | None = None
+    is_available: bool | None = None
+    location: str | None = None

@@ -15,10 +15,10 @@ from models.doctor_model import Doctor
 from models.nurse_model import Nurse
 from models.receptionist_model import Receptionist
 from models.user_model import User
-from schemas.reservation_schema import ReservationModel, ReservationCreate
+from schemas.reservation_schema import ReservationModel, ReservationCreate, ReservationUpdate
 from .user_router import require_role
 
-router = APIRouter(prefix="/reservation", tags=["reservation"])
+router = APIRouter(prefix="/reservation", tags=["Reservations"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -99,6 +99,98 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
     await db.refresh(new_reservation)
 
     return new_reservation
+
+
+@router.get("/", response_model=list[ReservationModel], description="Get all reservations (receptionist only).")
+async def get_all_reservations(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Retrieve all reservations in the system."""
+    result = await db.execute(select(Reservation))
+    reservations = result.scalars().all()
+    return reservations
+
+
+@router.get("/{reservation_id}", response_model=ReservationModel, description="Get reservation details by ID.")
+async def get_reservation_by_id(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Retrieve a specific reservation."""
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+    return reservation
+
+
+@router.put("/{reservation_id}", response_model=ReservationModel, description="Update reservation details.")
+async def update_reservation(
+    reservation_id: int,
+    update_data: ReservationUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Update reservation information (receptionist only)."""
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+
+    # Update allowed fields
+    for field, value in update_data.model_dump(exclude_unset=True).items():
+        setattr(reservation, field, value)
+
+    await db.commit()
+    await db.refresh(reservation)
+    return reservation
+
+
+@router.post("/{reservation_id}/cancel", description="Cancel a reservation without deleting it.")
+async def cancel_reservation(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """
+    Cancel a reservation.
+    This does not delete the reservation, just sets `is_cancelled` to True.
+    """
+    # Fetch the reservation
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+
+    # Update the status
+    reservation.is_cancelled = True
+
+    # Save changes
+    await db.commit()
+    await db.refresh(reservation)
+
+    return {"status": "Reservation cancelled successfully", "reservation_id": reservation_id}
+
+
+# ----- DELETE -----
+@router.delete("/{reservation_id}", description="Delete or cancel a reservation.")
+async def delete_reservation(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Delete or cancel a reservation (receptionist only)."""
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+
+    await db.delete(reservation)
+    await db.commit()
+
+    return {"status": "Reservation deleted successfully"}
 
 
 def to_naive_utc(dt: datetime) -> datetime:

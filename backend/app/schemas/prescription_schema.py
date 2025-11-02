@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 # ----- PRESCRIPTION -----
 
@@ -30,3 +31,9 @@ class PrescriptionModel(PrescriptionBase):
 
     class Config:
         from_attributes = True
+
+
+class PrescriptionUpdate(BaseModel):
+    medication: Optional[str] = None
+    dosage: Optional[str] = None
+    instruction: Optional[str] = None

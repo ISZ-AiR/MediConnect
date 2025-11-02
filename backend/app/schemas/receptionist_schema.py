@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from schemas.user_schema import UserBase
+from typing import Literal
 
 # ----- RECEPTIONIST -----
 
@@ -33,3 +34,4 @@ class ReceptionistCreate(UserBase):
     Data required for Receptionist creation
     """
     password: str = Field(..., description="Password for user account", example="secret123")
+    role: Literal["receptionist"] = "receptionist"

@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from schemas.user_schema import UserBase
+from typing import Literal
 
 
 # ----- DOCTOR -----
@@ -36,3 +37,14 @@ class DoctorCreate(UserBase, DoctorBase):
     Additionally, a password to be hashed.
     """
     password: str = Field(..., description="Password for user account", example="secret123")
+    role: Literal["doctor"] = "doctor"
+
+
+class DoctorUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    password: str | None = None
+    specialization: str | None = None
+    license_number: str | None = None

@@ -29,3 +29,19 @@ class VisitModel(VisitBase):
 
     class Config:
         from_attributes = True
+
+
+class VisitUpdate(BaseModel):
+    """
+    Schema for updating a visit.
+    All fields are optional to allow partial updates.
+    """
+    visit_note: str = Field(
+        None, description="Notes from the visit"
+    )
+    visit_date: date = Field(
+        None, description="Date of the visit"
+    )
+    nurse_id: int = Field(
+        None, description="ID of the nurse responsible for the visit"
+    )

@@ -49,3 +49,25 @@ class ReferralCreate(ReferralBase):
     patient_id: int
     examination_id: int
     doctor_id: int
+
+
+from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import date
+
+class ReferralUpdate(BaseModel):
+    """
+    Schema for updating referral details.
+    All fields are optional, allowing partial updates.
+    """
+    visit_id: Optional[int] = Field(None, description="ID of the associated visit")
+    patient_id: Optional[int] = Field(None, description="ID of the patient")
+    examination_id: Optional[int] = Field(None, description="ID of the examination")
+    doctor_id: Optional[int] = Field(None, description="ID of the doctor issuing the referral")
+    referral_date: Optional[date] = Field(None, description="Date when the referral was issued")
+    notes: Optional[str] = Field(None, description="Additional notes or instructions for the referral")
+    is_completed: Optional[bool] = Field(None, description="Whether the referral has been completed")
+
+    class Config:
+        from_attributes = True
+

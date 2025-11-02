@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from core import get_db
 from models import User
 from api.routers.login_router import oauth2_scheme, SECRET_KEY, ALGORITHM
+from typing import Union, List
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -47,12 +48,23 @@ async def read_current_user(current_user: User = Depends(get_current_user)):
     }
 
 
-def require_role(role: str):
+def require_role(roles: Union[str, List[str]]):
+    """
+    Dependency that checks if the current user has one of the required roles.
+
+    :param roles: a role string or a list of role strings allowed
+    """
+    if isinstance(roles, str):
+        roles_list = [roles]
+    else:
+        roles_list = roles
+
     async def role_checker(current_user: User = Depends(get_current_user)):
-        if current_user.role != role:
+        if current_user.role not in roles_list:
             raise HTTPException(
                 status_code=403,
-                detail=f"Access denied. {role} role required."
+                detail=f"Access denied. Required role(s): {', '.join(roles_list)}."
             )
         return current_user
+
     return role_checker
