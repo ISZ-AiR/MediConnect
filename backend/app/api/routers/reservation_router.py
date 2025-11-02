@@ -29,12 +29,12 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
 
     # Check if the data is correct
     result = await db.execute(select(Patient).filter(Patient.patient_id == reservation.patient_id))
-    existing_patient = result.scalar_one_or_none()
+    existing_patient = result.scalars().all()
     if not existing_patient:
         raise HTTPException(status_code=400, detail="Patient record does not exist.")
 
     result = await db.execute(select(Doctor).filter(Doctor.doctor_id == reservation.doctor_id))
-    existing_doctor = result.scalar_one_or_none()
+    existing_doctor = result.scalars().all()
     if not existing_doctor:
         raise HTTPException(status_code=400, detail="Doctor record does not exist.")
 
@@ -63,7 +63,7 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
         )
     )
     result = await db.execute(stmt)
-    conflicting_reservation  = result.scalar_one_or_none()
+    conflicting_reservation  = result.scalars().all()
     if conflicting_reservation:
         raise HTTPException(status_code=400, detail="Doctor is not available at this time.")
 
@@ -77,12 +77,12 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
         )
     )
     result = await db.execute(stmt)
-    conflicting_reservation = result.scalar_one_or_none()
+    conflicting_reservation = result.scalars().all()
     if conflicting_reservation:
         raise HTTPException(status_code=400, detail="Conflicting reservation found.")
 
     result = await db.execute(select(Receptionist).where(Receptionist.user_id == current_user.user_id))
-    receptionist = result.scalar_one_or_none()
+    receptionist = result.scalars().all()
 
     # Create new reservation
     new_reservation = Reservation(
