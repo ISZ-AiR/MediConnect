@@ -5,7 +5,7 @@ from core.database import get_db
 from typing import Annotated
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt
 from sqlalchemy import select, and_
 
@@ -14,33 +14,18 @@ from models.patient_model import Patient
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
 from models.receptionist_model import Receptionist
+from models.user_model import User
 from schemas.reservation_schema import ReservationModel, ReservationCreate
+from .user_router import require_role
 
 router = APIRouter(prefix="/reservation", tags=["reservation"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    """
-    Decode the token.
-    """
-    try:
-        payload = jwt.decode(token, "your_secret_key", algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
-# TODO: Find a way to store tokens and test the create reservation function below
-"""
 @router.post("/create", response_model=ReservationModel)
-async def create_reservation(reservation: ReservationCreate, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-
-    # Check if the logged in user is permitted to make reservations
-    if current_user["role"] != "receptionist":
-        raise HTTPException(status_code=403, detail="Forbidden")
+async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
 
     # Check if the data is correct
     result = await db.execute(select(Patient).filter(Patient.patient_id == reservation.patient_id))
@@ -55,20 +40,25 @@ async def create_reservation(reservation: ReservationCreate, current_user=Depend
 
     # TODO: ?? Check if the nurse data is correct
 
-    # Check if the date is correct (is not in the past)
-    if reservation.reservation_time < datetime.now():
-        raise HTTPException(status_code=400, detail="The reservation time is in the future.")
+    raw_time = reservation.reservation_time
+    reservation_time = to_naive_utc(raw_time)
+
+    if reservation_time < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="The reservation time must be in the future.")
 
     # Check if the reservation is possible -- for the doctor and for the patient
     start_window = reservation.reservation_time - timedelta(minutes=15)
     end_window = reservation.reservation_time + timedelta(minutes=15)
 
+    start_time = to_naive_utc(start_window)
+    end_time = to_naive_utc(end_window)
+
     # for the doctor
     stmt = select(Reservation).where(
         and_(
             Reservation.doctor_id == reservation.doctor_id,
-            Reservation.reservation_time >= start_window,
-            Reservation.reservation_time <= end_window,
+            Reservation.reservation_time >= start_time,
+            Reservation.reservation_time <= end_time,
             Reservation.is_cancelled == False
         )
     )
@@ -81,8 +71,8 @@ async def create_reservation(reservation: ReservationCreate, current_user=Depend
     stmt = select(Reservation).where(
         and_(
             Reservation.patient_id == reservation.patient_id,
-            Reservation.reservation_time >= start_window,
-            Reservation.reservation_time <= end_window,
+            Reservation.reservation_time >= start_time,
+            Reservation.reservation_time <= end_time,
             Reservation.is_cancelled == False
         )
     )
@@ -91,13 +81,16 @@ async def create_reservation(reservation: ReservationCreate, current_user=Depend
     if conflicting_reservation:
         raise HTTPException(status_code=400, detail="Conflicting reservation found.")
 
+    result = await db.execute(select(Receptionist).where(Receptionist.user_id == current_user.user_id))
+    receptionist = result.scalar_one_or_none()
+
     # Create new reservation
     new_reservation = Reservation(
-        receptionist_id=current_user["user_id"],
+        receptionist_id=receptionist.receptionist_id,
         patient_id=reservation.patient_id,
         doctor_id=reservation.doctor_id,
         nurse_id=reservation.nurse_id,
-        reservation_time=reservation.date,
+        reservation_time=reservation_time,
         is_cancelled=reservation.is_cancelled,
     )
 
@@ -105,8 +98,14 @@ async def create_reservation(reservation: ReservationCreate, current_user=Depend
     await db.commit()
     await db.refresh(new_reservation)
 
-    return {"status": "Reservation created!", "id": new_reservation.reservation_id}
-"""
+    return new_reservation
+
+
+def to_naive_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
 
 
 

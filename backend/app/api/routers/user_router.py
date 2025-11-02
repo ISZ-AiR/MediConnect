@@ -45,3 +45,14 @@ async def read_current_user(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "role": current_user.role,
     }
+
+
+def require_role(role: str):
+    async def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role != role:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access denied. {role} role required."
+            )
+        return current_user
+    return role_checker

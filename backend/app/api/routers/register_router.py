@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy import select
+from .user_router import get_current_user, require_role
 
 from core import get_db
 from models import Patient, User
@@ -18,7 +19,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.post("/patient", response_model=PatientModel, description="Create your own patient account.")
-async def patient(new_patient: PatientCreate, db: Session = Depends(get_db)):
+async def patient(new_patient: PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
 
     # Check if the account already exists
     result = await db.execute(select(User).where(User.email == new_patient.email))
