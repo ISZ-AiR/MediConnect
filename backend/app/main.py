@@ -24,6 +24,11 @@ async def lifespan(app: FastAPI):
         # Initialize database tables on startup
         await create_tables(engine)
         logging.info("Database initialization completed successfully!")
+
+        # Create default admin user if needed
+        from core.init_db import create_default_admin
+        await create_default_admin()
+
     except Exception as e:
         logging.error(f"Failed to initialize database: {e}")
         raise

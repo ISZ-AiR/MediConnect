@@ -67,9 +67,21 @@ All services communicate through a shared bridge network: `med-network`.
    ```
 
 4. **Access the application**
+
    - Frontend: http://localhost:5173
    - Backend API docs: http://localhost:8000/docs
    - pgAdmin: http://localhost:5050
+
+5. **Login with default admin credentials**
+
+   ```
+   Email:    admin@mediconnect.com
+   Password: admin123
+   ```
+
+   ⚠️ **Note**: A default admin user is automatically created on first startup for testing purposes. Change these credentials in production!
+
+   See [DEFAULT_ADMIN.md](backend/DEFAULT_ADMIN.md) for more details.
 
 ### 📁 Project Structure
 

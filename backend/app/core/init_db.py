@@ -9,10 +9,64 @@ import asyncio
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy import select
+from passlib.context import CryptContext
 import models
 
 from .config import logger
-from .database import Base, engine
+from .database import Base, engine, async_session
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+async def create_default_admin() -> None:
+    """
+    Create a default admin user if no admin exists.
+
+    Default credentials:
+        Email: admin@mediconnect.com
+        Password: admin123
+    """
+    try:
+        async with async_session() as session:
+            # Check if any admin user exists
+            result = await session.execute(
+                select(models.User).where(models.User.role == "admin")
+            )
+            existing_admin = result.scalars().first()
+
+            if existing_admin:
+                logger.info(
+                    "Admin user already exists. Skipping default admin creation.")
+                return
+
+            # Create default admin user
+            logger.info("Creating default admin user...")
+            hashed_password = pwd_context.hash("admin123")
+
+            default_admin = models.User(
+                first_name="Admin",
+                last_name="User",
+                email="admin@mediconnect.com",
+                phone="+48123456789",
+                password_hash=hashed_password,
+                role="admin"
+            )
+
+            session.add(default_admin)
+            await session.commit()
+            await session.refresh(default_admin)
+
+            logger.info("✅ Default admin user created successfully!")
+            logger.info("   Email: admin@mediconnect.com")
+            logger.info("   Password: admin123")
+            logger.info(
+                "   ⚠️  IMPORTANT: Change this password in production!")
+
+    except Exception as e:
+        logger.error(f"Error creating default admin user: {e}")
+        raise
 
 
 async def create_tables(engine: AsyncEngine) -> None:
@@ -53,11 +107,12 @@ async def drop_tables(engine: AsyncEngine) -> None:
 
 async def init_db() -> None:
     """
-    Initialize the database by creating all tables.
+    Initialize the database by creating all tables and default admin user.
     """
     try:
         logger.info("Initializing database...")
         await create_tables(engine)
+        await create_default_admin()
         logger.info("Database initialization completed successfully!")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
@@ -69,12 +124,13 @@ async def init_db() -> None:
 
 async def init_db_without_dispose() -> None:
     """
-    Initialize the database by creating all tables without disposing the engine.
+    Initialize the database by creating all tables and default admin user without disposing the engine.
     Used when called from the main application.
     """
     try:
         logger.info("Initializing database...")
         await create_tables(engine)
+        await create_default_admin()
         logger.info("Database initialization completed successfully!")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")

@@ -14,26 +14,28 @@ from models import Patient, User
 from schemas.patient_schema import PatientModel, PatientCreate, PatientUpdate
 
 
-router = APIRouter(prefix="/register", tags=["Register"])
+router = APIRouter(prefix="/patients", tags=["Patients"])
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@router.post("/patient", response_model=PatientModel, description="Create your own patient account.")
-async def patient(new_patient: PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
+@router.post("/register", response_model=PatientModel, description="Create your own patient account.")
+async def patient(new_patient: PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
 
     # Check if the account already exists
     result = await db.execute(select(User).where(User.email == new_patient.email))
     patient = result.scalar_one_or_none()
 
     if patient:
-        raise HTTPException(status_code=400, detail="A patient with this email already exists.")
+        raise HTTPException(
+            status_code=400, detail="A patient with this email already exists.")
 
     # Check if the PESEL is already registered
     result = await db.execute(select(Patient).where(Patient.pesel == new_patient.pesel))
-    existing_pesel =  result.scalar_one_or_none()
+    existing_pesel = result.scalar_one_or_none()
     if existing_pesel:
-        raise HTTPException(status_code=400,detail="A patient with this PESEL already exists.")
+        raise HTTPException(
+            status_code=400, detail="A patient with this PESEL already exists.")
 
     # Create the user record
     hashed_password = pwd_context.hash(new_patient.password)
@@ -63,14 +65,14 @@ async def patient(new_patient: PatientCreate, db: Session = Depends(get_db), cur
 
 
 @router.get("/", response_model=list[PatientModel], description="Retrieve all patients.")
-async def get_all_patients(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
+async def get_all_patients(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
     result = await db.execute(select(Patient))
     patients = result.scalars().all()
     return patients
 
 
 @router.get("/{patient_id}", response_model=PatientModel, description="Retrieve a patient by ID.")
-async def get_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
+async def get_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()
     if not patient:
@@ -79,7 +81,7 @@ async def get_patient(patient_id: int, db: AsyncSession = Depends(get_db), curre
 
 
 @router.put("/{patient_id}", response_model=PatientModel, description="Update a patient's details.")
-async def update_patient(patient_id: int, patient_update: PatientUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
+async def update_patient(patient_id: int, patient_update: PatientUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()
     if not patient:
@@ -103,7 +105,7 @@ async def update_patient(patient_id: int, patient_update: PatientUpdate, db: Asy
 
 
 @router.delete("/{patient_id}", description="Delete a patient account.")
-async def delete_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
+async def delete_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()
     if not patient:

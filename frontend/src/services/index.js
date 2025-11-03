@@ -1,4 +1,6 @@
-import { healthService } from "./healthService";
+export { healthService } from "./healthService";
+export { authService } from "./authService";
+export { statsService } from "./statsService";
 import { apiRequest } from "./apiClient";
 
 // Named exports
