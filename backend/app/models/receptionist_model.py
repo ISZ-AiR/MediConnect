@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from core import Base
+from core.database import Base
 
 
 class Receptionist(Base):

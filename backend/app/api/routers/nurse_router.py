@@ -5,6 +5,7 @@ from core.database import get_db
 from models.user_model import User
 from models.nurse_model import Nurse
 from schemas.nurse_schema import NurseCreate, NurseModel
+from .user_router import require_role
 from passlib.hash import bcrypt
 
 router = APIRouter(
@@ -13,7 +14,7 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=NurseModel)
-async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db)):
+async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
     # 1. E-mail uniqueness
     result = await db.execute(select(User).filter(User.email == nurse.email))
     existing_user = result.scalar_one_or_none()
@@ -40,3 +41,43 @@ async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db)):
     await db.refresh(db_nurse)
 
     return db_nurse
+
+
+@router.get("/", response_model=list[NurseModel])
+async def get_all_nurses(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    result = await db.execute(select(Nurse))
+    nurses = result.scalars().all()
+    return nurses
+
+
+@router.get("/{nurse_id}", response_model=NurseModel)
+async def get_nurse_by_id(
+    nurse_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    result = await db.execute(select(Nurse).where(Nurse.nurse_id == nurse_id))
+    nurse = result.scalar_one_or_none()
+    if not nurse:
+        raise HTTPException(status_code=404, detail="Nurse not found")
+    return nurse
+
+
+@router.delete("/{nurse_id}")
+async def delete_nurse(
+    nurse_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    result = await db.execute(select(Nurse).where(Nurse.nurse_id == nurse_id))
+    nurse = result.scalar_one_or_none()
+
+    if not nurse:
+        raise HTTPException(status_code=404, detail="Nurse not found")
+
+    await db.delete(nurse)
+    await db.commit()
+    return {"status": "Nurse deleted successfully"}

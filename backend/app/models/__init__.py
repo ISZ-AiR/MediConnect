@@ -9,3 +9,4 @@ from .prescription_model import Prescription
 from .referral_model import Referral
 from .disease_model import Disease
 from .diagnosis_model import Diagnosis
+from .schedule_model import Schedule

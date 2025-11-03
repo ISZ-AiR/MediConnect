@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Text, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from core import Base
+from core.database import Base
 
 
 class Diagnosis(Base):

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from schemas.user_schema import UserBase
+from typing import Literal
 
 # ----- NURSE -----
 
@@ -34,3 +35,4 @@ class NurseCreate(UserBase):
     Includes nurse-specific credentials.
     """
     password: str = Field(..., description="Password for user account", example="secret123")
+    role: Literal["nurse"] = "nurse"

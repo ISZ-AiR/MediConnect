@@ -5,7 +5,7 @@ from core.database import get_db
 from typing import Annotated
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt
 from sqlalchemy import select, and_
 
@@ -14,66 +14,56 @@ from models.patient_model import Patient
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
 from models.receptionist_model import Receptionist
-from schemas.reservation_schema import ReservationModel, ReservationCreate
+from models.user_model import User
+from schemas.reservation_schema import ReservationModel, ReservationCreate, ReservationUpdate
+from .user_router import require_role
 
-router = APIRouter(prefix="/reservation", tags=["reservation"])
+router = APIRouter(prefix="/reservation", tags=["Reservations"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    """
-    Decode the token.
-    """
-    try:
-        payload = jwt.decode(token, "your_secret_key", algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
-# TODO: Find a way to store tokens and test the create reservation function below
-"""
 @router.post("/create", response_model=ReservationModel)
-async def create_reservation(reservation: ReservationCreate, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-
-    # Check if the logged in user is permitted to make reservations
-    if current_user["role"] != "receptionist":
-        raise HTTPException(status_code=403, detail="Forbidden")
+async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
 
     # Check if the data is correct
     result = await db.execute(select(Patient).filter(Patient.patient_id == reservation.patient_id))
-    existing_patient = result.scalar_one_or_none()
+    existing_patient = result.scalars().all()
     if not existing_patient:
         raise HTTPException(status_code=400, detail="Patient record does not exist.")
 
     result = await db.execute(select(Doctor).filter(Doctor.doctor_id == reservation.doctor_id))
-    existing_doctor = result.scalar_one_or_none()
+    existing_doctor = result.scalars().all()
     if not existing_doctor:
         raise HTTPException(status_code=400, detail="Doctor record does not exist.")
 
     # TODO: ?? Check if the nurse data is correct
 
-    # Check if the date is correct (is not in the past)
-    if reservation.reservation_time < datetime.now():
-        raise HTTPException(status_code=400, detail="The reservation time is in the future.")
+    raw_time = reservation.reservation_time
+    reservation_time = to_naive_utc(raw_time)
+
+    if reservation_time < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="The reservation time must be in the future.")
 
     # Check if the reservation is possible -- for the doctor and for the patient
     start_window = reservation.reservation_time - timedelta(minutes=15)
     end_window = reservation.reservation_time + timedelta(minutes=15)
 
+    start_time = to_naive_utc(start_window)
+    end_time = to_naive_utc(end_window)
+
     # for the doctor
     stmt = select(Reservation).where(
         and_(
             Reservation.doctor_id == reservation.doctor_id,
-            Reservation.reservation_time >= start_window,
-            Reservation.reservation_time <= end_window,
+            Reservation.reservation_time >= start_time,
+            Reservation.reservation_time <= end_time,
             Reservation.is_cancelled == False
         )
     )
     result = await db.execute(stmt)
-    conflicting_reservation  = result.scalar_one_or_none()
+    conflicting_reservation  = result.scalars().all()
     if conflicting_reservation:
         raise HTTPException(status_code=400, detail="Doctor is not available at this time.")
 
@@ -81,23 +71,26 @@ async def create_reservation(reservation: ReservationCreate, current_user=Depend
     stmt = select(Reservation).where(
         and_(
             Reservation.patient_id == reservation.patient_id,
-            Reservation.reservation_time >= start_window,
-            Reservation.reservation_time <= end_window,
+            Reservation.reservation_time >= start_time,
+            Reservation.reservation_time <= end_time,
             Reservation.is_cancelled == False
         )
     )
     result = await db.execute(stmt)
-    conflicting_reservation = result.scalar_one_or_none()
+    conflicting_reservation = result.scalars().all()
     if conflicting_reservation:
         raise HTTPException(status_code=400, detail="Conflicting reservation found.")
 
+    result = await db.execute(select(Receptionist).where(Receptionist.user_id == current_user.user_id))
+    receptionist = result.scalars().all()
+
     # Create new reservation
     new_reservation = Reservation(
-        receptionist_id=current_user["user_id"],
+        receptionist_id=receptionist.receptionist_id,
         patient_id=reservation.patient_id,
         doctor_id=reservation.doctor_id,
         nurse_id=reservation.nurse_id,
-        reservation_time=reservation.date,
+        reservation_time=reservation_time,
         is_cancelled=reservation.is_cancelled,
     )
 
@@ -105,8 +98,106 @@ async def create_reservation(reservation: ReservationCreate, current_user=Depend
     await db.commit()
     await db.refresh(new_reservation)
 
-    return {"status": "Reservation created!", "id": new_reservation.reservation_id}
-"""
+    return new_reservation
+
+
+@router.get("/", response_model=list[ReservationModel], description="Get all reservations (receptionist only).")
+async def get_all_reservations(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Retrieve all reservations in the system."""
+    result = await db.execute(select(Reservation))
+    reservations = result.scalars().all()
+    return reservations
+
+
+@router.get("/{reservation_id}", response_model=ReservationModel, description="Get reservation details by ID.")
+async def get_reservation_by_id(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Retrieve a specific reservation."""
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+    return reservation
+
+
+@router.put("/{reservation_id}", response_model=ReservationModel, description="Update reservation details.")
+async def update_reservation(
+    reservation_id: int,
+    update_data: ReservationUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Update reservation information (receptionist only)."""
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+
+    # Update allowed fields
+    for field, value in update_data.model_dump(exclude_unset=True).items():
+        setattr(reservation, field, value)
+
+    await db.commit()
+    await db.refresh(reservation)
+    return reservation
+
+
+@router.post("/{reservation_id}/cancel", description="Cancel a reservation without deleting it.")
+async def cancel_reservation(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """
+    Cancel a reservation.
+    This does not delete the reservation, just sets `is_cancelled` to True.
+    """
+    # Fetch the reservation
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+
+    # Update the status
+    reservation.is_cancelled = True
+
+    # Save changes
+    await db.commit()
+    await db.refresh(reservation)
+
+    return {"status": "Reservation cancelled successfully", "reservation_id": reservation_id}
+
+
+# ----- DELETE -----
+@router.delete("/{reservation_id}", description="Delete or cancel a reservation.")
+async def delete_reservation(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("receptionist"))
+):
+    """Delete or cancel a reservation (receptionist only)."""
+    result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
+    reservation = result.scalar_one_or_none()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found.")
+
+    await db.delete(reservation)
+    await db.commit()
+
+    return {"status": "Reservation deleted successfully"}
+
+
+def to_naive_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
 
 
 

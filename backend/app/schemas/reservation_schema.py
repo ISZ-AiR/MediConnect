@@ -43,3 +43,12 @@ class ReservationCreate(ReservationBase):
     patient_id: int = Field(..., description="ID of the patient making the reservation")
     doctor_id: int = Field(..., description="ID of the doctor for the appointment")
     nurse_id: int = Field(..., description="ID of the nurse assisting with the appointment")
+
+
+
+class ReservationUpdate(BaseModel):
+    """Schema for updating an existing reservation."""
+    doctor_id: int | None = None
+    nurse_id: int | None = None
+    reservation_time: datetime | None = None
+    is_cancelled: bool | None = None

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import date
 from schemas.user_schema import UserBase
+from typing import Optional
 
 
 # ----- PATIENT -----
@@ -32,3 +33,18 @@ class PatientModel(PatientBase):
 
 class PatientCreate(UserBase, PatientBase):
     password: str = Field(..., description="Password for patient account", example="user123")
+
+
+class PatientUpdate(BaseModel):
+    """
+    Schema for updating a patient's details.
+    All fields are optional.
+    """
+    first_name: Optional[str] = Field(None, description="Patient's first name", example="John")
+    last_name: Optional[str] = Field(None, description="Patient's last name", example="Doe")
+    phone: Optional[str] = Field(None, description="Patient's phone number", example="+48123456789")
+    pesel: Optional[str] = Field(None, description="Patient's PESEL number", example="12345678901")
+    birth_date: Optional[date] = Field(None, description="Patient's date of birth", example="1980-01-01")
+
+    class Config:
+        from_attributes = True

@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from models.doctor_model import Doctor
 from models.user_model import User
-from schemas.doctor_schema import DoctorCreate, DoctorModel
+from schemas.doctor_schema import DoctorCreate, DoctorModel, DoctorUpdate
 from passlib.hash import bcrypt
+from .user_router import require_role
 
 router = APIRouter(
     prefix="/doctor",
@@ -14,7 +15,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=DoctorModel)
-async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)):
+async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
     # 1. Check if email exists
     result = await db.execute(select(User).filter(User.email == doctor.email))
     existing_user = result.scalar_one_or_none()
@@ -51,3 +52,85 @@ async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)
     await db.refresh(db_doctor)
 
     return db_doctor
+
+
+@router.get("/", response_model=list[DoctorModel])
+async def get_all_doctors(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+    result = await db.execute(select(Doctor))
+    doctors = result.scalars().all()
+    return doctors
+
+
+@router.get("/{doctor_id}", response_model=DoctorModel)
+async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+    result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
+    doctor = result.scalar_one_or_none()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return doctor
+
+
+
+@router.put("/{doctor_id}", response_model=DoctorModel)
+async def update_doctor(
+    doctor_id: int,
+    doctor_update: DoctorUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
+    doctor = result.scalar_one_or_none()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    # update linked user data if provided
+    result = await db.execute(select(User).where(User.user_id == doctor.user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Linked user not found")
+
+    if doctor_update.first_name:
+        user.first_name = doctor_update.first_name
+    if doctor_update.last_name:
+        user.last_name = doctor_update.last_name
+    if doctor_update.email:
+        user.email = doctor_update.email
+    if doctor_update.phone:
+        user.phone = doctor_update.phone
+    if doctor_update.password:
+        user.password_hash = bcrypt.hash(doctor_update.password)
+
+    # doctor-specific fields
+    if doctor_update.specialization:
+        doctor.specialization = doctor_update.specialization
+    if doctor_update.license_number:
+        doctor.license_number = doctor_update.license_number
+
+    db.add_all([user, doctor])
+    await db.commit()
+    await db.refresh(doctor)
+
+    return doctor
+
+
+@router.delete("/{doctor_id}")
+async def delete_doctor(
+    doctor_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
+    doctor = result.scalar_one_or_none()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    # get linked user
+    result = await db.execute(select(User).where(User.user_id == doctor.user_id))
+    user = result.scalar_one_or_none()
+
+    if user:
+        await db.delete(user)
+    await db.delete(doctor)
+    await db.commit()
+
+    return {"status": "Doctor deleted successfully", "id": doctor_id}

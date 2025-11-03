@@ -5,6 +5,14 @@ from .config import settings
 
 Base = declarative_base()
 
+from models.user_model import User
+from models.doctor_model import Doctor
+from models.nurse_model import Nurse
+from models.receptionist_model import Receptionist
+from models.patient_model import Patient
+from models.visit_model import Visit
+from models.referral_model import Referral
+
 engine = create_async_engine(settings.DATABASE_URL, echo=False)
 
 # Session makers for global and local databases
