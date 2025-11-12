@@ -91,6 +91,10 @@ async def update_disease(disease_id: int, new_disease: DiseaseBase, db: AsyncSes
 @router.delete("/{disease_id}")
 async def delete_disease(disease_id: int, db: AsyncSession = Depends(get_db)):
 
+    """
+    Delete an existing disease record.
+    """
+
     result = await db.execute(select(Disease).where(Disease.disease_id == disease_id))
     disease = result.scalar_one_or_none()
 
