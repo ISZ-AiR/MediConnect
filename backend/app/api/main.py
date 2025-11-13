@@ -4,7 +4,7 @@ from .routers import (health_router, doctor_router, nurse_router,
                       referral_router, visit_router, prescription_router,
                       login_router, receptionist_router, register_router,
                       reservation_router, user_router, schedule_router,
-                      examination_router, admin_router)
+                      examination_router, admin_router, disease_router, diagnosis_router)
 
 api_router = APIRouter()
 
@@ -22,4 +22,5 @@ api_router.include_router(prescription_router.router)
 api_router.include_router(reservation_router.router)
 api_router.include_router(schedule_router.router)
 api_router.include_router(examination_router.router)
-
+api_router.include_router(disease_router.router)
+api_router.include_router(diagnosis_router.router)
