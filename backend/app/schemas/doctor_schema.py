@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, EmailStr
 from schemas.user_schema import UserBase
 from typing import Literal
 
-
 # ----- DOCTOR -----
 class DoctorBase(BaseModel):
     """

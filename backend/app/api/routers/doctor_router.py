@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from models.doctor_model import Doctor
@@ -54,9 +55,16 @@ async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)
     return db_doctor
 
 
+
 @router.get("/", response_model=list[DoctorModel])
-async def get_all_doctors(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
-    result = await db.execute(select(Doctor))
+async def get_all_doctors(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    result = await db.execute(
+        select(Doctor)
+        .options(selectinload(Doctor.user))
+    )
     doctors = result.scalars().all()
     return doctors
 

@@ -12,6 +12,8 @@ from fastapi.responses import RedirectResponse
 import models
 
 
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """

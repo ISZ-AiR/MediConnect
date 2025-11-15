@@ -10,6 +10,7 @@ import PatientRegister from "./pages/PatientRegister";
 import StaffRegister from "./pages/StaffRegister";
 import PatientDashboard from "./pages/PatientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import ManageUsers from "./pages/ManageUsers";
 
 function App() {
   return (
@@ -29,6 +30,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <StaffRegister />
+                </ProtectedRoute>
+              }
+            />
+
+              <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <ManageUsers />
                 </ProtectedRoute>
               }
             />
