@@ -1,32 +1,71 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from datetime import date
 from core.database import get_db
-from models import Doctor, Visit, Reservation, Referral, Prescription
+from models import Doctor, Visit, Reservation, Referral, Prescription, User
 from .user_router import require_role
+from pydantic import BaseModel
+from sqlalchemy import cast, Date
 
 router = APIRouter(
     prefix="/reports",
     tags=["Manager Reports"]
 )
 
+# -------------------
+# Pydantic Models
+# -------------------
 
-@router.get("/doctor-workload")
-async def doctor_workload_report(
-    start_date: str,
-    end_date: str,
+class DailyData(BaseModel):
+    date: date
+    reservations: int
+    visits: int
+
+class DoctorWorkload(BaseModel):
+    doctor_id: int
+    first_name: str
+    last_name: str
+    daily: list[DailyData]
+
+class ReservationSummary(BaseModel):
+    total_reservations: int
+    cancelled_reservations: int
+    completed_visits: int
+
+class ExaminationStat(BaseModel):
+    examination_id: int
+    count: int
+
+class MedicationStat(BaseModel):
+    medication: str
+    count: int
+
+
+# -----------------------
+# DOCTOR WORKLOAD REPORT
+# -----------------------
+
+from datetime import timedelta
+
+@router.get("/doctor-workload", response_model=list[DoctorWorkload])
+async def doctor_workload_report_daily(
+    start_date: date,
+    end_date: date,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_role(["manager"]))
+    current_user = Depends(require_role(["manager"]))
 ):
     """
-    Workload report for all doctors in a specified date range.
-    Includes number of reservations and visits per doctor.
+    Workload report for all doctors, aggregated per day, in a date range.
+    Returns a list of dicts with doctor info and daily reservations & visits.
     """
 
-    # Count reservations per doctor
+    res_date = cast(Reservation.reservation_time, Date).label("res_date")
+
     reservations_stmt = (
         select(
             Reservation.doctor_id,
+            res_date,
             func.count(Reservation.reservation_id)
         )
         .where(
@@ -34,142 +73,187 @@ async def doctor_workload_report(
             Reservation.reservation_time <= end_date,
             Reservation.is_cancelled == False
         )
-        .group_by(Reservation.doctor_id)
+        .group_by(Reservation.doctor_id, res_date)
     )
-
-    # Count visits per doctor
     visits_stmt = (
         select(
-            Doctor.doctor_id,
+            Reservation.doctor_id,
+            Visit.visit_date,
             func.count(Visit.visit_id)
         )
         .join(Reservation, Reservation.reservation_id == Visit.reservation_id)
-        .join(Doctor, Doctor.doctor_id == Reservation.doctor_id)
         .where(
             Visit.visit_date >= start_date,
             Visit.visit_date <= end_date
         )
-        .group_by(Doctor.doctor_id)
+        .group_by(Reservation.doctor_id, Visit.visit_date)
     )
 
-    reservations_result = (await db.execute(reservations_stmt)).all()
-    visits_result = (await db.execute(visits_stmt)).all()
+    reservations_rows = (await db.execute(reservations_stmt)).all()
+    visits_rows = (await db.execute(visits_stmt)).all()
 
-    return {
-        "reservations": reservations_result,
-        "visits": visits_result
-    }
+    daily_map = {}
+    for doctor_id, date_, count in reservations_rows:
+        daily_map.setdefault(doctor_id, {}).setdefault(date_, {"reservations": 0, "visits": 0})
+        daily_map[doctor_id][date_]["reservations"] = count
 
+    for doctor_id, date_, count in visits_rows:
+        daily_map.setdefault(doctor_id, {}).setdefault(date_, {"reservations": 0, "visits": 0})
+        daily_map[doctor_id][date_]["visits"] = count
+
+    doctor_ids = list(daily_map.keys())
+    doctors_stmt = (
+        select(Doctor.doctor_id, User.first_name, User.last_name)
+        .join(User, User.user_id == Doctor.user_id)
+        .where(Doctor.doctor_id.in_(doctor_ids))
+    )
+    doctor_rows = (await db.execute(doctors_stmt)).all()
+    doctor_map = {row[0]: {"first_name": row[1], "last_name": row[2]} for row in doctor_rows}
+
+    results = []
+    for doctor_id, days in daily_map.items():
+        doctor_info = doctor_map.get(doctor_id, {"first_name": "", "last_name": ""})
+        daily_list = []
+        # Generujemy pełen zakres dat
+        current_date = start_date
+        while current_date <= end_date:
+            day_data = days.get(current_date, {"reservations": 0, "visits": 0})
+            daily_list.append({
+                "date": current_date.isoformat(),
+                "reservations": day_data["reservations"],
+                "visits": day_data["visits"]
+            })
+            current_date += timedelta(days=1)
+        results.append({
+            "doctor_id": doctor_id,
+            "first_name": doctor_info["first_name"],
+            "last_name": doctor_info["last_name"],
+            "daily": daily_list
+        })
+
+    return results
+
+
+# -----------------------
+# ALL VISITS
+# -----------------------
 
 @router.get("/visits")
 async def all_visits_report(
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_role(["manager"]))
+    current_user = Depends(require_role(["manager"]))
 ):
-    """
-    Returns all visits in the system.
-    """
+    """Returns all visits."""
     result = await db.execute(select(Visit))
     return result.scalars().all()
 
 
-@router.get("/reservations-summary")
+# -----------------------
+# RESERVATION SUMMARY
+# -----------------------
+
+@router.get("/reservations-summary", response_model=ReservationSummary)
 async def reservations_summary(
-    start_date: str,
-    end_date: str,
+    start_date: date,
+    end_date: date,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_role(["manager"]))
+    current_user = Depends(require_role(["manager"]))
 ):
-    """
-    Summary of reservations for a date range:
-    - total
-    - cancelled
-    - completed (those that turned into a visit)
-    """
+    """Summary of reservations in a date range."""
 
-    total_stmt = select(func.count(Reservation.reservation_id)).where(
-        Reservation.reservation_time >= start_date,
-        Reservation.reservation_time <= end_date
-    )
-
-    cancelled_stmt = select(func.count(Reservation.reservation_id)).where(
-        Reservation.is_cancelled == True,
-        Reservation.reservation_time >= start_date,
-        Reservation.reservation_time <= end_date
-    )
-
-    completed_stmt = (
-        select(func.count(Visit.visit_id))
-        .join(Reservation, Reservation.reservation_id == Visit.reservation_id)
-        .where(
-            Reservation.reservation_time >= start_date,
-            Reservation.reservation_time <= end_date
+    total = (
+        await db.execute(
+            select(func.count(Reservation.reservation_id)).where(
+                Reservation.reservation_time >= start_date,
+                Reservation.reservation_time <= end_date
+            )
         )
+    ).scalar()
+
+    cancelled = (
+        await db.execute(
+            select(func.count(Reservation.reservation_id)).where(
+                Reservation.is_cancelled == True,
+                Reservation.reservation_time >= start_date,
+                Reservation.reservation_time <= end_date
+            )
+        )
+    ).scalar()
+
+    completed = (
+        await db.execute(
+            select(func.count(Visit.visit_id))
+            .join(Reservation, Reservation.reservation_id == Visit.reservation_id)
+            .where(
+                Reservation.reservation_time >= start_date,
+                Reservation.reservation_time <= end_date
+            )
+        )
+    ).scalar()
+
+    return ReservationSummary(
+        total_reservations=total,
+        cancelled_reservations=cancelled,
+        completed_visits=completed
     )
 
-    total = (await db.execute(total_stmt)).scalar()
-    cancelled = (await db.execute(cancelled_stmt)).scalar()
-    completed = (await db.execute(completed_stmt)).scalar()
 
-    return {
-        "total_reservations": total,
-        "cancelled_reservations": cancelled,
-        "completed_visits": completed
-    }
+# -----------------------
+# EXAMINATION STATS
+# -----------------------
 
-
-@router.get("/examinations")
+@router.get("/examinations", response_model=list[ExaminationStat])
 async def examinations_report(
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_role(["manager"]))
+    current_user = Depends(require_role(["manager"]))
 ):
-    """
-    Returns statistics about examinations:
-    number of referrals per examination.
-    """
+    """Returns statistics about examinations."""
 
     stmt = (
         select(
             Referral.examination_id,
-            func.count(Referral.referral_id).label("count")
+            func.count(Referral.referral_id)
         )
         .group_by(Referral.examination_id)
         .order_by(func.count(Referral.referral_id).desc())
     )
 
-    result = (await db.execute(stmt)).all()
-    return result
+    rows = (await db.execute(stmt)).all()
 
+    return [ExaminationStat(examination_id=r[0], count=r[1]) for r in rows]
+
+
+# -----------------------
+# PRESCRIPTION STATS
+# -----------------------
 
 @router.get("/prescriptions")
 async def prescriptions_report(
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_role(["manager"]))
+    current_user = Depends(require_role(["manager"]))
 ):
-    """
-    Returns statistics on prescriptions:
-    - total prescriptions
-    - most common medications
-    """
+    """Statistics on prescriptions."""
 
-    total = (await db.execute(
-        select(func.count(Prescription.prescription_id))
-    )).scalar()
+    total_prescriptions = (
+        await db.execute(select(func.count(Prescription.prescription_id)))
+    ).scalar()
 
-    common_medications = (
-        await db.execute(
-            select(
-                Prescription.medication,
-                func.count(Prescription.prescription_id)
-            )
-            .group_by(Prescription.medication)
-            .order_by(func.count().desc())
+    medications_stmt = (
+        select(
+            Prescription.medication,
+            func.count(Prescription.prescription_id)
         )
-    ).all()
+        .group_by(Prescription.medication)
+        .order_by(func.count(Prescription.prescription_id).desc())
+    )
+
+    medication_rows = (await db.execute(medications_stmt)).all()
 
     return {
-        "total_prescriptions": total,
-        "most_common_medications": common_medications
+        "total_prescriptions": total_prescriptions,
+        "most_common_medications": [
+            {"medication": r[0], "count": r[1]}
+            for r in medication_rows
+        ]
     }
-
 

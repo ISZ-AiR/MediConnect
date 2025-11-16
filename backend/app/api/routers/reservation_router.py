@@ -229,6 +229,81 @@ def to_naive_utc(dt: datetime) -> datetime:
     return dt
 
 
+@router.post("/book", response_model=ReservationModel, description="Patient books a visit online.")
+async def book_reservation(
+    reservation: ReservationCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("patient"))
+):
+    # --- Determine patient_id from token ---
+    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+    patient_obj = result.scalar_one_or_none()
+
+    if not patient_obj:
+        raise HTTPException(status_code=400, detail="Patient profile not found.")
+
+    patient_id = patient_obj.patient_id
+
+    # --- Validate doctor ---
+    result = await db.execute(select(Doctor).filter(Doctor.doctor_id == reservation.doctor_id))
+    existing_doctor = result.scalar_one_or_none()
+    if not existing_doctor:
+        raise HTTPException(status_code=400, detail="Doctor record does not exist.")
+
+    # --- Normalize datetime ---
+    reservation_time = to_naive_utc(reservation.reservation_time)
+
+    if reservation_time < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="The reservation time must be in the future.")
+
+    # --- Conflict check window ---
+    start_time = reservation_time - timedelta(minutes=15)
+    end_time = reservation_time + timedelta(minutes=15)
+
+    # Check doctor availability
+    stmt = select(Reservation).where(
+        and_(
+            Reservation.doctor_id == reservation.doctor_id,
+            Reservation.reservation_time >= start_time,
+            Reservation.reservation_time <= end_time,
+            Reservation.is_cancelled == False
+        )
+    )
+    result = await db.execute(stmt)
+    if result.scalars().first():
+        raise HTTPException(status_code=400, detail="The doctor is not available at this time.")
+
+    # Check patient availability
+    stmt = select(Reservation).where(
+        and_(
+            Reservation.patient_id == patient_id,
+            Reservation.reservation_time >= start_time,
+            Reservation.reservation_time <= end_time,
+            Reservation.is_cancelled == False
+        )
+    )
+    result = await db.execute(stmt)
+    if result.scalars().first():
+        raise HTTPException(status_code=400, detail="You already have a visit scheduled around this time.")
+
+    # --- Create reservation ---
+    new_reservation = Reservation(
+        receptionist_id=None,
+        patient_id=patient_id,
+        doctor_id=reservation.doctor_id,
+        nurse_id=reservation.nurse_id if reservation.nurse_id else None,
+        reservation_time=reservation_time,
+        is_cancelled=False
+    )
+
+    db.add(new_reservation)
+    await db.commit()
+    await db.refresh(new_reservation)
+
+    return new_reservation
+
+
+
 
 
 

@@ -57,4 +57,79 @@ export const statsService = {
       throw error;
     }
   },
+
+  /**
+   * Get doctor workload report
+   * @param {string} start_date - format YYYY-MM-DD
+   * @param {string} end_date - format YYYY-MM-DD
+   * @returns {Promise<Array>} List of doctors with reservations and visits count
+   */
+  async getDoctorWorkload(start_date, end_date) {
+    try {
+      const params = new URLSearchParams();
+      if (start_date) params.append("start_date", start_date);
+      if (end_date) params.append("end_date", end_date);
+
+      const resp = await apiRequest(`/reports/doctor-workload?${params.toString()}`, {
+        method: "GET",
+      });
+
+      return unwrap(resp);
+    } catch (error) {
+      console.error("Error fetching doctor workload report:", error);
+      throw error;
+    }
+  },
+
+    /**
+   * Get Reservations Summary between two dates
+   */
+  async getReservationsSummary(startDate, endDate) {
+    try {
+      const data = await apiRequest("/reports/reservations-summary", {
+        method: "GET",
+        params: { start_date: startDate, end_date: endDate },
+      });
+      return unwrap(data);
+    } catch (err) {
+      console.error("Error fetching reservations summary:", err);
+      throw err;
+    }
+  },
+
+  /**
+   * Get Examinations stats
+   */
+  async getExaminations() {
+    try {
+      const data = await apiRequest("/reports/examinations", { method: "GET" });
+      return unwrap(data);
+    } catch (err) {
+      console.error("Error fetching examinations stats:", err);
+      throw err;
+    }
+  },
+
+  /**
+   * Get Prescriptions stats
+   */
+  async getPrescriptions() {
+    try {
+      const data = await apiRequest("/reports/prescriptions", { method: "GET" });
+      return unwrap(data);
+    } catch (err) {
+      console.error("Error fetching prescriptions stats:", err);
+      throw err;
+    }
+  },
+
+    async getDoctors() {
+    try {
+      const resp = await apiRequest("/doctor/", { method: "GET" });
+      return unwrap(resp);
+    } catch (err) {
+      console.error("Error fetching doctors list:", err);
+      throw err;
+    }
+  },
 };

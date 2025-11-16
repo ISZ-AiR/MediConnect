@@ -15,6 +15,7 @@ import ResourcesIndex from "./pages/ResourcesIndex";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import NurseDashboard from "./pages/NurseDashboard";
 import ReceptionistDashboard from "./pages/ReceptionistDashboard";
+import ManagerDashboard from './pages/ManagerDashboard';
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -50,6 +51,10 @@ import ReferralDetail from "./pages/ReferralDetail";
 import ReferralForm from "./pages/ReferralForm";
 import ManagerDetail from "./pages/ManagerDetail";
 import ManagerForm from "./pages/ManagerForm";
+import DoctorWorkload from './pages/reports/DoctorWorkload';
+import ReservationsSummary from './pages/reports/ReservationsSummary';
+import Examinations from './pages/reports/Examinations';
+import Prescriptions from './pages/reports/Prescriptions';
 
 function App() {
   return (
@@ -474,6 +479,49 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/manager/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["manager"]}>
+                  <ManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/reports/doctor-workload"
+              element={
+                <ProtectedRoute allowedRoles={["manager"]}>
+                  <DoctorWorkload />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/reports/reservations-summary"
+              element={
+                <ProtectedRoute allowedRoles={["manager"]}>
+                  <ReservationsSummary />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/examinations"
+              element={
+                <ProtectedRoute allowedRoles={["manager"]}>
+                  <Examinations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/prescriptions"
+              element={
+                <ProtectedRoute allowedRoles={["manager"]}>
+                  <Prescriptions />
                 </ProtectedRoute>
               }
             />
