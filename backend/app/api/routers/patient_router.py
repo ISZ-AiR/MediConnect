@@ -20,7 +20,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.post("/register", response_model=PatientModel, description="Create your own patient account.")
-async def patient(new_patient: PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
+async def patient(new_patient: PatientCreate, db: Session = Depends(get_db)):
 
     # Check if the account already exists
     result = await db.execute(select(User).where(User.email == new_patient.email))

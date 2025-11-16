@@ -75,8 +75,9 @@ const PatientRegister = () => {
     setLoading(true);
 
     try {
-      // Remove confirmPassword before sending to API
+      // Remove confirmPassword before sending to API and add required role
       const { confirmPassword, ...registrationData } = formData;
+      registrationData.role = "patient";
 
       // Note: This endpoint requires receptionist authentication in the backend
       // You may need to update the backend to allow public patient registration

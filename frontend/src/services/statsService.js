@@ -12,6 +12,12 @@ import { apiRequest } from "./apiClient";
  * - GET /receptionist/ - List all receptionists (admin only)
  */
 
+const unwrap = (resp) => {
+  if (!resp) return [];
+  if (typeof resp === "object" && resp.success === true) return resp.data || [];
+  return resp;
+};
+
 export const statsService = {
   /**
    * Get system statistics
@@ -21,24 +27,24 @@ export const statsService = {
     try {
       // Fetch all data in parallel
       const [
-        doctorsResponse,
-        nursesResponse,
-        patientsResponse,
-        adminsResponse,
-        receptionistsResponse,
+        doctorsResp,
+        nursesResp,
+        patientsResp,
+        adminsResp,
+        receptionistsResp,
       ] = await Promise.all([
-        apiRequest("/doctor/", { requiresAuth: true }),
-        apiRequest("/nurse/", { requiresAuth: true }),
-        apiRequest("/patients/", { requiresAuth: true }),
-        apiRequest("/admins/", { requiresAuth: true }),
-        apiRequest("/receptionist/", { requiresAuth: true }),
+        apiRequest("/doctor/", { method: "GET" }),
+        apiRequest("/nurse/", { method: "GET" }),
+        apiRequest("/patients/", { method: "GET" }),
+        apiRequest("/admins/", { method: "GET" }),
+        apiRequest("/receptionist/", { method: "GET" }),
       ]);
 
-      const doctors = doctorsResponse?.length || 0;
-      const nurses = nursesResponse?.length || 0;
-      const patients = patientsResponse?.length || 0;
-      const admins = adminsResponse?.length || 0;
-      const receptionists = receptionistsResponse?.length || 0;
+      const doctors = unwrap(doctorsResp).length;
+      const nurses = unwrap(nursesResp).length;
+      const patients = unwrap(patientsResp).length;
+      const admins = unwrap(adminsResp).length;
+      const receptionists = unwrap(receptionistsResp).length;
 
       return {
         totalUsers: doctors + nurses + patients + admins + receptionists,

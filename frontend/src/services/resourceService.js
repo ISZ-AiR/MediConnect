@@ -1,0 +1,197 @@
+import { apiRequest } from "./apiClient";
+import { API_ENDPOINTS } from "../constants/apiEndpoints";
+
+const unwrap = (resp) => {
+  if (!resp) return [];
+  if (typeof resp === "object" && resp.success === true) return resp.data || [];
+  return resp;
+};
+
+export const resourceService = {
+  async listDoctors() {
+    const res = await apiRequest(API_ENDPOINTS.DOCTORS_LIST, { method: "GET" });
+    return unwrap(res);
+  },
+  async listNurses() {
+    const res = await apiRequest(API_ENDPOINTS.NURSES_LIST, { method: "GET" });
+    return unwrap(res);
+  },
+  async listPatients() {
+    const res = await apiRequest(API_ENDPOINTS.PATIENTS_LIST, {
+      method: "GET",
+    });
+    return unwrap(res);
+  },
+  async listReceptionists() {
+    const res = await apiRequest(API_ENDPOINTS.RECEPTIONISTS_LIST, {
+      method: "GET",
+    });
+    return unwrap(res);
+  },
+  async listAdmins() {
+    const res = await apiRequest(API_ENDPOINTS.ADMINS_LIST, { method: "GET" });
+    return unwrap(res);
+  },
+  async listManagers() {
+    const res = await apiRequest("/managers/", { method: "GET" });
+    return unwrap(res);
+  },
+  async listReservations() {
+    const res = await apiRequest("/reservation/", { method: "GET" });
+    return unwrap(res);
+  },
+  async listVisits() {
+    const res = await apiRequest("/visits/", { method: "GET" });
+    return unwrap(res);
+  },
+  async listPrescriptions() {
+    const res = await apiRequest("/prescriptions/", { method: "GET" });
+    return unwrap(res);
+  },
+  async listReferrals() {
+    const res = await apiRequest("/referrals/", { method: "GET" });
+    return unwrap(res);
+  },
+  async listExaminations() {
+    const res = await apiRequest("/examinations/", { method: "GET" });
+    return unwrap(res);
+  },
+  async getExamination(id) {
+    const res = await apiRequest(`/examinations/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createExamination(payload) {
+    const res = await apiRequest(`/examinations/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updateExamination(id, payload) {
+    const res = await apiRequest(`/examinations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deleteExamination(id) {
+    const res = await apiRequest(`/examinations/${id}`, { method: "DELETE" });
+    return res;
+  },
+  async listSchedules() {
+    const res = await apiRequest("/schedules/", { method: "GET" });
+    return unwrap(res);
+  },
+  async getSchedule(id) {
+    const res = await apiRequest(`/schedules/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createSchedule(payload) {
+    const res = await apiRequest(`/schedules/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updateSchedule(id, payload) {
+    const res = await apiRequest(`/schedules/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deleteSchedule(id) {
+    const res = await apiRequest(`/schedules/${id}`, { method: "DELETE" });
+    return res;
+  },
+  async getVisit(id) {
+    const res = await apiRequest(`/visits/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createVisit(payload) {
+    const res = await apiRequest(`/visits/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updateVisit(id, payload) {
+    const res = await apiRequest(`/visits/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deleteVisit(id) {
+    const res = await apiRequest(`/visits/${id}`, { method: "DELETE" });
+    return res;
+  },
+  async getPrescription(id) {
+    const res = await apiRequest(`/prescriptions/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createPrescription(payload) {
+    const res = await apiRequest(`/prescriptions/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updatePrescription(id, payload) {
+    const res = await apiRequest(`/prescriptions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deletePrescription(id) {
+    const res = await apiRequest(`/prescriptions/${id}`, { method: "DELETE" });
+    return res;
+  },
+  async getReferral(id) {
+    const res = await apiRequest(`/referrals/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createReferral(payload) {
+    const res = await apiRequest(`/referrals/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updateReferral(id, payload) {
+    const res = await apiRequest(`/referrals/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deleteReferral(id) {
+    const res = await apiRequest(`/referrals/${id}`, { method: "DELETE" });
+    return res;
+  },
+  async getManager(id) {
+    const res = await apiRequest(`/managers/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createManager(payload) {
+    const res = await apiRequest(`/managers/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updateManager(id, payload) {
+    const res = await apiRequest(`/managers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deleteManager(id) {
+    const res = await apiRequest(`/managers/${id}`, { method: "DELETE" });
+    return res;
+  },
+};
+
+export default resourceService;

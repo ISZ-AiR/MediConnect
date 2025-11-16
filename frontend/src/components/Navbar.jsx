@@ -119,6 +119,17 @@ const Navbar = () => {
                           Settings
                         </Link>
                       </li>
+                      {user?.role === "patient" && (
+                        <li>
+                          <Link
+                            className="dropdown-item"
+                            to="/patient/dashboard"
+                          >
+                            <i className="bi bi-speedometer2 me-2"></i>
+                            Patient Dashboard
+                          </Link>
+                        </li>
+                      )}
                       {user?.role === "admin" && (
                         <>
                           <li>
