@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
 from datetime import date
 from core.database import get_db
 from models import Doctor, Visit, Reservation, Referral, Prescription, User
@@ -29,6 +29,7 @@ class DoctorWorkload(BaseModel):
     daily: list[DailyData]
 
 class ReservationSummary(BaseModel):
+    date: date
     total_reservations: int
     cancelled_reservations: int
     completed_visits: int
@@ -114,7 +115,6 @@ async def doctor_workload_report_daily(
     for doctor_id, days in daily_map.items():
         doctor_info = doctor_map.get(doctor_id, {"first_name": "", "last_name": ""})
         daily_list = []
-        # Generujemy pełen zakres dat
         current_date = start_date
         while current_date <= end_date:
             day_data = days.get(current_date, {"reservations": 0, "visits": 0})
@@ -152,50 +152,64 @@ async def all_visits_report(
 # RESERVATION SUMMARY
 # -----------------------
 
-@router.get("/reservations-summary", response_model=ReservationSummary)
-async def reservations_summary(
+@router.get("/reservations-summary", response_model=list[ReservationSummary])
+async def reservations_summary_daily(
     start_date: date,
     end_date: date,
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_role(["manager"]))
 ):
-    """Summary of reservations in a date range."""
+    """Daily summary of reservations in a date range."""
 
-    total = (
-        await db.execute(
-            select(func.count(Reservation.reservation_id)).where(
-                Reservation.reservation_time >= start_date,
-                Reservation.reservation_time <= end_date
-            )
+    res_date = cast(Reservation.reservation_time, Date).label("res_date")
+
+    # Rezerwacje całkowite i anulowane
+    reservations_stmt = (
+        select(
+            res_date,
+            func.count(Reservation.reservation_id),
+            func.sum(case((Reservation.is_cancelled == True, 1), else_=0))
         )
-    ).scalar()
-
-    cancelled = (
-        await db.execute(
-            select(func.count(Reservation.reservation_id)).where(
-                Reservation.is_cancelled == True,
-                Reservation.reservation_time >= start_date,
-                Reservation.reservation_time <= end_date
-            )
-        )
-    ).scalar()
-
-    completed = (
-        await db.execute(
-            select(func.count(Visit.visit_id))
-            .join(Reservation, Reservation.reservation_id == Visit.reservation_id)
-            .where(
-                Reservation.reservation_time >= start_date,
-                Reservation.reservation_time <= end_date
-            )
-        )
-    ).scalar()
-
-    return ReservationSummary(
-        total_reservations=total,
-        cancelled_reservations=cancelled,
-        completed_visits=completed
+        .where(Reservation.reservation_time >= start_date, Reservation.reservation_time <= end_date)
+        .group_by(res_date)
     )
+
+    reservations_rows = (await db.execute(reservations_stmt)).all()
+
+    # Wizyty zakończone
+    visits_stmt = (
+        select(
+            Visit.visit_date,
+            func.count(Visit.visit_id)
+        )
+        .join(Reservation, Reservation.reservation_id == Visit.reservation_id)
+        .where(Visit.visit_date >= start_date, Visit.visit_date <= end_date)
+        .group_by(Visit.visit_date)
+    )
+
+    visits_rows = (await db.execute(visits_stmt)).all()
+    visits_map = {v[0]: v[1] for v in visits_rows}
+
+    # Mapowanie danych
+    rows_map = {r[0]: {"total_reservations": r[1], "cancelled_reservations": r[2]} for r in reservations_rows}
+
+    # Generowanie pełnego zakresu dat
+    results = []
+    current_date = start_date
+    while current_date <= end_date:
+        day_data = rows_map.get(current_date, {"total_reservations": 0, "cancelled_reservations": 0})
+        completed = visits_map.get(current_date, 0)
+        results.append(
+            ReservationSummary(
+                date=current_date,
+                total_reservations=day_data["total_reservations"],
+                cancelled_reservations=day_data["cancelled_reservations"],
+                completed_visits=completed
+            )
+        )
+        current_date += timedelta(days=1)
+
+    return results
 
 
 # -----------------------

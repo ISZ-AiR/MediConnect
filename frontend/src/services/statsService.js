@@ -84,16 +84,20 @@ export const statsService = {
     /**
    * Get Reservations Summary between two dates
    */
-  async getReservationsSummary(startDate, endDate) {
+  async getReservationsSummary(start_date, end_date) {
     try {
-      const data = await apiRequest("/reports/reservations-summary", {
+      const params = new URLSearchParams();
+      if (start_date) params.append("start_date", start_date);
+      if (end_date) params.append("end_date", end_date);
+
+      const resp = await apiRequest(`/reports/reservations-summary?${params.toString()}`, {
         method: "GET",
-        params: { start_date: startDate, end_date: endDate },
       });
-      return unwrap(data);
-    } catch (err) {
-      console.error("Error fetching reservations summary:", err);
-      throw err;
+
+      return unwrap(resp);
+    } catch (error) {
+      console.error("Error fetching doctor workload report:", error);
+      throw error;
     }
   },
 
