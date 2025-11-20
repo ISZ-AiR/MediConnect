@@ -71,7 +71,7 @@ def require_role(roles: Union[str, List[str]]):
 
 
 @router.get("/", response_model=List[dict])
-async def read_users(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def read_users(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "receptionist"]))):
     result = await db.execute(select(User))
     users = result.scalars().all()
     return [

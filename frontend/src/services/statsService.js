@@ -114,18 +114,6 @@ export const statsService = {
     }
   },
 
-  /**
-   * Get Prescriptions stats
-   */
-  async getPrescriptions() {
-    try {
-      const data = await apiRequest("/reports/prescriptions", { method: "GET" });
-      return unwrap(data);
-    } catch (err) {
-      console.error("Error fetching prescriptions stats:", err);
-      throw err;
-    }
-  },
 
     async getDoctors() {
     try {
@@ -136,4 +124,27 @@ export const statsService = {
       throw err;
     }
   },
+
+    getDoctorAvailability: async (startDate, endDate, doctorIds = []) => {
+      const params = new URLSearchParams();
+
+      if (startDate) params.append("start_date", startDate);
+      if (endDate) params.append("end_date", endDate);
+
+      if (doctorIds.length > 0) {
+        doctorIds.forEach(id => params.append("doctor_ids", id));
+      }
+
+      return apiRequest(`/reports/doctor-availability?${params.toString()}`, "GET");
+    },
+
+    async getVisitsSummary() {
+    try {
+      const data = await apiRequest("/reports/summary", { method: "GET" });
+      return unwrap(data);
+    } catch (err) {
+      console.error("Error fetching examinations stats:", err);
+      throw err;
+    }
+  }
 };

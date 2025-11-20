@@ -54,7 +54,7 @@ import ManagerForm from "./pages/ManagerForm";
 import DoctorWorkload from './pages/reports/DoctorWorkload';
 import ReservationsSummary from './pages/reports/ReservationsSummary';
 import Examinations from './pages/reports/Examinations';
-import Prescriptions from './pages/reports/Prescriptions';
+import DoctorAvailability from './pages/reports/DoctorAvailability.jsx';
 
 function App() {
   return (
@@ -518,10 +518,10 @@ function App() {
               }
             />
             <Route
-              path="/reports/prescriptions"
+              path="/reports/doctor-availability"
               element={
                 <ProtectedRoute allowedRoles={["manager"]}>
-                  <Prescriptions />
+                  <DoctorAvailability />
                 </ProtectedRoute>
               }
             />

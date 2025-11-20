@@ -29,10 +29,10 @@ const ManagerDashboard = () => {
         </div>
 
         {/* QUICK ACTIONS */}
-        <div className="row g-4 mb-4">
+        <div className="row g-4 mb-3">
 
           {/* Doctor Workload */}
-          <div className="col-md-3">
+          <div className="col-md-4">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-clipboard-data text-primary fs-1 mb-3"></i>
@@ -48,7 +48,7 @@ const ManagerDashboard = () => {
           </div>
 
           {/* Reservations Summary */}
-          <div className="col-md-3">
+          <div className="col-md-4">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-bar-chart-line text-success fs-1 mb-3"></i>
@@ -63,32 +63,17 @@ const ManagerDashboard = () => {
             </div>
           </div>
 
-          {/* Examination Statistics */}
-          <div className="col-md-3">
-            <div className="card border-0 shadow-sm h-100">
-              <div className="card-body text-center p-4">
-                <i className="bi bi-hospital text-info fs-1 mb-3"></i>
-                <h5 className="card-title">Examinations</h5>
-                <p className="card-text text-muted small">
-                  View statistics of ordered medical examinations
-                </p>
-                <Link to="/reports/examinations" className="btn btn-info btn-sm">
-                  View Stats
-                </Link>
-              </div>
-            </div>
-          </div>
 
-          {/* Prescription Statistics */}
-          <div className="col-md-3">
+          {/* Doctor Availability Statistics */}
+          <div className="col-md-4">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-capsule text-warning fs-1 mb-3"></i>
-                <h5 className="card-title">Prescriptions</h5>
+                <h5 className="card-title">Doctor Availability</h5>
                 <p className="card-text text-muted small">
-                  Check total prescriptions and common medications
+                  Check general schedule overview of doctors
                 </p>
-                <Link to="/reports/prescriptions" className="btn btn-warning btn-sm">
+                <Link to="/reports/doctor-availability" className="btn btn-warning btn-sm">
                   View Overview
                 </Link>
               </div>

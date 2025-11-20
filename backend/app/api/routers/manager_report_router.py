@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, and_
 from datetime import date
 from core.database import get_db
-from models import Doctor, Visit, Reservation, Referral, Prescription, User
+from models import Doctor, Visit, Reservation, Referral, Prescription, User, Schedule
 from .user_router import require_role
 from pydantic import BaseModel
 from sqlalchemy import cast, Date
+from datetime import datetime, timedelta
 
 router = APIRouter(
     prefix="/reports",
@@ -271,3 +272,104 @@ async def prescriptions_report(
         ]
     }
 
+
+@router.get("/doctor-availability")
+async def doctor_availability_report(
+    start_date: str,
+    end_date: str,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(require_role(["admin", "manager"]))
+):
+
+    try:
+        start = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end = datetime.strptime(end_date, "%Y-%m-%d").date()
+    except:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+
+    if start > end:
+        raise HTTPException(status_code=400, detail="Start date must be before end date")
+
+    # Pobierz grafiki w zakresie dat
+    result = await db.execute(
+        select(Schedule, Doctor, User)
+        .join(Doctor, Schedule.doctor_id == Doctor.doctor_id)
+        .join(User, Doctor.user_id == User.user_id)
+        .where(
+            and_(
+                Schedule.schedule_date >= start,
+                Schedule.schedule_date <= end
+            )
+        )
+        .order_by(Schedule.schedule_date.asc())
+    )
+
+    rows = result.all()
+    if not rows:
+        return []
+
+    # Grupowanie po lekarzach
+    report = {}
+    for schedule, doctor, user in rows:
+
+        # Unikalny wpis dla lekarza
+        if doctor.doctor_id not in report:
+            report[doctor.doctor_id] = {
+                "doctor_id": doctor.doctor_id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "specialization": doctor.specialization,
+                "total_days": 0,
+                "total_hours": 0.0,
+                "slots": []
+            }
+
+        # Oblicz godziny pracy
+        duration = (
+            datetime.combine(schedule.schedule_date, schedule.end_time)
+            - datetime.combine(schedule.schedule_date, schedule.start_time)
+        ) / timedelta(hours=1)
+
+        report[doctor.doctor_id]["slots"].append({
+            "date": str(schedule.schedule_date),
+            "start_time": str(schedule.start_time),
+            "end_time": str(schedule.end_time),
+            "hours": round(duration, 2),
+            "is_available": schedule.is_available,
+            "location": schedule.location
+        })
+
+        report[doctor.doctor_id]["total_hours"] += duration
+        report[doctor.doctor_id]["total_days"] += 1
+
+    # Zamiana dict na listę
+    return list(report.values())
+
+
+@router.get("/summary")
+async def visits_summary(db: AsyncSession = Depends(get_db)):
+    """
+    Returns summary of visits: this month's total and today's scheduled.
+    """
+    today = date.today()
+    first_day_of_month = today.replace(day=1)
+
+    # Visits this month
+    monthly_stmt = select(func.count(Visit.visit_id)).where(
+        Visit.visit_date >= first_day_of_month,
+        Visit.visit_date <= today
+    )
+    monthly_result = await db.execute(monthly_stmt)
+    monthly_visits = monthly_result.scalar() or 0
+
+    # Visits scheduled today
+    today_stmt = select(func.count(Visit.visit_id)).where(
+        Visit.visit_date == today
+    )
+    today_result = await db.execute(today_stmt)
+    today_visits = today_result.scalar() or 0
+
+    return {
+        "monthlyVisits": monthly_visits,
+        "todayVisits": today_visits
+    }
