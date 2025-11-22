@@ -406,7 +406,7 @@ function App() {
             <Route
               path="/admin/schedules"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
                   <SchedulesList />
                 </ProtectedRoute>
               }
@@ -414,7 +414,7 @@ function App() {
             <Route
               path="/admin/schedules/create"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
                   <ScheduleForm />
                 </ProtectedRoute>
               }
@@ -422,7 +422,7 @@ function App() {
             <Route
               path="/admin/schedules/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
                   <ScheduleDetail />
                 </ProtectedRoute>
               }
@@ -430,7 +430,7 @@ function App() {
             <Route
               path="/admin/schedules/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
                   <ScheduleForm />
                 </ProtectedRoute>
               }

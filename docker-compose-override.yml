@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfdile.dev
     container_name: backend-dev
     ports:
       - "8000:8000"

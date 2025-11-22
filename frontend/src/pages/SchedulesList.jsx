@@ -1,23 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Typeahead } from "react-bootstrap-typeahead";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
-import ListToolbar from "../components/ListToolbar";
 import { apiRequest } from "../services/apiClient";
 
 const SchedulesList = () => {
-  const [items, setItems] = useState([]);
+  const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
+  const [error, setError] = useState("");
+  const [searchDoctor, setSearchDoctor] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const load = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await resourceService.listSchedules();
-        setItems(data || []);
+        const [schedulesResp, usersResp, doctorsResp] = await Promise.all([
+          resourceService.listSchedules(),
+          apiRequest("/users"),
+          apiRequest("/doctor"),
+        ]);
+        setSchedules(schedulesResp || []);
+        setUsers(usersResp?.data || []);
+        setDoctors(doctorsResp?.data || []);
       } catch (err) {
         console.error(err);
         setError("Failed to load schedules");
@@ -25,140 +37,204 @@ const SchedulesList = () => {
         setLoading(false);
       }
     };
-    load();
+    loadData();
   }, []);
+
+  const getDoctorLabel = (doctor_id) => {
+    const d = doctors.find((doc) => doc.doctor_id === doctor_id);
+    if (!d) return `Doctor ${doctor_id}`;
+    const u = users.find((u) => u.user_id === d.user_id);
+    return u ? `${u.first_name} ${u.last_name}` : `Doctor ${doctor_id}`;
+  };
+
+  const handleDelete = async (scheduleId) => {
+    if (!window.confirm("Delete this schedule?")) return;
+    try {
+      const resp = await apiRequest(`/schedules/${scheduleId}`, { method: "DELETE" });
+      if (resp?.success === true || resp?.status === "Schedule deleted successfully") {
+        setSchedules((prev) => prev.filter((s) => s.schedule_id !== scheduleId));
+      } else {
+        setSchedules((await resourceService.listSchedules()) || []);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete schedule");
+    }
+  };
+
+  // Filtracja po dacie i doktorze
+  const filteredSchedules = schedules.filter((s) => {
+    const scheduleDate = new Date(s.schedule_date);
+    let matchDate = true;
+    if (startDate) matchDate = scheduleDate >= startDate;
+    if (matchDate && endDate) matchDate = scheduleDate <= endDate;
+
+    let matchDoctor = true;
+    if (searchDoctor && searchDoctor.length > 0) {
+      matchDoctor = s.doctor_id === searchDoctor[0]?.doctor_id;
+    }
+
+    return matchDate && matchDoctor;
+  });
+
+  // Grupowanie po dacie
+  const groupedSchedules = filteredSchedules.reduce((acc, s) => {
+    acc[s.schedule_date] = acc[s.schedule_date] || [];
+    acc[s.schedule_date].push(s);
+    return acc;
+  }, {});
 
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
       <div className="container py-5">
-        <h2 className="mb-4">Schedules</h2>
-        <div className="mb-3 d-flex justify-content-between align-items-center">
-          <div>
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/admin/schedules/create")}
-            >
-              Create Schedule
-            </button>
-          </div>
-          <div style={{ width: "50%" }}>
-            <ListToolbar
-              search={search}
-              onSearch={(v) => setSearch(v)}
-              page={1}
-              pageSize={20}
-              total={items.length}
-              onPageChange={() => {}}
-            />
+        <div className="row justify-content-center">
+          <div className="col-md-9 col-lg-8">
+            <div className="card shadow-sm border-0 mt-3">
+              <div className="card-body p-5">
+                {/* Header */}
+                <div className="text-center mb-4">
+                  <i className="bi bi-calendar2-check-fill text-primary" style={{fontSize: "3rem"}}></i>
+                  <h2 className="fw-bold mt-3 mb-2">Schedules</h2>
+                  <p className="text-muted">Manage doctor schedules</p>
+                </div>
+
+                {/* Alerts */}
+                {error && (
+                    <div className="alert alert-danger d-flex align-items-center" role="alert">
+                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                      <div>{error}</div>
+                    </div>
+                )}
+
+                {/* Filters */}
+                {/* Start Date */}
+                <div className="mb-3 d-flex align-items-center">
+                  <i className="bi bi-calendar2-event fs-4 me-2 text-primary"></i>
+                  <div className="w-100 d-flex flex-column">
+                    <label className="form-label mb-1">Start Date</label>
+                    <DatePicker
+                      className="form-control border-primary w-100"
+                      selected={startDate}
+                      onChange={(date) => setStartDate(date)}
+                      placeholderText="Select start date"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                  </div>
+                </div>
+
+                {/* End Date */}
+                <div className="mb-3 d-flex align-items-center">
+                  <i className="bi bi-calendar2-event fs-4 me-2 text-primary"></i>
+                  <div className="w-100 d-flex flex-column">
+                    <label className="form-label mb-1">End Date</label>
+                    <DatePicker
+                      className="form-control border-primary w-100"
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      placeholderText="Select end date"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                  </div>
+                </div>
+
+                {/* Doctor */}
+                <div className="mb-3 d-flex align-items-center">
+                  <i className="bi bi-person-badge fs-4 me-2 text-primary"></i>
+                  <div className="w-100 d-flex flex-column">
+                    <label className="form-label mb-1">Doctor</label>
+                    <Typeahead
+                      id="doctor-filter"
+                      labelKey={(d) => {
+                        const u = users.find((u) => u.user_id === d.user_id);
+                        return u ? `${u.first_name} ${u.last_name}` : `Doctor ${d.doctor_id}`;
+                      }}
+                      options={doctors}
+                      selected={searchDoctor || []}
+                      onChange={setSearchDoctor}
+                      placeholder="Select or type doctor"
+                      allowNew={false}
+                      className="w-100"
+                    />
+                  </div>
+                </div>
+
+                {/* Create Button */}
+                <div className="mb-4">
+                  <button
+                      className="btn btn-primary w-100"
+                      onClick={() => navigate("/admin/schedules/create")}
+                  >
+                    <i className="bi bi-plus-circle me-2"></i> Create Schedule
+                  </button>
+                </div>
+
+                {/* Loading */}
+                {loading && (
+                    <div className="d-flex justify-content-center my-4">
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                )}
+
+                {/* Grouped schedules */}
+                {!loading &&
+                    Object.keys(groupedSchedules)
+                        .sort()
+                        .map((date) => (
+                            <div key={date} className="mb-4">
+                              <h5 className="fw-semibold mb-3">
+                                <i className="bi bi-calendar-event me-2"></i>
+                              {date}
+                            </h5>
+                            {groupedSchedules[date].map((s) => (
+                                <div key={s.schedule_id} className="card mb-2 shadow-sm">
+                                  <div className="card-body d-flex justify-content-between align-items-center p-3">
+                                    <div>
+                                      <strong>Doctor:</strong> {getDoctorLabel(s.doctor_id)} <br/>
+                                      <strong>Start:</strong> {s.start_time} <br/>
+                                      <strong>End:</strong> {s.end_time}
+                                    </div>
+                                    <div className="btn-group">
+                                      <button
+                                          className="btn btn-sm btn-outline-primary"
+                                          onClick={() => navigate(`/admin/schedules/${s.schedule_id}`)}
+                                      >
+                                        <i className="bi bi-eye me-1"></i> View
+                                      </button>
+                                      <button
+                                          className="btn btn-sm btn-outline-secondary"
+                                          onClick={() => navigate(`/admin/schedules/edit/${s.schedule_id}`)}
+                                      >
+                                        <i className="bi bi-pencil me-1"></i> Edit
+                                      </button>
+                                      <button
+                                          className="btn btn-sm btn-outline-danger"
+                                          onClick={() => handleDelete(s.schedule_id)}
+                                      >
+                                        <i className="bi bi-trash me-1"></i> Delete
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                            ))}
+                          </div>
+                      ))}
+
+              {!loading && filteredSchedules.length === 0 && (
+                  <div className="alert alert-info text-center mt-4">
+                    No schedules found.
+                  </div>
+              )}
+            </div>
           </div>
         </div>
-        {loading && (
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        )}
-        {error && <div className="alert alert-danger">{error}</div>}
-        {!loading && !error && (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Doctor ID</th>
-                  <th>Date</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items
-                  .filter(
-                    (it) =>
-                      !search ||
-                      JSON.stringify(it)
-                        .toLowerCase()
-                        .includes(search.toLowerCase())
-                  )
-                  .map((s, idx) => (
-                    <tr key={s.schedule_id || idx}>
-                      <td>{idx + 1}</td>
-                      <td>{s.doctor_id}</td>
-                      <td>{s.schedule_date}</td>
-                      <td>{s.start_time}</td>
-                      <td>{s.end_time}</td>
-                      <td>
-                        <div className="btn-group" role="group">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() =>
-                              navigate(`/admin/schedules/${s.schedule_id}`)
-                            }
-                          >
-                            View
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() =>
-                              navigate(`/admin/schedules/edit/${s.schedule_id}`)
-                            }
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={async () => {
-                              if (!window.confirm("Delete this schedule?"))
-                                return;
-                              try {
-                                const resp = await apiRequest(
-                                  `/schedules/${s.schedule_id}`,
-                                  { method: "DELETE" }
-                                );
-                                // if apiRequest returns success-wrapped
-                                if (resp && resp.success === true) {
-                                  setItems((prev) =>
-                                    prev.filter(
-                                      (it) => it.schedule_id !== s.schedule_id
-                                    )
-                                  );
-                                } else if (
-                                  resp &&
-                                  resp.status ===
-                                    "Schedule deleted successfully"
-                                ) {
-                                  setItems((prev) =>
-                                    prev.filter(
-                                      (it) => it.schedule_id !== s.schedule_id
-                                    )
-                                  );
-                                } else {
-                                  // attempt to refresh list
-                                  setItems(
-                                    (await resourceService.listSchedules()) ||
-                                      []
-                                  );
-                                }
-                              } catch (err) {
-                                console.error(err);
-                                alert("Failed to delete schedule");
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
-  );
+</div>
+)
+  ;
 };
 
 export default SchedulesList;

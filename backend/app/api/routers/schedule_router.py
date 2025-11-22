@@ -50,7 +50,7 @@ async def create_schedule(
 @router.get("/", response_model=list[ScheduleModel], description="Get all schedules.")
 async def get_all_schedules(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role(["admin", "receptionist", "patient", "doctor"]))
 ):
     """Retrieve all schedule entries (admin only)."""
     result = await db.execute(select(Schedule))

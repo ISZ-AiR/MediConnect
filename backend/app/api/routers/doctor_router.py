@@ -58,7 +58,7 @@ async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)
 @router.get("/", response_model=list[dict])
 async def get_all_doctors(
         db: AsyncSession = Depends(get_db),
-        current_user=Depends(require_role(["admin", "manager", "receptionist"]))
+        current_user=Depends(require_role(["admin", "manager", "receptionist", "patient"]))
 ):
     # Pobierz lekarzy wraz z powiązanym userem
     result = await db.execute(
@@ -82,7 +82,7 @@ async def get_all_doctors(
 
 
 @router.get("/{doctor_id}", response_model=DoctorModel)
-async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "manager", "receptionist"]))):
+async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "manager", "receptionist", "patient"]))):
     result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
     doctor = result.scalar_one_or_none()
     if not doctor:
