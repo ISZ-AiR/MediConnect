@@ -1,10 +1,53 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
+import { apiRequest } from "../services/apiClient";
 
 const PatientDashboard = () => {
   const { user } = useAuth();
+
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [patient, setPatient] = useState(null)
+
+  useEffect(() => {
+  const loadPatient = async () => {
+    try {
+      const data = await apiRequest("/patients/me", { method: "GET" });
+      setPatient(data.data);
+      console.log("Patient/me response:", data);
+    } catch (err) {
+      console.error("Failed to load patient", err);
+    }
+  };
+  loadPatient();
+}, []);
+
+useEffect(() => {
+  if (!patient) return;
+
+  const fetchAppointments = async () => {
+    try {
+      const res = await apiRequest(`/reservation/me`);
+      if (res.success) {
+        const upcoming = res.data
+          .filter(a => new Date(a.reservation_time) > new Date())
+          .sort((a, b) => new Date(a.reservation_time) - new Date(b.reservation_time))
+          .slice(0, 3);
+        setAppointments(upcoming);
+      }
+    } catch (err) {
+      console.error("Failed to fetch appointments", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAppointments();
+}, [patient]);
+
+
 
   return (
     <div className="min-vh-100 bg-light">
@@ -105,13 +148,33 @@ const PatientDashboard = () => {
                 </h5>
               </div>
               <div className="card-body">
-                <div className="text-center py-5 text-muted">
-                  <i className="bi bi-calendar-x fs-1 mb-3 d-block"></i>
-                  <p>No upcoming appointments</p>
-                  <Link to="/appointments/book" className="btn btn-primary">
-                    Schedule an Appointment
-                  </Link>
-                </div>
+                {loading ? (
+                    <p>Loading...</p>
+                ) : appointments.length === 0 ? (
+                    <div className="text-center py-5 text-muted">
+                      <i className="bi bi-calendar-x fs-1 mb-3 d-block"></i>
+                      <p>No upcoming appointments</p>
+                      <Link to="/appointments/book" className="btn btn-primary">
+                        Schedule an Appointment
+                      </Link>
+                    </div>
+                ) : (
+                    <ul className="list-group list-group-flush">
+                      {appointments.map(a => (
+                          <li key={a.reservation_id}
+                              className="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                              <strong>{new Date(a.reservation_time).toLocaleString()}</strong>
+                              <br/>
+                              Doctor: {a.doctor_name || a.doctor_id}
+                            </div>
+                            <Link to={`/appointments/${a.reservation_id}`} className="btn btn-sm btn-outline-primary">
+                              View
+                            </Link>
+                          </li>
+                      ))}
+                    </ul>
+                )}
               </div>
             </div>
           </div>
