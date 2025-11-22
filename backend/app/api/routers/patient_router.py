@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from typing import Annotated
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
@@ -98,22 +98,43 @@ async def get_patient(patient_id: int, db: AsyncSession = Depends(get_db), curre
 
 
 @router.put("/{patient_id}", response_model=PatientModel, description="Update a patient's details.")
-async def update_patient(patient_id: int, patient_update: PatientUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
-    result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
+async def update_patient(
+    patient_id: int,
+    patient_update: PatientUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["receptionist", "admin"]))
+):
+    # Fetch patient WITH related user (async safe)
+    result = await db.execute(
+        select(Patient)
+        .options(selectinload(Patient.user))
+        .where(Patient.patient_id == patient_id)
+    )
+
     patient = result.scalar_one_or_none()
+
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    # Update fields if provided
-    if patient_update.first_name:
-        patient.user.first_name = patient_update.first_name
-    if patient_update.last_name:
-        patient.user.last_name = patient_update.last_name
-    if patient_update.phone:
-        patient.user.phone = patient_update.phone
-    if patient_update.pesel:
+    user = patient.user
+    if not user:
+        raise HTTPException(status_code=500, detail="Patient has no linked user")
+
+    # Update USER fields
+    if patient_update.first_name is not None:
+        user.first_name = patient_update.first_name
+
+    if patient_update.last_name is not None:
+        user.last_name = patient_update.last_name
+
+    if patient_update.phone is not None:
+        user.phone = patient_update.phone
+
+    # Update PATIENT fields
+    if patient_update.pesel is not None:
         patient.pesel = patient_update.pesel
-    if patient_update.birth_date:
+
+    if patient_update.birth_date is not None:
         patient.birth_date = patient_update.birth_date
 
     await db.commit()

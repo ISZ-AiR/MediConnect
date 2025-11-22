@@ -6,6 +6,7 @@ import { useParams, useNavigate } from "react-router-dom";
 const PatientForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -15,29 +16,44 @@ const PatientForm = () => {
     pesel: "",
     birth_date: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       if (!id) return;
+
       try {
-        const res = await apiRequest(`/patients/${id}`, { method: "GET" });
-        const data = res.success ? res.data : res;
+        setLoading(true);
+
+        const [patientRes, usersRes] = await Promise.all([
+          apiRequest(`/patients/${id}`),
+          apiRequest("/users"),
+        ]);
+
+        const patient = patientRes.success ? patientRes.data : patientRes;
+        const users = usersRes?.data || [];
+
+        const user = users.find((u) => u.user_id === patient.user_id);
+
         setForm({
-          first_name: data.user?.first_name || "",
-          last_name: data.user?.last_name || "",
-          email: data.user?.email || "",
-          phone: data.user?.phone || "",
+          first_name: user?.first_name || "",
+          last_name: user?.last_name || "",
+          email: user?.email || "",
+          phone: user?.phone || "",
           password: "",
-          pesel: data.pesel || "",
-          birth_date: data.birth_date || "",
+          pesel: patient.pesel || "",
+          birth_date: patient.birth_date || "",
         });
       } catch (err) {
         console.error(err);
         setError("Failed to load patient");
+      } finally {
+        setLoading(false);
       }
     };
+
     load();
   }, [id]);
 
@@ -48,6 +64,7 @@ const PatientForm = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const payload = {
         first_name: form.first_name,
@@ -57,6 +74,7 @@ const PatientForm = () => {
         password: form.password || undefined,
         pesel: form.pesel,
         birth_date: form.birth_date,
+        role: "patient",
       };
 
       if (id) {
@@ -66,7 +84,6 @@ const PatientForm = () => {
         });
         if (res.success) navigate("/admin/patients");
       } else {
-        // Create patient via admin endpoint may be /patients/register (requires receptionist/admin)
         const res = await apiRequest("/patients/register", {
           method: "POST",
           body: JSON.stringify(payload),
@@ -84,99 +101,151 @@ const PatientForm = () => {
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
+
       <div className="container py-5">
-        <h2 className="mb-4">{id ? "Edit Patient" : "Create Patient"}</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <form onSubmit={handleSubmit} className="card p-4">
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label className="form-label">First name</label>
-              <input
-                name="first_name"
-                className="form-control"
-                value={form.first_name}
-                onChange={handleChange}
-                required
-              />
+        <div className="row justify-content-center">
+          <div className="col-md-9 col-lg-8">
+            <div className="card shadow-sm border-0">
+              <div className="card-body p-5">
+
+                <div className="text-center mb-4">
+                  <i
+                    className="bi bi-person-circle text-primary"
+                    style={{ fontSize: "3rem" }}
+                  ></i>
+                  <h2 className="fw-bold mt-3 mb-2">
+                    {id ? "Edit Patient" : "Register Patient"}
+                  </h2>
+                  <p className="text-muted">Fill in patient information</p>
+                </div>
+
+                {error && (
+                  <div className="alert alert-danger d-flex align-items-center">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="card p-4">
+                  <h5 className="mb-3">
+                    <i className="bi bi-person-vcard me-2"></i>
+                    Personal Information
+                  </h5>
+
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label fw-semibold">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="first_name"
+                        value={form.first_name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label fw-semibold">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="last_name"
+                        value={form.last_name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">
+                      <i className="bi bi-envelope me-2"></i>Email
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">
+                      <i className="bi bi-telephone me-2"></i>Phone
+                    </label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label fw-semibold">PESEL</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="pesel"
+                        value={form.pesel}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label fw-semibold">
+                        Birth Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="birth_date"
+                        value={form.birth_date}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">
+                      <i className="bi bi-lock me-2"></i>Password{" "}
+                      {id && (
+                        <small className="text-muted">(leave empty to keep)</small>
+                      )}
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="d-grid">
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-lg"
+                      disabled={loading}
+                    >
+                      {loading ? "Saving..." : "Save Patient"}
+                    </button>
+                  </div>
+                </form>
+
+              </div>
             </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Last name</label>
-              <input
-                name="last_name"
-                className="form-control"
-                value={form.last_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
           </div>
-
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input
-              name="email"
-              type="email"
-              className="form-control"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Phone</label>
-            <input
-              name="phone"
-              className="form-control"
-              value={form.phone}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">
-              Password{" "}
-              {id && (
-                <small className="text-muted">(leave empty to keep)</small>
-              )}
-            </label>
-            <input
-              name="password"
-              type="password"
-              className="form-control"
-              value={form.password}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label className="form-label">PESEL</label>
-              <input
-                name="pesel"
-                className="form-control"
-                value={form.pesel}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Birth date</label>
-              <input
-                name="birth_date"
-                type="date"
-                className="form-control"
-                value={form.birth_date}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div>
-            <button className="btn btn-primary" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ const ReceptionistDashboard = () => {
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-person-badge text-info fs-1 mb-3"></i>
-                <h5 className="card-title">Doctors</h5>
+                <h5 className="card-title">Schedules</h5>
                 <p className="card-text text-muted small">
                   View and manage doctor schedules
                 </p>

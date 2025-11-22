@@ -16,6 +16,7 @@ const SchedulesList = () => {
   const [endDate, setEndDate] = useState(null);
   const [users, setUsers] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,8 +78,14 @@ const SchedulesList = () => {
     return matchDate && matchDoctor;
   });
 
+  const pageSize = 20;
+  const paginatedSchedules = filteredSchedules.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   // Grupowanie po dacie
-  const groupedSchedules = filteredSchedules.reduce((acc, s) => {
+  const groupedSchedules = paginatedSchedules.reduce((acc, s) => {
     acc[s.schedule_date] = acc[s.schedule_date] || [];
     acc[s.schedule_date].push(s);
     return acc;
@@ -89,7 +96,7 @@ const SchedulesList = () => {
       <Navbar />
       <div className="container py-5">
         <div className="row justify-content-center">
-          <div className="col-md-9 col-lg-8">
+          <div className="col-md-10 col-lg-9">
             <div className="card shadow-sm border-0 mt-3">
               <div className="card-body p-5">
                 {/* Header */}
@@ -107,58 +114,6 @@ const SchedulesList = () => {
                     </div>
                 )}
 
-                {/* Filters */}
-                {/* Start Date */}
-                <div className="mb-3 d-flex align-items-center">
-                  <i className="bi bi-calendar2-event fs-4 me-2 text-primary"></i>
-                  <div className="w-100 d-flex flex-column">
-                    <label className="form-label mb-1">Start Date</label>
-                    <DatePicker
-                      className="form-control border-primary w-100"
-                      selected={startDate}
-                      onChange={(date) => setStartDate(date)}
-                      placeholderText="Select start date"
-                      dateFormat="yyyy-MM-dd"
-                    />
-                  </div>
-                </div>
-
-                {/* End Date */}
-                <div className="mb-3 d-flex align-items-center">
-                  <i className="bi bi-calendar2-event fs-4 me-2 text-primary"></i>
-                  <div className="w-100 d-flex flex-column">
-                    <label className="form-label mb-1">End Date</label>
-                    <DatePicker
-                      className="form-control border-primary w-100"
-                      selected={endDate}
-                      onChange={(date) => setEndDate(date)}
-                      placeholderText="Select end date"
-                      dateFormat="yyyy-MM-dd"
-                    />
-                  </div>
-                </div>
-
-                {/* Doctor */}
-                <div className="mb-3 d-flex align-items-center">
-                  <i className="bi bi-person-badge fs-4 me-2 text-primary"></i>
-                  <div className="w-100 d-flex flex-column">
-                    <label className="form-label mb-1">Doctor</label>
-                    <Typeahead
-                      id="doctor-filter"
-                      labelKey={(d) => {
-                        const u = users.find((u) => u.user_id === d.user_id);
-                        return u ? `${u.first_name} ${u.last_name}` : `Doctor ${d.doctor_id}`;
-                      }}
-                      options={doctors}
-                      selected={searchDoctor || []}
-                      onChange={setSearchDoctor}
-                      placeholder="Select or type doctor"
-                      allowNew={false}
-                      className="w-100"
-                    />
-                  </div>
-                </div>
-
                 {/* Create Button */}
                 <div className="mb-4">
                   <button
@@ -168,6 +123,61 @@ const SchedulesList = () => {
                     <i className="bi bi-plus-circle me-2"></i> Create Schedule
                   </button>
                 </div>
+
+                {/* Filters */}
+                {/* Start Date */}
+                <div className="mb-3 d-flex align-items-center">
+                  <i className="bi bi-calendar2-event fs-4 me-2 text-primary"></i>
+                  <div className="w-100 d-flex flex-column">
+                    <label className="form-label fw-bold mb-1">Start Date</label>
+                    <DatePicker
+                        className="form-control border-secondary w-100"
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        placeholderText="Select start date"
+                        dateFormat="yyyy-MM-dd"
+                    />
+                  </div>
+                </div>
+
+                {/* End Date */}
+                <div className="mb-3 d-flex align-items-center">
+                  <i className="bi bi-calendar2-event fs-4 me-2 text-primary"></i>
+                  <div className="w-100 d-flex flex-column">
+                    <label className="form-label fw-bold mb-1">End Date</label>
+                    <DatePicker
+                        className="form-control border-secondary w-100"
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        placeholderText="Select end date"
+                        dateFormat="yyyy-MM-dd"
+                    />
+                  </div>
+                </div>
+
+                {/* Doctor */}
+                <div className="mb-3 d-flex align-items-center">
+                  <i className="bi bi-person-badge fs-4 me-2 text-primary"></i>
+                  <div className="w-100 d-flex flex-column">
+                    <label className="form-label fw-bold mb-1">Doctor</label>
+                    <Typeahead
+                        id="doctor-filter"
+                        labelKey={(d) => {
+                          const u = users.find((u) => u.user_id === d.user_id);
+                          return u ? `${u.first_name} ${u.last_name}` : `Doctor ${d.doctor_id}`;
+                        }}
+                        options={doctors}
+                        selected={searchDoctor || []}
+                        onChange={setSearchDoctor}
+                        placeholder="Select or type doctor"
+                        allowNew={false}
+                        className="w-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4 border-bottom"></div>
+
 
                 {/* Loading */}
                 {loading && (
@@ -186,55 +196,75 @@ const SchedulesList = () => {
                             <div key={date} className="mb-4">
                               <h5 className="fw-semibold mb-3">
                                 <i className="bi bi-calendar-event me-2"></i>
-                              {date}
-                            </h5>
-                            {groupedSchedules[date].map((s) => (
-                                <div key={s.schedule_id} className="card mb-2 shadow-sm">
-                                  <div className="card-body d-flex justify-content-between align-items-center p-3">
-                                    <div>
-                                      <strong>Doctor:</strong> {getDoctorLabel(s.doctor_id)} <br/>
-                                      <strong>Start:</strong> {s.start_time} <br/>
-                                      <strong>End:</strong> {s.end_time}
-                                    </div>
-                                    <div className="btn-group">
-                                      <button
-                                          className="btn btn-sm btn-outline-primary"
-                                          onClick={() => navigate(`/admin/schedules/${s.schedule_id}`)}
-                                      >
-                                        <i className="bi bi-eye me-1"></i> View
-                                      </button>
-                                      <button
-                                          className="btn btn-sm btn-outline-secondary"
-                                          onClick={() => navigate(`/admin/schedules/edit/${s.schedule_id}`)}
-                                      >
-                                        <i className="bi bi-pencil me-1"></i> Edit
-                                      </button>
-                                      <button
-                                          className="btn btn-sm btn-outline-danger"
-                                          onClick={() => handleDelete(s.schedule_id)}
-                                      >
-                                        <i className="bi bi-trash me-1"></i> Delete
-                                      </button>
+                                {date}
+                              </h5>
+                              {groupedSchedules[date].map((s) => (
+                                  <div key={s.schedule_id} className="card mb-2 shadow-sm">
+                                    <div className="card-body d-flex justify-content-between align-items-center p-3">
+                                      <div>
+                                        <strong>Doctor:</strong> {getDoctorLabel(s.doctor_id)} <br/>
+                                        <strong>Start:</strong> {s.start_time} || <strong>End:</strong> {s.end_time}
+                                      </div>
+                                      <div className="btn-group">
+                                        <button
+                                            className="btn btn-sm btn-outline-primary"
+                                            onClick={() => navigate(`/admin/schedules/${s.schedule_id}`)}
+                                        >
+                                          <i className="bi bi-eye me-1"></i> View
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-outline-secondary"
+                                            onClick={() => navigate(`/admin/schedules/edit/${s.schedule_id}`)}
+                                        >
+                                          <i className="bi bi-pencil me-1"></i> Edit
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-outline-danger"
+                                            onClick={() => handleDelete(s.schedule_id)}
+                                        >
+                                          <i className="bi bi-trash me-1"></i> Delete
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                            ))}
-                          </div>
-                      ))}
+                              ))}
+                            </div>
+                        ))}
 
-              {!loading && filteredSchedules.length === 0 && (
-                  <div className="alert alert-info text-center mt-4">
-                    No schedules found.
-                  </div>
-              )}
+                {!loading && filteredSchedules.length === 0 && (
+                    <div className="alert alert-info text-center mt-4">
+                      No schedules found.
+                    </div>
+                )}
+              </div>
+
+
+              <div className="d-flex justify-content-between align-items-center mt-3 px-3 mb-4">
+                <button
+                    className="btn btn-outline-secondary"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                >
+                  Previous
+                </button>
+                <span>Page {page}</span>
+                <button
+                    className="btn btn-outline-secondary"
+                    disabled={page * pageSize >= filteredSchedules.length}
+                    onClick={() => setPage(page + 1)}
+                >
+                  Next
+                </button>
+              </div>
+
+
             </div>
           </div>
         </div>
       </div>
     </div>
-</div>
-)
-  ;
+  )
+      ;
 };
 
 export default SchedulesList;
