@@ -146,7 +146,7 @@ async def get_my_reservations(
 async def get_reservation_by_id(
     reservation_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("receptionist"))
+    current_user: User = Depends(require_role(["receptionist", "patient"]))
 ):
     """Retrieve a specific reservation."""
     result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))

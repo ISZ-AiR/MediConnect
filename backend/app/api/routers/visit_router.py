@@ -7,6 +7,7 @@ from core.database import get_db
 from models.visit_model import Visit
 from models.reservation_model import Reservation
 from models.user_model import User
+from models.patient_model import Patient
 from schemas.visit_schema import VisitBase, VisitModel, VisitUpdate
 from .user_router import require_role
 
@@ -56,6 +57,24 @@ async def get_all_visits(db: AsyncSession = Depends(get_db)):
     visits = result.scalars().all()
     return visits
 
+@router.get("/me", response_model=List[VisitModel])
+async def get_my_visits(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("patient"))
+    ):
+    """
+    Get all visits for the logged-in patient via reservation
+    """
+    result = await db.execute(
+        select(Visit)
+        .options(joinedload(Visit.reservation))
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .join(Patient, Reservation.patient_id == Patient.patient_id)
+        .where(Patient.user_id == current_user.user_id)
+    )
+    visits = result.scalars().all()
+    return visits
+
 
 @router.get("/{visit_id}", response_model=VisitModel)
 async def get_visit(visit_id: int, db: AsyncSession = Depends(get_db)):
@@ -74,7 +93,7 @@ async def update_visit(
     visit_id: int,
     visit_data: VisitUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("nurse"))
+    current_user: User = Depends(require_role(["nurse", "receptionist"]))
 ):
     """
     Update an existing visit. Only the nurse who created it or admin can update.
@@ -117,19 +136,3 @@ async def delete_visit(
     return {"status": "Visit deleted successfully"}
 
 
-@router.get("/me", response_model=List[VisitModel])
-async def get_my_visits(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("patient"))
-    ):
-    """
-    Get all visits for the logged-in patient via reservation
-    """
-    result = await db.execute(
-    select(Visit)
-        .options(joinedload(Visit.reservation))
-        .join(Reservation)
-        .where(Reservation.patient_id == current_user.user_id)
-    )
-    visits = result.scalars().all()
-    return visits

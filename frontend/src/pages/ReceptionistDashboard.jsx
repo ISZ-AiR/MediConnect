@@ -15,11 +15,11 @@ const ReceptionistDashboard = () => {
             <p className="text-muted">Welcome, {user?.email}</p>
           </div>
         </div>
-
         <div className="row g-4">
 
           {/* Reservations */}
-          <div className="col-md-4">
+
+          <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-calendar-check text-primary fs-1 mb-3"></i>
@@ -27,7 +27,24 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   Manage and schedule patient reservations
                 </p>
-                <Link to="/admin/reservations" className="btn btn-primary btn-sm">
+                <Link to="/receptionist/reservations" className="btn btn-primary btn-sm">
+                  Open
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Visits */}
+
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body text-center p-4">
+                <i className="bi bi-calendar-plus text-warning fs-1 mb-3"></i>
+                <h5 className="card-title">Visits</h5>
+                <p className="card-text text-muted small">
+                  Browse and manage patient visits
+                </p>
+                <Link to="/receptionist/visits" className="btn btn-warning btn-sm">
                   Open
                 </Link>
               </div>
@@ -35,7 +52,8 @@ const ReceptionistDashboard = () => {
           </div>
 
           {/* Patients */}
-          <div className="col-md-4">
+
+          <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-people text-success fs-1 mb-3"></i>
@@ -43,15 +61,16 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   Browse and update patient records
                 </p>
-                <Link to="/admin/patients" className="btn btn-success btn-sm">
+                <Link to="/receptionist/patients" className="btn btn-success btn-sm">
                   Open
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Doctors */}
-          <div className="col-md-4">
+          {/* Doctors / Schedules */}
+
+          <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-person-badge text-info fs-1 mb-3"></i>
@@ -59,17 +78,18 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   View and manage doctor schedules
                 </p>
-                <Link to="/admin/schedules" className="btn btn-info btn-sm">
+                <Link to="/receptionist/schedules" className="btn btn-info btn-sm">
                   Open
                 </Link>
               </div>
             </div>
           </div>
 
-        </div>
       </div>
     </div>
-  );
+</div>
+)
+  ;
 };
 
 export default ReceptionistDashboard;

@@ -72,7 +72,7 @@ function App() {
             <Route
               path="/admin/reservations/create"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ReservationForm />
                 </ProtectedRoute>
               }
@@ -80,7 +80,7 @@ function App() {
             <Route
               path="/admin/reservations/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ReservationDetail />
                 </ProtectedRoute>
               }
@@ -88,7 +88,7 @@ function App() {
             <Route
               path="/admin/reservations/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ReservationForm />
                 </ProtectedRoute>
               }
@@ -122,7 +122,7 @@ function App() {
             <Route
               path="/admin/patients/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <PatientDetail />
                 </ProtectedRoute>
               }
@@ -130,7 +130,7 @@ function App() {
             <Route
               path="/admin/patients/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <PatientForm />
                 </ProtectedRoute>
               }
@@ -138,7 +138,7 @@ function App() {
             <Route
               path="/admin/patients/create"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <PatientForm />
                 </ProtectedRoute>
               }
@@ -188,7 +188,7 @@ function App() {
             <Route
               path="/patients"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <PatientsList />
                 </ProtectedRoute>
               }
@@ -206,7 +206,7 @@ function App() {
             <Route
               path="/admin/patients"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <PatientsList />
                 </ProtectedRoute>
               }
@@ -272,7 +272,7 @@ function App() {
             <Route
               path="/admin/reservations"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ReservationsList />
                 </ProtectedRoute>
               }
@@ -408,7 +408,7 @@ function App() {
             <Route
               path="/admin/schedules"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <SchedulesList />
                 </ProtectedRoute>
               }
@@ -416,7 +416,7 @@ function App() {
             <Route
               path="/admin/schedules/create"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ScheduleForm />
                 </ProtectedRoute>
               }
@@ -424,7 +424,7 @@ function App() {
             <Route
               path="/admin/schedules/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ScheduleDetail />
                 </ProtectedRoute>
               }
@@ -432,7 +432,7 @@ function App() {
             <Route
               path="/admin/schedules/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "receptionist"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ScheduleForm />
                 </ProtectedRoute>
               }
@@ -458,7 +458,7 @@ function App() {
             />
 
             <Route
-              path="/patient/visit/:id"
+              path="/patient/records/:id"
               element={
                 <ProtectedRoute allowedRoles={["patient"]}>
                   <PatientRecordsDetail />
@@ -499,6 +499,141 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["receptionist"]}>
                   <ReceptionistDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/reservations"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ReservationsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/visits"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <VisitsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/visits/create"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <VisitForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/visits/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <VisitDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/visits/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <VisitForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/reservations/create"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ReservationForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/reservations/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ReservationDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/reservations/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ReservationForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/patients"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <PatientsList />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/patients/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <PatientDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/patients/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <PatientForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/patients/create"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <PatientForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/receptionist/schedules"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <SchedulesList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/schedules/create"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ScheduleForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/schedules/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ScheduleDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receptionist/schedules/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["receptionist"]}>
+                  <ScheduleForm />
                 </ProtectedRoute>
               }
             />

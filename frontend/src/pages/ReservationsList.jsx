@@ -142,7 +142,7 @@ return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="contai
       <div className="d-grid mb-3">
         <button
           className="btn btn-primary btn-lg"
-          onClick={() => navigate("/admin/reservations/create")}
+          onClick={() => navigate("/receptionist/reservations/create")}
         >
           Create Reservation
         </button>
@@ -179,11 +179,11 @@ return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="contai
                           }).replace(",", " godz.")}</td>
                           <td>{r.is_cancelled ? "Yes" : "No"}</td>
                           <td>
-                              <Link to={`/admin/reservations/${r.reservation_id}`}
+                              <Link to={`/receptionist/reservations/${r.reservation_id}`}
                                     className="btn btn-sm btn-outline-primary me-2">
                                   View
                               </Link>
-                              <Link to={`/admin/reservations/edit/${r.reservation_id}`}
+                              <Link to={`/receptionist/reservations/edit/${r.reservation_id}`}
                                     className="btn btn-sm btn-outline-secondary me-2">
                                   Edit
                               </Link>

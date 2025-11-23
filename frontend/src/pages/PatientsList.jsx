@@ -75,7 +75,7 @@ const PatientsList = () => {
                 <div className="mb-4">
                   <button
                     className="btn btn-primary btn-lg w-100"
-                    onClick={() => navigate("/admin/patients/create")}
+                    onClick={() => navigate("/receptionist/patients/create")}
                   >
                     <i className="bi bi-plus-lg me-2"></i>Create Patient
                   </button>
@@ -131,13 +131,13 @@ const PatientsList = () => {
                             <td>{p.birth_date}</td>
                             <td>
                               <Link
-                                to={`/admin/patients/${p.patient_id}`}
+                                to={`/receptionist/patients/${p.patient_id}`}
                                 className="btn btn-sm btn-outline-primary me-2"
                               >
                                 View
                               </Link>
                               <Link
-                                to={`/admin/patients/edit/${p.patient_id}`}
+                                to={`/receptionist/patients/edit/${p.patient_id}`}
                                 className="btn btn-sm btn-outline-secondary"
                               >
                                 Edit

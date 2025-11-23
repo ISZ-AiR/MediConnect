@@ -118,7 +118,7 @@ const SchedulesList = () => {
                 <div className="mb-4">
                   <button
                       className="btn btn-primary w-100"
-                      onClick={() => navigate("/admin/schedules/create")}
+                      onClick={() => navigate("/receptionist/schedules/create")}
                   >
                     <i className="bi bi-plus-circle me-2"></i> Create Schedule
                   </button>
@@ -208,13 +208,13 @@ const SchedulesList = () => {
                                       <div className="btn-group">
                                         <button
                                             className="btn btn-sm btn-outline-primary"
-                                            onClick={() => navigate(`/admin/schedules/${s.schedule_id}`)}
+                                            onClick={() => navigate(`/receptionist/schedules/${s.schedule_id}`)}
                                         >
                                           <i className="bi bi-eye me-1"></i> View
                                         </button>
                                         <button
                                             className="btn btn-sm btn-outline-secondary"
-                                            onClick={() => navigate(`/admin/schedules/edit/${s.schedule_id}`)}
+                                            onClick={() => navigate(`/receptionist/schedules/edit/${s.schedule_id}`)}
                                         >
                                           <i className="bi bi-pencil me-1"></i> Edit
                                         </button>
