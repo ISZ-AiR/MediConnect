@@ -1,137 +1,74 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import PropTypes from "prop-types";
 import Navbar from "../components/Navbar";
-import ListToolbar from "../components/ListToolbar";
 import { resourceService } from "../services/resourceService";
 import { apiRequest } from "../services/apiClient";
+import ListScaffold from "../components/ListScaffold";
+import { Link } from "react-router-dom";
+
+function ReferralActions({ referral }) {
+  return (
+    <div className="btn-group">
+      <Link
+        to={`/admin/referrals/${referral.referral_id}`}
+        className="btn btn-sm btn-outline-primary"
+      >
+        View
+      </Link>
+      <Link
+        to={`/admin/referrals/edit/${referral.referral_id}`}
+        className="btn btn-sm btn-outline-secondary"
+      >
+        Edit
+      </Link>
+      <button
+        className="btn btn-sm btn-outline-danger"
+        onClick={async () => {
+          if (!globalThis.confirm("Delete this referral?")) return;
+          try {
+            await apiRequest(`/referrals/${referral.referral_id}`, {
+              method: "DELETE",
+            });
+            globalThis.location.reload();
+          } catch (err) {
+            console.error(err);
+            alert("Failed to delete referral");
+          }
+        }}
+      >
+        Delete
+      </button>
+    </div>
+  );
+}
+
+ReferralActions.propTypes = {
+  referral: PropTypes.object.isRequired,
+};
+
+const renderReferralActions = (r) => <ReferralActions referral={r} />;
 
 const ReferralsList = () => {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await resourceService.listReferrals();
-        setItems(data || []);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load referrals");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
-      <div className="container py-5">
-        <h2 className="mb-4">Referrals</h2>
-        <div className="mb-3">
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate("/admin/referrals/create")}
-          >
-            Create Referral
-          </button>
-        </div>
-        <ListToolbar
-          search={search}
-          onSearch={(val) => setSearch(val)}
-          page={1}
-          pageSize={20}
-          total={items.length}
-          onPageChange={() => {}}
-        />
-        {loading && (
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        )}
-        {error && <div className="alert alert-danger">{error}</div>}
-        {!loading && !error && (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Visit ID</th>
-                  <th>Examination ID</th>
-                  <th>Doctor ID</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items
-                  .filter(
-                    (it) =>
-                      !search ||
-                      JSON.stringify(it)
-                        .toLowerCase()
-                        .includes(search.toLowerCase())
-                  )
-                  .map((r, idx) => (
-                    <tr key={r.referral_id || idx}>
-                      <td>{idx + 1}</td>
-                      <td>{r.visit_id}</td>
-                      <td>{r.examination_id}</td>
-                      <td>{r.doctor_id}</td>
-                      <td>
-                        <div className="btn-group" role="group">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() =>
-                              navigate(`/admin/referrals/${r.referral_id}`)
-                            }
-                          >
-                            View
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() =>
-                              navigate(`/admin/referrals/edit/${r.referral_id}`)
-                            }
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={async () => {
-                              if (!window.confirm("Delete this referral?"))
-                                return;
-                              try {
-                                await apiRequest(
-                                  `/referrals/${r.referral_id}`,
-                                  { method: "DELETE" }
-                                );
-                                setItems((prev) =>
-                                  prev.filter(
-                                    (it) => it.referral_id !== r.referral_id
-                                  )
-                                );
-                              } catch (err) {
-                                console.error(err);
-                                alert("Failed to delete referral");
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <ListScaffold
+        title="Referrals"
+        fetchFn={resourceService.listReferrals}
+        createLabel="Create Referral"
+        createPath="/admin/referrals/create"
+        columns={[
+          { header: "Visit ID", render: (r) => r.visit_id },
+          { header: "Examination ID", render: (r) => r.examination_id },
+          { header: "Doctor ID", render: (r) => r.doctor_id },
+          {
+            header: "Completed",
+            render: (r) => (r.is_completed ? "Yes" : "No"),
+          },
+          { header: "Notes", render: (r) => r.notes || "" },
+        ]}
+        actions={renderReferralActions}
+      />
     </div>
   );
 };

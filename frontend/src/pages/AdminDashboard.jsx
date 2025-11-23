@@ -104,6 +104,62 @@ const AdminDashboard = () => {
             </Link>
           </div>
           <div className="col-md-6 col-lg-3">
+            <Link to="/admin/nurses" className="text-decoration-none">
+              <div className="card border-0 shadow-sm h-100 hover-shadow">
+                <div className="card-body text-center p-4">
+                  <div
+                    className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                    style={{ width: "80px", height: "80px" }}
+                  >
+                    <i className="bi bi-person-badge text-info fs-1"></i>
+                  </div>
+                  <h5 className="card-title fw-bold mb-3">Manage Nurses</h5>
+                  <p className="card-text text-muted">
+                    View and manage nurses profiles and schedules
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="col-md-6 col-lg-3">
+            <Link to="/admin/receptionists" className="text-decoration-none">
+              <div className="card border-0 shadow-sm h-100 hover-shadow">
+                <div className="card-body text-center p-4">
+                  <div
+                    className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                    style={{ width: "80px", height: "80px" }}
+                  >
+                    <i className="bi bi-person-badge text-info fs-1"></i>
+                  </div>
+                  <h5 className="card-title fw-bold mb-3">
+                    Manage Receptionists
+                  </h5>
+                  <p className="card-text text-muted">
+                    View and manage receptionists profiles
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="col-md-6 col-lg-3">
+            <Link to="/admin/managers" className="text-decoration-none">
+              <div className="card border-0 shadow-sm h-100 hover-shadow">
+                <div className="card-body text-center p-4">
+                  <div
+                    className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                    style={{ width: "80px", height: "80px" }}
+                  >
+                    <i className="bi bi-person-badge text-info fs-1"></i>
+                  </div>
+                  <h5 className="card-title fw-bold mb-3">Manage Admins</h5>
+                  <p className="card-text text-muted">
+                    View and manage managers profiles
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="col-md-6 col-lg-3">
             <Link to="/admin/settings" className="text-decoration-none">
               <div className="card border-0 shadow-sm h-100 hover-shadow">
                 <div className="card-body text-center p-4">
