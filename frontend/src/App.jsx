@@ -490,6 +490,135 @@ function App() {
             />
 
             <Route
+              path="/doctor/visits"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <VisitsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/visits/create"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <VisitForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/visits/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <VisitDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/visits/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <VisitForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/prescriptions"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor", "nurse"]}>
+                  <PrescriptionsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/prescriptions/create"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
+                  <PrescriptionForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/prescriptions/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor", "nurse"]}>
+                  <PrescriptionDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/prescriptions/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
+                  <PrescriptionForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/referrals"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
+                  <ReferralsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/referrals/create"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
+                  <ReferralForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/referrals/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
+                  <ReferralDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/referrals/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
+                  <ReferralForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/examinations"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ExaminationsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/examinations/create"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ExaminationForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/examinations/:id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ExaminationDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/examinations/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <ExaminationForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/nurse/dashboard"
               element={
                 <ProtectedRoute allowedRoles={["nurse"]}>
