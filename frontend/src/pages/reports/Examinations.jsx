@@ -50,12 +50,18 @@ const Examinations = () => {
               </button>
               <ul className="dropdown-menu">
                 <li>
-                  <button className="dropdown-item" onClick={() => handleExport("pdf")}>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleExport("pdf")}
+                  >
                     PDF
                   </button>
                 </li>
                 <li>
-                  <button className="dropdown-item" onClick={() => handleExport("excel")}>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleExport("excel")}
+                  >
                     Excel
                   </button>
                 </li>

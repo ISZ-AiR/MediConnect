@@ -90,7 +90,7 @@ const StaffRegister = () => {
       case "admin":
         return "/admins/";
       case "manager":
-        return "/managers/"
+        return "/managers/";
       default:
         return null;
     }
@@ -228,18 +228,18 @@ const StaffRegister = () => {
                     <div className="row g-3">
                       <div className="col-6 col-md-3">
                         <input
-                            type="radio"
-                            className="btn-check"
-                            name="role"
-                            id="role-doctor"
-                            value="doctor"
-                            checked={formData.role === "doctor"}
-                            onChange={handleChange}
-                            disabled={loading}
+                          type="radio"
+                          className="btn-check"
+                          name="role"
+                          id="role-doctor"
+                          value="doctor"
+                          checked={formData.role === "doctor"}
+                          onChange={handleChange}
+                          disabled={loading}
                         />
                         <label
-                            className="btn btn-outline-primary w-100"
-                            htmlFor="role-doctor"
+                          className="btn btn-outline-primary w-100"
+                          htmlFor="role-doctor"
                         >
                           <i className="bi bi-person-badge d-block fs-3 mb-2"></i>
                           Doctor
@@ -247,18 +247,18 @@ const StaffRegister = () => {
                       </div>
                       <div className="col-6 col-md-3">
                         <input
-                            type="radio"
-                            className="btn-check"
-                            name="role"
-                            id="role-nurse"
-                            value="nurse"
-                            checked={formData.role === "nurse"}
-                            onChange={handleChange}
-                            disabled={loading}
+                          type="radio"
+                          className="btn-check"
+                          name="role"
+                          id="role-nurse"
+                          value="nurse"
+                          checked={formData.role === "nurse"}
+                          onChange={handleChange}
+                          disabled={loading}
                         />
                         <label
-                            className="btn btn-outline-success w-100"
-                            htmlFor="role-nurse"
+                          className="btn btn-outline-success w-100"
+                          htmlFor="role-nurse"
                         >
                           <i className="bi bi-heart-pulse d-block fs-3 mb-2"></i>
                           Nurse
@@ -266,18 +266,18 @@ const StaffRegister = () => {
                       </div>
                       <div className="col-6 col-md-3">
                         <input
-                            type="radio"
-                            className="btn-check"
-                            name="role"
-                            id="role-receptionist"
-                            value="receptionist"
-                            checked={formData.role === "receptionist"}
-                            onChange={handleChange}
-                            disabled={loading}
+                          type="radio"
+                          className="btn-check"
+                          name="role"
+                          id="role-receptionist"
+                          value="receptionist"
+                          checked={formData.role === "receptionist"}
+                          onChange={handleChange}
+                          disabled={loading}
                         />
                         <label
-                            className="btn btn-outline-info w-100"
-                            htmlFor="role-receptionist"
+                          className="btn btn-outline-info w-100"
+                          htmlFor="role-receptionist"
                         >
                           <i className="bi bi-person-workspace d-block fs-3 mb-2"></i>
                           Receptionist
@@ -286,18 +286,18 @@ const StaffRegister = () => {
 
                       <div className="col-6 col-md-3">
                         <input
-                            type="radio"
-                            className="btn-check"
-                            name="role"
-                            id="role-manager"
-                            value="manager"
-                            checked={formData.role === "manager"}
-                            onChange={handleChange}
-                            disabled={loading}
+                          type="radio"
+                          className="btn-check"
+                          name="role"
+                          id="role-manager"
+                          value="manager"
+                          checked={formData.role === "manager"}
+                          onChange={handleChange}
+                          disabled={loading}
                         />
                         <label
-                            className="btn btn-outline-warning w-100"
-                            htmlFor="role-manager"
+                          className="btn btn-outline-warning w-100"
+                          htmlFor="role-manager"
                         >
                           <i className="bi bi-shield-check d-block fs-3 mb-2"></i>
                           Manager
@@ -306,18 +306,18 @@ const StaffRegister = () => {
 
                       <div className="col-6 col-md-12">
                         <input
-                            type="radio"
-                            className="btn-check"
-                            name="role"
-                            id="role-admin"
-                            value="admin"
-                            checked={formData.role === "admin"}
-                            onChange={handleChange}
-                            disabled={loading}
+                          type="radio"
+                          className="btn-check"
+                          name="role"
+                          id="role-admin"
+                          value="admin"
+                          checked={formData.role === "admin"}
+                          onChange={handleChange}
+                          disabled={loading}
                         />
                         <label
-                            className="btn btn-outline-warning w-100"
-                            htmlFor="role-admin"
+                          className="btn btn-outline-warning w-100"
+                          htmlFor="role-admin"
                         >
                           <i className="bi bi-shield-check d-block fs-3 mb-2"></i>
                           Admin
@@ -326,7 +326,7 @@ const StaffRegister = () => {
                     </div>
                   </div>
 
-                  <hr className="my-4"/>
+                  <hr className="my-4" />
 
                   {/* Personal Information */}
                   <h5 className="mb-3">
@@ -337,16 +337,16 @@ const StaffRegister = () => {
                   <div className="row">
                     <div className="col-md-6 mb-3">
                       <label
-                          htmlFor="first_name"
-                          className="form-label fw-semibold"
+                        htmlFor="first_name"
+                        className="form-label fw-semibold"
                       >
                         First Name <span className="text-danger">*</span>
                       </label>
                       <input
-                          type="text"
-                          className="form-control"
-                          id="first_name"
-                          name="first_name"
+                        type="text"
+                        className="form-control"
+                        id="first_name"
+                        name="first_name"
                         value={formData.first_name}
                         onChange={handleChange}
                         disabled={loading}

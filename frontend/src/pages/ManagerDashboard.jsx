@@ -30,7 +30,6 @@ const ManagerDashboard = () => {
 
         {/* QUICK ACTIONS */}
         <div className="row g-4 mb-3">
-
           {/* Doctor Workload */}
           <div className="col-md-4">
             <div className="card border-0 shadow-sm h-100">
@@ -40,7 +39,10 @@ const ManagerDashboard = () => {
                 <p className="card-text text-muted small">
                   Analyze number of visits and reservations per doctor
                 </p>
-                <Link to="/reports/doctor-workload" className="btn btn-primary btn-sm">
+                <Link
+                  to="/reports/doctor-workload"
+                  className="btn btn-primary btn-sm"
+                >
                   View Report
                 </Link>
               </div>
@@ -56,13 +58,15 @@ const ManagerDashboard = () => {
                 <p className="card-text text-muted small">
                   Track total, cancelled and completed reservations
                 </p>
-                <Link to="/reports/reservations-summary" className="btn btn-success btn-sm">
+                <Link
+                  to="/reports/reservations-summary"
+                  className="btn btn-success btn-sm"
+                >
                   Open Summary
                 </Link>
               </div>
             </div>
           </div>
-
 
           {/* Doctor Availability Statistics */}
           <div className="col-md-4">
@@ -73,18 +77,19 @@ const ManagerDashboard = () => {
                 <p className="card-text text-muted small">
                   Check general schedule overview of doctors
                 </p>
-                <Link to="/reports/doctor-availability" className="btn btn-warning btn-sm">
+                <Link
+                  to="/reports/doctor-availability"
+                  className="btn btn-warning btn-sm"
+                >
                   View Overview
                 </Link>
               </div>
             </div>
           </div>
-
         </div>
 
         {/* LOWER SECTION */}
         <div className="row">
-
           {/* ALL VISITS REPORT */}
           <div className="col-lg-8">
             <div className="card border-0 shadow-sm mb-4">
@@ -123,10 +128,8 @@ const ManagerDashboard = () => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
   );
 };

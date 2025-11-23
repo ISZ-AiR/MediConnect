@@ -52,12 +52,6 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/patients">
-                <i className="bi bi-people me-1"></i>
-                Patients
-              </Link>
-            </li>
-            <li className="nav-item">
               <Link className="nav-link" to="/about">
                 <i className="bi bi-info-circle me-1"></i>
                 About
@@ -127,6 +121,14 @@ const Navbar = () => {
                           >
                             <i className="bi bi-speedometer2 me-2"></i>
                             Patient Dashboard
+                          </Link>
+                        </li>
+                      )}
+                      {["doctor", "admin", "nurse"].includes(user?.role) && (
+                        <li>
+                          <Link className="dropdown-item" to="/patients">
+                            <i className="bi bi-people me-2"></i>
+                            Patients
                           </Link>
                         </li>
                       )}

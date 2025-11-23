@@ -16,7 +16,6 @@ const ReceptionistDashboard = () => {
           </div>
         </div>
         <div className="row g-4">
-
           {/* Reservations */}
 
           <div className="col-md-3">
@@ -27,7 +26,10 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   Manage and schedule patient reservations
                 </p>
-                <Link to="/receptionist/reservations" className="btn btn-primary btn-sm">
+                <Link
+                  to="/receptionist/reservations"
+                  className="btn btn-primary btn-sm"
+                >
                   Open
                 </Link>
               </div>
@@ -44,7 +46,10 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   Browse and manage patient visits
                 </p>
-                <Link to="/receptionist/visits" className="btn btn-warning btn-sm">
+                <Link
+                  to="/receptionist/visits"
+                  className="btn btn-warning btn-sm"
+                >
                   Open
                 </Link>
               </div>
@@ -61,7 +66,10 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   Browse and update patient records
                 </p>
-                <Link to="/receptionist/patients" className="btn btn-success btn-sm">
+                <Link
+                  to="/receptionist/patients"
+                  className="btn btn-success btn-sm"
+                >
                   Open
                 </Link>
               </div>
@@ -78,18 +86,19 @@ const ReceptionistDashboard = () => {
                 <p className="card-text text-muted small">
                   View and manage doctor schedules
                 </p>
-                <Link to="/receptionist/schedules" className="btn btn-info btn-sm">
+                <Link
+                  to="/receptionist/schedules"
+                  className="btn btn-info btn-sm"
+                >
                   Open
                 </Link>
               </div>
             </div>
           </div>
-
+        </div>
       </div>
     </div>
-</div>
-)
-  ;
+  );
 };
 
 export default ReceptionistDashboard;
