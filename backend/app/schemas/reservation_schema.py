@@ -29,7 +29,7 @@ class ReservationModel(ReservationBase):
                             description="ID of the patient who made the reservation")
     doctor_id: int = Field(...,
                            description="ID of the doctor for the appointment")
-    nurse_id: int = Field(...,
+    nurse_id: int | None = Field(None,
                           description="ID of the nurse assisting with the appointment")
 
     class Config:
@@ -42,7 +42,7 @@ class ReservationCreate(ReservationBase):
     """
     patient_id: int = Field(..., description="ID of the patient making the reservation")
     doctor_id: int = Field(..., description="ID of the doctor for the appointment")
-    nurse_id: int = Field(..., description="ID of the nurse assisting with the appointment")
+    nurse_id: int | None = Field(None, description="ID of the nurse assisting with the appointment")
 
 
 

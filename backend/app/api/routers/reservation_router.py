@@ -25,7 +25,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 @router.post("/create", response_model=ReservationModel)
-async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("receptionist"))):
+async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "patient"]))):
 
     # Check if the data is correct
     result = await db.execute(select(Patient).filter(Patient.patient_id == reservation.patient_id))
@@ -81,15 +81,29 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
     if conflicting_reservation:
         raise HTTPException(status_code=400, detail="Conflicting reservation found.")
 
-    result = await db.execute(select(Receptionist).where(Receptionist.user_id == current_user.user_id))
-    receptionist = result.scalars().all()
+    # Determine who is creating the reservation
+    receptionist_id = None
+    # If a receptionist creates it, associate their receptionist_id
+    if getattr(current_user, "role", None) == "receptionist":
+        result = await db.execute(select(Receptionist).where(Receptionist.user_id == current_user.user_id))
+        receptionist_obj = result.scalar_one_or_none()
+        if receptionist_obj:
+            receptionist_id = receptionist_obj.receptionist_id
+    # If a patient creates a booking, ensure they are booking for themselves
+    if getattr(current_user, "role", None) == "patient":
+        result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+        patient_obj = result.scalar_one_or_none()
+        if not patient_obj:
+            raise HTTPException(status_code=400, detail="Patient record not found for current user.")
+        # override provided patient_id to current user's patient id to avoid spoofing
+        reservation.patient_id = patient_obj.patient_id
 
     # Create new reservation
     new_reservation = Reservation(
-        receptionist_id=receptionist.receptionist_id,
+        receptionist_id=receptionist_id,
         patient_id=reservation.patient_id,
         doctor_id=reservation.doctor_id,
-        nurse_id=reservation.nurse_id,
+        nurse_id=reservation.nurse_id if reservation.nurse_id is not None else None,
         reservation_time=reservation_time,
         is_cancelled=reservation.is_cancelled,
     )
@@ -112,11 +126,27 @@ async def get_all_reservations(
     return reservations
 
 
+@router.get("/me", response_model=list[ReservationModel], description="Get reservations for current patient.")
+async def get_my_reservations(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("patient"))
+):
+    # Find patient record for current user
+    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient record not found for current user.")
+
+    result = await db.execute(select(Reservation).where(Reservation.patient_id == patient.patient_id))
+    reservations = result.scalars().all()
+    return reservations
+
+
 @router.get("/{reservation_id}", response_model=ReservationModel, description="Get reservation details by ID.")
 async def get_reservation_by_id(
     reservation_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("receptionist"))
+    current_user: User = Depends(require_role(["receptionist", "patient"]))
 ):
     """Retrieve a specific reservation."""
     result = await db.execute(select(Reservation).where(Reservation.reservation_id == reservation_id))
@@ -197,6 +227,21 @@ def to_naive_utc(dt: datetime) -> datetime:
     if dt.tzinfo is not None:
         return dt.astimezone(timezone.utc).replace(tzinfo=None)
     return dt
+
+@router.get("/me", response_model=list[ReservationModel], description="Get reservations for current patient.")
+async def get_my_reservations(
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(require_role("patient"))
+):
+    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient record not found for current user.")
+
+    result = await db.execute(select(Reservation).where(Reservation.patient_id == patient.patient_id))
+    reservations = result.scalars().all()
+    return reservations
+
 
 
 

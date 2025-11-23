@@ -46,7 +46,7 @@ async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db), c
 @router.get("/", response_model=list[NurseModel])
 async def get_all_nurses(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role(["admin", "receptionist", "patient", "doctor"]))
 ):
     result = await db.execute(select(Nurse))
     nurses = result.scalars().all()

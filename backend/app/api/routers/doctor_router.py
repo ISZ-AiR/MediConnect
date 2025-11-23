@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from models.doctor_model import Doctor
@@ -54,15 +55,34 @@ async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)
     return db_doctor
 
 
-@router.get("/", response_model=list[DoctorModel])
-async def get_all_doctors(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
-    result = await db.execute(select(Doctor))
-    doctors = result.scalars().all()
+@router.get("/", response_model=list[dict])
+async def get_all_doctors(
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(require_role(["admin", "manager", "receptionist", "patient"]))
+):
+    # Pobierz lekarzy wraz z powiązanym userem
+    result = await db.execute(
+        select(Doctor, User)
+        .join(User, User.user_id == Doctor.user_id)
+    )
+    rows = result.all()
+
+    doctors = []
+    for doctor, user in rows:
+        doctors.append({
+            "doctor_id": doctor.doctor_id,
+            "specialization": doctor.specialization,
+            "license_number": doctor.license_number,
+            "user_id": doctor.user_id,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        })
+
     return doctors
 
 
 @router.get("/{doctor_id}", response_model=DoctorModel)
-async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "manager", "receptionist", "patient"]))):
     result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
     doctor = result.scalar_one_or_none()
     if not doctor:

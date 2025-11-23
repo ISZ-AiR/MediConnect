@@ -50,7 +50,7 @@ async def create_schedule(
 @router.get("/", response_model=list[ScheduleModel], description="Get all schedules.")
 async def get_all_schedules(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role(["admin", "receptionist", "patient", "doctor"]))
 ):
     """Retrieve all schedule entries (admin only)."""
     result = await db.execute(select(Schedule))
@@ -63,7 +63,7 @@ async def get_all_schedules(
 async def get_schedule_by_id(
     schedule_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role(["admin", "receptionist"]))
 ):
     """Retrieve a single schedule entry (admin only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))
@@ -79,7 +79,7 @@ async def update_schedule(
     schedule_id: int,
     update_data: ScheduleUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role(["admin", "receptionist"]))
 ):
     """Update an existing doctor's schedule (admin only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))
@@ -105,7 +105,7 @@ async def update_schedule(
 async def delete_schedule(
     schedule_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role(["admin", "receptionist"]))
 ):
     """Delete a schedule entry (admin only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))
