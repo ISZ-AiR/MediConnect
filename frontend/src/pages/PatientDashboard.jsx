@@ -99,7 +99,7 @@ useEffect(() => {
                 <p className="card-text text-muted small">
                   View your medical history and records
                 </p>
-                <Link to="/records" className="btn btn-success btn-sm">
+                <Link to="/patient/records" className="btn btn-success btn-sm">
                   View Records
                 </Link>
               </div>
@@ -114,7 +114,7 @@ useEffect(() => {
                 <p className="card-text text-muted small">
                   View and manage your prescriptions
                 </p>
-                <Link to="/prescriptions" className="btn btn-info btn-sm">
+                <Link to="/patient/prescriptions" className="btn btn-info btn-sm">
                   View All
                 </Link>
               </div>

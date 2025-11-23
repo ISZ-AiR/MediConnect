@@ -55,6 +55,8 @@ import DoctorWorkload from './pages/reports/DoctorWorkload';
 import ReservationsSummary from './pages/reports/ReservationsSummary';
 import Examinations from './pages/reports/Examinations';
 import DoctorAvailability from './pages/reports/DoctorAvailability.jsx';
+import PatientRecordsList from "./pages/PatientRecordsList.jsx";
+import PatientRecordsDetail from "./pages/PatientRecordsDetail.jsx";
 
 function App() {
   return (
@@ -442,6 +444,33 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["patient"]}>
                   <PatientDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/patient/records"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientRecordsList />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/patient/visit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientRecordsDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/patient/prescriptions"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PrescriptionsList />
                 </ProtectedRoute>
               }
             />

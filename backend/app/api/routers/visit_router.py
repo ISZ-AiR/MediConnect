@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 from core.database import get_db
 from models.visit_model import Visit
 from models.reservation_model import Reservation
@@ -114,3 +115,21 @@ async def delete_visit(
     await db.delete(visit)
     await db.commit()
     return {"status": "Visit deleted successfully"}
+
+
+@router.get("/me", response_model=List[VisitModel])
+async def get_my_visits(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("patient"))
+    ):
+    """
+    Get all visits for the logged-in patient via reservation
+    """
+    result = await db.execute(
+    select(Visit)
+        .options(joinedload(Visit.reservation))
+        .join(Reservation)
+        .where(Reservation.patient_id == current_user.user_id)
+    )
+    visits = result.scalars().all()
+    return visits
