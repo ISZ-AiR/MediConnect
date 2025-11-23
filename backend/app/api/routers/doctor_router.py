@@ -1,10 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from models.doctor_model import Doctor
 from models.user_model import User
+from models.nurse_model import Nurse
+from models.reservation_model import Reservation
+from models.visit_model import Visit
+from models.patient_model import Patient
 from schemas.doctor_schema import DoctorCreate, DoctorModel, DoctorUpdate
 from passlib.hash import bcrypt
 from .user_router import require_role
@@ -80,6 +84,18 @@ async def get_all_doctors(
 
     return doctors
 
+@router.get("/me", response_model=DoctorModel)
+async def get_my_doctor(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["doctor"]))
+    ):
+    result = await db.execute(select(Doctor).where(Doctor.user_id == current_user.user_id))
+    doctor = result.scalar_one_or_none()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return doctor
+
+
 
 @router.get("/{doctor_id}", response_model=DoctorModel)
 async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "manager", "receptionist", "patient", "doctor"]))):
@@ -153,4 +169,3 @@ async def delete_doctor(
     await db.delete(doctor)
     await db.commit()
 
-    return {"status": "Doctor deleted successfully", "id": doctor_id}
