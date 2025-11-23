@@ -207,7 +207,7 @@ const SchedulesList = () => {
                 {/* Grouped schedules */}
                 {!loading &&
                   Object.keys(groupedSchedules)
-                    .sort()
+                    .sort((a, b) => a.localeCompare(b))
                     .map((date) => (
                       <div key={date} className="mb-4">
                         <h5 className="fw-semibold mb-3">

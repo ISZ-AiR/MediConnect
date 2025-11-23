@@ -45,12 +45,18 @@ async def reset_admin_password():
                 print()
 
                 # Ask if user wants to reset password
-                reset = input(
-                    "Do you want to reset the password? (yes/no): ").strip().lower()
+                reset = await asyncio.to_thread(
+                    input,
+                    "Do you want to reset the password? (yes/no): "
+                )
+                reset = reset.strip().lower()
 
                 if reset == 'yes':
-                    new_password = input(
-                        "Enter new password (press Enter for 'admin123'): ").strip()
+                    new_password = await asyncio.to_thread(
+                        input,
+                        "Enter new password (press Enter for 'admin123'): "
+                    )
+                    new_password = new_password.strip()
                     if not new_password:
                         new_password = "admin123"
 

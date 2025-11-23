@@ -229,6 +229,11 @@ const ManageUsers = () => {
                 maxWidth: "500px",
                 transform: "translateY(-10%)",
               }}
+              role="dialog"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setShowEditModal(false);
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <h5 className="mb-3">Edit User</h5>
