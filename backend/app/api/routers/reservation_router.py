@@ -118,7 +118,7 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
 @router.get("/", response_model=list[ReservationModel], description="Get all reservations (receptionist only).")
 async def get_all_reservations(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("receptionist"))
+    current_user: User = Depends(require_role(["receptionist", "doctor", "nurse"]))
 ):
     """Retrieve all reservations in the system."""
     result = await db.execute(select(Reservation))
