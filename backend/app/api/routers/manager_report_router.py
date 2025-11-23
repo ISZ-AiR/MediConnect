@@ -284,7 +284,7 @@ async def doctor_availability_report(
     try:
         start = datetime.strptime(start_date, "%Y-%m-%d").date()
         end = datetime.strptime(end_date, "%Y-%m-%d").date()
-    except:
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
 
     if start > end:

@@ -64,7 +64,7 @@ async def reset_admin_password():
                     await session.commit()
                     print()
                     print("✅ Password reset successfully!")
-                    print(f"   Email: admin@mediconnect.com")
+                    print("   Email: admin@mediconnect.com")
                     print(f"   Password: {new_password}")
                 else:
                     print("Operation cancelled.")
@@ -89,8 +89,8 @@ async def reset_admin_password():
                 await session.commit()
 
                 print("✅ Admin user created successfully!")
-                print(f"   Email: admin@mediconnect.com")
-                print(f"   Password: admin123")
+                print("   Email: admin@mediconnect.com")
+                print("   Password: admin123")
                 print()
                 print("⚠️  IMPORTANT: Change this password in production!")
 

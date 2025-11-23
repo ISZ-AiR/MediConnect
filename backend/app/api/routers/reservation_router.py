@@ -242,8 +242,6 @@ async def get_my_reservations(
     reservations = result.scalars().all()
     return reservations
 
-    return new_reservation
-
 
 
 
