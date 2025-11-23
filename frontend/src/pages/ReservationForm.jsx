@@ -122,7 +122,7 @@ const res = await apiRequest(url, {
 method,
 body: JSON.stringify(payload),
 });
-if (res.success) navigate("/admin/reservations");
+if (res.success) navigate("/receptionist/reservations");
 else setError(res.detail || "Save failed");
 } catch (err) {
 console.error(err);

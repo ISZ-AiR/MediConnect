@@ -116,7 +116,7 @@ const PatientDetail = () => {
                 <div className="mt-4 d-grid gap-2">
                   <button
                     className="btn btn-outline-secondary btn-lg"
-                    onClick={() => navigate("/admin/patients")}
+                    onClick={() => navigate("/receptionist/patients")}
                   >
                     Back
                   </button>
@@ -124,7 +124,7 @@ const PatientDetail = () => {
                   <button
                     className="btn btn-primary btn-lg"
                     onClick={() =>
-                      navigate(`/admin/patients/edit/${patient.patient_id}`)
+                      navigate(`/receptionist/patients/edit/${patient.patient_id}`)
                     }
                   >
                     Edit Patient

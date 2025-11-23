@@ -82,13 +82,13 @@ const PatientForm = () => {
           method: "PUT",
           body: JSON.stringify(payload),
         });
-        if (res.success) navigate("/admin/patients");
+        if (res.success) navigate("/receptionist/patients");
       } else {
         const res = await apiRequest("/patients/register", {
           method: "POST",
           body: JSON.stringify(payload),
         });
-        if (res.success) navigate("/admin/patients");
+        if (res.success) navigate("/receptionist/patients");
       }
     } catch (err) {
       console.error(err);

@@ -47,7 +47,7 @@ const ScheduleDetail = () => {
     if (!window.confirm("Delete this schedule?")) return;
     try {
       await resourceService.deleteSchedule(id);
-      navigate("/admin/schedules");
+      navigate("/receptionist/schedules");
     } catch (err) {
       console.error(err);
       alert("Failed to delete schedule");
@@ -100,7 +100,7 @@ const ScheduleDetail = () => {
                   <div className="d-grid gap-2">
                     <button
                       className="btn btn-primary btn-lg"
-                      onClick={() => navigate(`/admin/schedules/edit/${item.schedule_id}`)}
+                      onClick={() => navigate(`/receptionist/schedules/edit/${item.schedule_id}`)}
                     >
                       <i className="bi bi-pencil me-2"></i>Edit Schedule
                     </button>
@@ -109,7 +109,7 @@ const ScheduleDetail = () => {
                     </button>
                     <button
                       className="btn btn-link btn-lg mt-2"
-                      onClick={() => navigate("/admin/schedules")}
+                      onClick={() => navigate("/receptionist/schedules")}
                     >
                       Back to list
                     </button>

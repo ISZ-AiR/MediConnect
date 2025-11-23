@@ -184,7 +184,7 @@ return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="contai
                 <button
                   type="button"
                   className="btn btn-link mt-2"
-                  onClick={() => navigate("/admin/schedules")}
+                  onClick={() => navigate("/receptionist/schedules")}
                 >
                   Cancel
                 </button>

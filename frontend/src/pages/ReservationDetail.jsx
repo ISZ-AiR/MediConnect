@@ -91,7 +91,7 @@ return user ? `${nurse.nurse_id} - ${user.first_name} ${user.last_name}` : `Nurs
 const handleCancel = async () => {
 try {
 await apiRequest(`/reservation/${id}/cancel`, { method: "POST" });
-navigate("/admin/reservations");
+navigate("/receptionist/reservations");
 } catch (err) {
 console.error(err);
 setError("Failed to cancel reservation");
@@ -161,8 +161,8 @@ return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="contai
 
             {/* BUTTONS */}
             <div className="mt-4 d-grid gap-2">
-              <button className="btn btn-outline-secondary btn-lg" onClick={() => navigate("/admin/reservations")}>Back</button>
-              <button className="btn btn-primary btn-lg" onClick={() => navigate(`/admin/reservations/edit/${reservation.reservation_id}`)}>Edit Reservation</button>
+              <button className="btn btn-outline-secondary btn-lg" onClick={() => navigate("/receptionist/reservations")}>Back</button>
+              <button className="btn btn-primary btn-lg" onClick={() => navigate(`/receptionist/reservations/edit/${reservation.reservation_id}`)}>Edit Reservation</button>
               {!reservation.is_cancelled && (
                 <>
                   <button className="btn btn-danger btn-lg" onClick={handleCancel}>Cancel Reservation</button>
