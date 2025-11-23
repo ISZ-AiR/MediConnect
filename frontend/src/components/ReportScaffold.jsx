@@ -142,11 +142,18 @@ export default function ReportScaffold({
   const exportPDF = async () => {
     if (!reportRef.current) return alert("Nothing to export");
     try {
-      const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true });
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+      });
       const imgWidthAvailable = 595.28 - 80; // A4 width (pt) - margins (2*40)
       const scale = imgWidthAvailable / canvas.width;
       const imgHeight = canvas.height * scale;
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 40;
       const headerHeight = 60;
@@ -164,7 +171,12 @@ export default function ReportScaffold({
         pdf.setFontSize(12);
         pdf.setTextColor("#0d6efd");
         pdf.setFont("helvetica", "bold");
-        pdf.text("MediConnect", pdf.internal.pageSize.getWidth() - margin, margin + 10, { align: "right" });
+        pdf.text(
+          "MediConnect",
+          pdf.internal.pageSize.getWidth() - margin,
+          margin + 10,
+          { align: "right" }
+        );
       };
 
       let remaining = imgHeight;
@@ -190,7 +202,14 @@ export default function ReportScaffold({
           sliceCanvas.height
         );
         const sliceData = sliceCanvas.toDataURL("image/jpeg", 0.85);
-        pdf.addImage(sliceData, "JPEG", margin, y, imgWidthAvailable, sliceHeightPt);
+        pdf.addImage(
+          sliceData,
+          "JPEG",
+          margin,
+          y,
+          imgWidthAvailable,
+          sliceHeightPt
+        );
         remaining -= sliceHeightPt;
         sourceY += sliceHeightPt;
         if (remaining > 0) {
@@ -265,11 +284,15 @@ export default function ReportScaffold({
                           type="checkbox"
                           id="select-all"
                           checked={
-                            selectedDoctors.length === doctorsList.length && doctorsList.length > 0
+                            selectedDoctors.length === doctorsList.length &&
+                            doctorsList.length > 0
                           }
                           onChange={toggleAllDoctors}
                         />
-                        <label className="form-check-label" htmlFor="select-all">
+                        <label
+                          className="form-check-label"
+                          htmlFor="select-all"
+                        >
                           All
                         </label>
                       </div>
@@ -299,7 +322,13 @@ export default function ReportScaffold({
                 </div>
               </div>
             )}
-            <div className={includeDoctors ? "col-md-4 d-flex gap-2" : "col-md-4 d-flex gap-2"}>
+            <div
+              className={
+                includeDoctors
+                  ? "col-md-4 d-flex gap-2"
+                  : "col-md-4 d-flex gap-2"
+              }
+            >
               <button className="btn btn-primary" onClick={generateReport}>
                 Generate
               </button>
@@ -331,18 +360,26 @@ export default function ReportScaffold({
         <div ref={reportRef}>
           {loading && <p>Loading...</p>}
           {error && <div className="alert alert-danger">{error}</div>}
-          {!loading && !error && (!data || (Array.isArray(data) && data.length === 0)) && (
-            <p>No data</p>
-          )}
-          {!loading && !error && data && renderTable && renderTable(filteredData, ctx)}
-          {!loading && !error && charts && charts.length > 0 && (
+          {!loading &&
+            !error &&
+            (!data || (Array.isArray(data) && data.length === 0)) && (
+              <p>No data</p>
+            )}
+          {!loading &&
+            !error &&
+            data &&
+            renderTable &&
+            renderTable(filteredData, ctx)}
+          {!loading &&
+            !error &&
+            charts &&
+            charts.length > 0 &&
             charts.map((c, i) => (
               <div key={i} className="card p-3 mt-4">
                 <h5>{c.title}</h5>
                 {c.render(filteredData, ctx)}
               </div>
-            ))
-          )}
+            ))}
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@ const DoctorWorkload = () => {
             (sum, day) => sum + (day.reservations || 0),
             0
           );
-            const totalVisits = d.daily.reduce(
+          const totalVisits = d.daily.reduce(
             (sum, day) => sum + (day.visits || 0),
             0
           );
@@ -57,7 +57,11 @@ const DoctorWorkload = () => {
         filtered.forEach((doc) => {
           doc.daily.forEach((day) => {
             if (!dateMap[day.date])
-              dateMap[day.date] = { date: day.date, reservations: 0, visits: 0 };
+              dateMap[day.date] = {
+                date: day.date,
+                reservations: 0,
+                visits: 0,
+              };
             dateMap[day.date].reservations += day.reservations;
             dateMap[day.date].visits += day.visits;
           });
@@ -67,7 +71,10 @@ const DoctorWorkload = () => {
         );
         return (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
@@ -100,7 +107,10 @@ const DoctorWorkload = () => {
         });
         return (
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={doctorChartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <BarChart
+              data={doctorChartData}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="doctor" />
               <YAxis />
@@ -116,11 +126,19 @@ const DoctorWorkload = () => {
   ];
 
   const buildExcelSheets = (all, { selectedDoctors }) => {
-    const filtered = selectedDoctors.length ? all.filter((d) => selectedDoctors.includes(d.doctor_id)) : all;
+    const filtered = selectedDoctors.length
+      ? all.filter((d) => selectedDoctors.includes(d.doctor_id))
+      : all;
     const rows = filtered.map((d) => ({
       Doctor: `${d.first_name} ${d.last_name}`,
-      Reservations: d.daily.reduce((sum, day) => sum + (day.reservations || 0), 0),
-      Completed_Visits: d.daily.reduce((sum, day) => sum + (day.visits || 0), 0),
+      Reservations: d.daily.reduce(
+        (sum, day) => sum + (day.reservations || 0),
+        0
+      ),
+      Completed_Visits: d.daily.reduce(
+        (sum, day) => sum + (day.visits || 0),
+        0
+      ),
     }));
     return [{ name: "Doctor Workload", rows }];
   };
