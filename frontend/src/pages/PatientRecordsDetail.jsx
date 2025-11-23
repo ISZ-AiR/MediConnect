@@ -94,7 +94,7 @@ return ( <div className="min-vh-100"> <Navbar /> <div className="container py-5 
 );
 
 return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="container py-5"> <div className="row justify-content-center"> <div className="col-md-9 col-lg-8"> <div className="card shadow-sm border-0"> <div className="card-body p-5 text-center">
-<i className="bi bi-calendar-plus text-warning" style={{ fontSize: "3rem" }}></i> <h2 className="fw-bold mt-3 mb-2">Visit Details</h2> <p className="text-muted">Review visit information</p>
+<i className="bi bi-calendar-plus text-success" style={{ fontSize: "3rem" }}></i> <h2 className="fw-bold mt-3 mb-2">Visit Details</h2> <p className="text-muted">Review visit information</p>
 
 
             <div className="text-start mt-4">
