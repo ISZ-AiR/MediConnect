@@ -58,7 +58,6 @@ const DoctorForm = () => {
         specialization: form.specialization,
         license_number: form.license_number,
       };
-
       if (id) {
         const res = await apiRequest(`/doctor/${id}`, {
           method: "PUT",
@@ -86,7 +85,7 @@ const DoctorForm = () => {
       <div className="container py-5">
         <h2 className="mb-4">{id ? "Edit Doctor" : "Create Doctor"}</h2>
         {error && <div className="alert alert-danger">{error}</div>}
-        <form onSubmit={handleSubmit} className="card p-4">
+        <form onSubmit={handleSubmit} className="card p-4 mb-4">
           <div className="row">
             <div className="col-md-6 mb-3">
               <label className="form-label">First name</label>
@@ -109,7 +108,6 @@ const DoctorForm = () => {
               />
             </div>
           </div>
-
           <div className="mb-3">
             <label className="form-label">Email</label>
             <input
@@ -121,7 +119,6 @@ const DoctorForm = () => {
               required
             />
           </div>
-
           <div className="mb-3">
             <label className="form-label">Phone</label>
             <input
@@ -131,7 +128,6 @@ const DoctorForm = () => {
               onChange={handleChange}
             />
           </div>
-
           <div className="mb-3">
             <label className="form-label">
               Password{" "}
@@ -147,7 +143,6 @@ const DoctorForm = () => {
               onChange={handleChange}
             />
           </div>
-
           <div className="row">
             <div className="col-md-6 mb-3">
               <label className="form-label">Specialization</label>
@@ -168,12 +163,9 @@ const DoctorForm = () => {
               />
             </div>
           </div>
-
-          <div>
-            <button className="btn btn-primary" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
+          <button className="btn btn-primary" disabled={loading}>
+            {loading ? "Saving..." : "Save"}
+          </button>
         </form>
       </div>
     </div>

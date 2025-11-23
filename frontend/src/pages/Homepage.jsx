@@ -1,7 +1,36 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Homepage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+
+  const handleBookAppointment = () => {
+    if (isAuthenticated && user?.role === "patient") {
+      navigate("/appointments/book");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handlePatientPortal = () => {
+    if (isAuthenticated && user?.role === "patient") {
+      navigate("/patient/dashboard");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleRegisterNow = () => {
+    navigate("/register");
+  };
+
+  const handleContactUs = () => {
+    navigate("/contact");
+  };
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
@@ -18,11 +47,17 @@ const Homepage = () => {
                 system.
               </p>
               <div className="d-flex gap-3 flex-wrap">
-                <button className="btn btn-light btn-lg">
+                <button
+                  className="btn btn-light btn-lg"
+                  onClick={handleBookAppointment}
+                >
                   <i className="bi bi-calendar-plus me-2"></i>
                   Book Appointment
                 </button>
-                <button className="btn btn-outline-light btn-lg">
+                <button
+                  className="btn btn-outline-light btn-lg"
+                  onClick={handlePatientPortal}
+                >
                   <i className="bi bi-file-medical me-2"></i>
                   Patient Portal
                 </button>
@@ -53,10 +88,10 @@ const Homepage = () => {
               <div className="card h-100 border-0 shadow-sm hover-shadow transition">
                 <div className="card-body text-center p-4">
                   <div
-                    className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                    className="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
                     style={{ width: "80px", height: "80px" }}
                   >
-                    <i className="bi bi-calendar-check text-primary fs-1"></i>
+                    <i className="bi bi-calendar-event text-primary fs-1"></i>
                   </div>
                   <h5 className="card-title fw-bold mb-3">
                     Appointment Management
@@ -217,11 +252,17 @@ const Homepage = () => {
                 healthcare needs.
               </p>
               <div className="d-flex gap-3 justify-content-center flex-wrap">
-                <button className="btn btn-primary btn-lg">
+                <button
+                  className="btn btn-primary btn-lg"
+                  onClick={handleRegisterNow}
+                >
                   <i className="bi bi-person-plus me-2"></i>
                   Register Now
                 </button>
-                <button className="btn btn-outline-primary btn-lg">
+                <button
+                  className="btn btn-outline-primary btn-lg"
+                  onClick={handleContactUs}
+                >
                   <i className="bi bi-telephone me-2"></i>
                   Contact Us
                 </button>
@@ -232,66 +273,7 @@ const Homepage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-dark text-white py-4">
-        <div className="container">
-          <div className="row">
-            <div className="col-md-6 mb-3 mb-md-0">
-              <h5 className="fw-bold mb-3">
-                <i className="bi bi-hospital me-2"></i>
-                MediConnect
-              </h5>
-              <p className="text-white-50">
-                Modern healthcare management system for the digital age.
-              </p>
-            </div>
-            <div className="col-md-3 mb-3 mb-md-0">
-              <h6 className="fw-bold mb-3">Quick Links</h6>
-              <ul className="list-unstyled">
-                <li>
-                  <a href="#" className="text-white-50 text-decoration-none">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white-50 text-decoration-none">
-                    Services
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white-50 text-decoration-none">
-                    Doctors
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white-50 text-decoration-none">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div className="col-md-3">
-              <h6 className="fw-bold mb-3">Contact Info</h6>
-              <ul className="list-unstyled text-white-50">
-                <li>
-                  <i className="bi bi-telephone me-2"></i>+1 234 567 890
-                </li>
-                <li>
-                  <i className="bi bi-envelope me-2"></i>info@mediconnect.com
-                </li>
-                <li>
-                  <i className="bi bi-geo-alt me-2"></i>123 Medical Center Dr.
-                </li>
-              </ul>
-            </div>
-          </div>
-          <hr className="my-4 bg-white opacity-25" />
-          <div className="text-center text-white-50">
-            <p className="mb-0">
-              &copy; 2025 MediConnect. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

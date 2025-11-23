@@ -15,8 +15,10 @@ import ResourcesIndex from "./pages/ResourcesIndex";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import NurseDashboard from "./pages/NurseDashboard";
 import ReceptionistDashboard from "./pages/ReceptionistDashboard";
-import ManagerDashboard from './pages/ManagerDashboard';
+import ManagerDashboard from "./pages/ManagerDashboard";
 import About from "./pages/About";
+import Services from "./pages/Services";
+import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import AppointmentsIndex from "./pages/AppointmentsIndex";
@@ -51,10 +53,10 @@ import ReferralDetail from "./pages/ReferralDetail";
 import ReferralForm from "./pages/ReferralForm";
 import ManagerDetail from "./pages/ManagerDetail";
 import ManagerForm from "./pages/ManagerForm";
-import DoctorWorkload from './pages/reports/DoctorWorkload';
-import ReservationsSummary from './pages/reports/ReservationsSummary';
-import Examinations from './pages/reports/Examinations';
-import DoctorAvailability from './pages/reports/DoctorAvailability.jsx';
+import DoctorWorkload from "./pages/reports/DoctorWorkload";
+import ReservationsSummary from "./pages/reports/ReservationsSummary";
+import Examinations from "./pages/reports/Examinations";
+import DoctorAvailability from "./pages/reports/DoctorAvailability.jsx";
 import PatientRecordsList from "./pages/PatientRecordsList.jsx";
 import PatientRecordsDetail from "./pages/PatientRecordsDetail.jsx";
 
@@ -217,6 +219,8 @@ function App() {
             <Route path="/book" element={<PatientBooking />} />
 
             <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
 

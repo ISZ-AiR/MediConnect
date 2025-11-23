@@ -19,7 +19,7 @@ const AdminsList = () => {
         setItems(data || []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load admins");
+        setError("Failed to load administrators");
       } finally {
         setLoading(false);
       }
@@ -32,15 +32,13 @@ const AdminsList = () => {
       <Navbar />
       <div className="container py-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="mb-0">Admins</h2>
-          <div>
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/admin/register-staff")}
-            >
-              Create Admin
-            </button>
-          </div>
+          <h2 className="mb-0">Administrators</h2>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/admin/register-staff")}
+          >
+            Create Admin
+          </button>
         </div>
         <ListToolbar
           search={search}

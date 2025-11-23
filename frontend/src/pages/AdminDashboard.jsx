@@ -29,30 +29,20 @@ const AdminDashboard = () => {
         setLoading(false);
       }
     };
-
     fetchStats();
   }, []);
 
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
-
       <div className="container py-5">
-        <div className="row">
-          <div className="col-12">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <h1 className="display-5 fw-bold">Admin Dashboard</h1>
-                <p className="text-muted">Welcome back, {user?.email}</p>
-              </div>
-              <div>
-                <span className="badge bg-warning text-dark fs-6">
-                  <i className="bi bi-shield-check me-2"></i>
-                  {user?.role}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="mb-4">
+          <h1 className="display-5 fw-bold">Admin Dashboard</h1>
+          <p className="text-muted">Welcome back, {user?.email}</p>
+          <span className="badge bg-warning text-dark fs-6">
+            <i className="bi bi-shield-check me-2"></i>
+            {user?.role}
+          </span>
         </div>
 
         {/* Quick Actions */}
@@ -76,7 +66,6 @@ const AdminDashboard = () => {
               </div>
             </Link>
           </div>
-
           <div className="col-md-6 col-lg-3">
             <Link to="/admin/users" className="text-decoration-none">
               <div className="card border-0 shadow-sm h-100 hover-shadow">
@@ -95,7 +84,6 @@ const AdminDashboard = () => {
               </div>
             </Link>
           </div>
-
           <div className="col-md-6 col-lg-3">
             <Link to="/admin/doctors" className="text-decoration-none">
               <div className="card border-0 shadow-sm h-100 hover-shadow">
@@ -115,7 +103,6 @@ const AdminDashboard = () => {
               </div>
             </Link>
           </div>
-
           <div className="col-md-6 col-lg-3">
             <Link to="/admin/settings" className="text-decoration-none">
               <div className="card border-0 shadow-sm h-100 hover-shadow">
@@ -142,8 +129,7 @@ const AdminDashboard = () => {
             <div className="card border-0 shadow-sm">
               <div className="card-header bg-white py-3">
                 <h5 className="mb-0">
-                  <i className="bi bi-bar-chart me-2"></i>
-                  System Overview
+                  <i className="bi bi-bar-chart me-2"></i>System Overview{" "}
                   {loading && (
                     <span
                       className="spinner-border spinner-border-sm ms-2"
@@ -246,8 +232,7 @@ const AdminDashboard = () => {
             <div className="card border-0 shadow-sm">
               <div className="card-header bg-white py-3">
                 <h5 className="mb-0">
-                  <i className="bi bi-clock-history me-2"></i>
-                  Recent Activity
+                  <i className="bi bi-clock-history me-2"></i>Recent Activity
                 </h5>
               </div>
               <div className="card-body">
@@ -261,13 +246,11 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
-
           <div className="col-lg-4">
             <div className="card border-0 shadow-sm mb-4">
               <div className="card-header bg-white py-3">
                 <h5 className="mb-0">
-                  <i className="bi bi-info-circle me-2"></i>
-                  Quick Info
+                  <i className="bi bi-info-circle me-2"></i>Quick Info
                 </h5>
               </div>
               <div className="card-body">
@@ -300,7 +283,6 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
-
             <div className="card border-0 shadow-sm bg-primary text-white">
               <div className="card-body text-center p-4">
                 <i className="bi bi-lightbulb fs-1 mb-3 d-block"></i>
@@ -309,8 +291,7 @@ const AdminDashboard = () => {
                   Check the documentation or contact support for assistance
                 </p>
                 <button className="btn btn-light btn-sm">
-                  <i className="bi bi-book me-2"></i>
-                  View Documentation
+                  <i className="bi bi-book me-2"></i>View Documentation
                 </button>
               </div>
             </div>
@@ -323,28 +304,25 @@ const AdminDashboard = () => {
             <div className="card border-0 shadow-sm">
               <div className="card-header bg-white py-3">
                 <h5 className="mb-0">
-                  <i className="bi bi-tools me-2"></i>
-                  Administrative Actions
+                  <i className="bi bi-tools me-2"></i>Administrative Actions
                 </h5>
               </div>
               <div className="card-body">
                 <div className="row g-3">
                   <div className="col-md-4">
                     <button className="btn btn-outline-primary w-100">
-                      <i className="bi bi-journal-text me-2"></i>
-                      View System Logs
+                      <i className="bi bi-journal-text me-2"></i>View System
+                      Logs
                     </button>
                   </div>
                   <div className="col-md-4">
                     <button className="btn btn-outline-success w-100">
-                      <i className="bi bi-download me-2"></i>
-                      Export Data
+                      <i className="bi bi-download me-2"></i>Export Data
                     </button>
                   </div>
                   <div className="col-md-4">
                     <button className="btn btn-outline-info w-100">
-                      <i className="bi bi-graph-up me-2"></i>
-                      Generate Reports
+                      <i className="bi bi-graph-up me-2"></i>Generate Reports
                     </button>
                   </div>
                 </div>
