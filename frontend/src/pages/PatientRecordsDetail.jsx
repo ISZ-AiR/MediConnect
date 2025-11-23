@@ -65,4 +65,3 @@ const PatientRecordsDetail = () => {
 };
 
 export default PatientRecordsDetail;
-if (id) loadData();
