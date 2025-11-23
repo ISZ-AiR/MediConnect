@@ -326,6 +326,8 @@ export default function ReportScaffold({
               className={
                 includeDoctors
                   ? "col-md-4 d-flex gap-2"
+                  : includeDateRange
+                  ? "col-md-8 d-flex gap-2"
                   : "col-md-4 d-flex gap-2"
               }
             >

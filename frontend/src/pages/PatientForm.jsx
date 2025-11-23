@@ -1,102 +1,68 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { apiRequest } from "../services/apiClient";
 import { useParams, useNavigate } from "react-router-dom";
+import { useEditableResource } from "../hooks/useEditableResource";
+import FormField from "../components/FormField";
 
 const PatientForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    password: "",
-    pesel: "",
-    birth_date: "",
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const load = async () => {
-      if (!id) return;
-
-      try {
-        setLoading(true);
-
+  const { form, handleChange, submit, loading, error, setForm } =
+    useEditableResource({
+      id,
+      initialValues: {
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        password: "",
+        pesel: "",
+        birth_date: "",
+      },
+      // Custom load combining patient + users
+      loadFn: async (pid) => {
         const [patientRes, usersRes] = await Promise.all([
-          apiRequest(`/patients/${id}`),
+          apiRequest(`/patients/${pid}`),
           apiRequest("/users"),
         ]);
-
         const patient = patientRes.success ? patientRes.data : patientRes;
         const users = usersRes?.data || [];
-
         const user = users.find((u) => u.user_id === patient.user_id);
-
-        setForm({
-          first_name: user?.first_name || "",
-          last_name: user?.last_name || "",
-          email: user?.email || "",
-          phone: user?.phone || "",
-          password: "",
-          pesel: patient.pesel || "",
-          birth_date: patient.birth_date || "",
-        });
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load patient");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, [id]);
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const payload = {
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-        phone: form.phone,
-        password: form.password || undefined,
-        pesel: form.pesel,
-        birth_date: form.birth_date,
-        role: "patient",
-      };
-
-      if (id) {
-        const res = await apiRequest(`/patients/${id}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
-        if (res.success) navigate("/receptionist/patients");
-      } else {
-        const res = await apiRequest("/patients/register", {
+        return { patient, user };
+      },
+      mapLoad: ({ patient, user }) => ({
+        first_name: user?.first_name || "",
+        last_name: user?.last_name || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+        password: "",
+        pesel: patient.pesel || "",
+        birth_date: patient.birth_date || "",
+      }),
+      createFn: async (payload) =>
+        apiRequest("/patients/register", {
           method: "POST",
           body: JSON.stringify(payload),
-        });
-        if (res.success) navigate("/receptionist/patients");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Save failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+        }),
+      updateFn: async (pid, payload) =>
+        apiRequest(`/patients/${pid}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        }),
+      buildPayload: (f) => ({
+        first_name: f.first_name,
+        last_name: f.last_name,
+        email: f.email,
+        phone: f.phone,
+        pesel: f.pesel,
+        birth_date: f.birth_date,
+        role: "patient",
+        ...(f.password ? { password: f.password } : {}),
+      }),
+      onSuccess: () => navigate("/receptionist/patients"),
+    });
 
   return (
     <div className="min-vh-100 bg-light">
@@ -125,112 +91,98 @@ const PatientForm = () => {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="card p-4">
+                <form onSubmit={submit} className="card p-4">
                   <h5 className="mb-3">
                     <i className="bi bi-person-vcard me-2"></i>
                     Personal Information
                   </h5>
 
                   <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-semibold">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
+                    <div className="col-md-6">
+                      <FormField
                         name="first_name"
+                        label="First Name"
                         value={form.first_name}
                         onChange={handleChange}
                         required
+                        className="mb-3"
                       />
                     </div>
-
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-semibold">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
+                    <div className="col-md-6">
+                      <FormField
                         name="last_name"
+                        label="Last Name"
                         value={form.last_name}
                         onChange={handleChange}
                         required
+                        className="mb-3"
                       />
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">
-                      <i className="bi bi-envelope me-2"></i>Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                  <FormField
+                    type="email"
+                    name="email"
+                    label={
+                      <>
+                        <i className="bi bi-envelope me-2"></i>Email
+                      </>
+                    }
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                  />
 
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">
-                      <i className="bi bi-telephone me-2"></i>Phone
-                    </label>
-                    <input
-                      type="tel"
-                      className="form-control"
-                      name="phone"
-                      value={form.phone}
-                      onChange={handleChange}
-                    />
-                  </div>
+                  <FormField
+                    type="tel"
+                    name="phone"
+                    label={
+                      <>
+                        <i className="bi bi-telephone me-2"></i>Phone
+                      </>
+                    }
+                    value={form.phone}
+                    onChange={handleChange}
+                  />
 
                   <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-semibold">PESEL</label>
-                      <input
-                        type="text"
-                        className="form-control"
+                    <div className="col-md-6">
+                      <FormField
                         name="pesel"
+                        label="PESEL"
                         value={form.pesel}
                         onChange={handleChange}
+                        className="mb-3"
                       />
                     </div>
-
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-semibold">
-                        Birth Date
-                      </label>
-                      <input
+                    <div className="col-md-6">
+                      <FormField
                         type="date"
-                        className="form-control"
                         name="birth_date"
+                        label="Birth Date"
                         value={form.birth_date}
                         onChange={handleChange}
+                        className="mb-3"
                       />
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">
-                      <i className="bi bi-lock me-2"></i>Password{" "}
-                      {id && (
-                        <small className="text-muted">
-                          (leave empty to keep)
-                        </small>
-                      )}
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                    />
-                  </div>
+                  <FormField
+                    type="password"
+                    name="password"
+                    label={
+                      <>
+                        <i className="bi bi-lock me-2"></i>Password{" "}
+                        {id && (
+                          <small className="text-muted">
+                            (leave empty to keep)
+                          </small>
+                        )}
+                      </>
+                    }
+                    value={form.password}
+                    onChange={handleChange}
+                  />
 
                   <div className="d-grid">
                     <button

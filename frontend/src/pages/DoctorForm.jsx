@@ -1,83 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Navbar from "../components/Navbar";
-import { apiRequest } from "../services/apiClient";
 import { useParams, useNavigate } from "react-router-dom";
+import { resourceService } from "../services/resourceService";
+import { useEditableResource } from "../hooks/useEditableResource";
 
 const DoctorForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    password: "",
-    specialization: "",
-    license_number: "",
+  const { form, handleChange, submit, loading, error } = useEditableResource({
+    id,
+    initialValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      password: "",
+      specialization: "",
+      license_number: "",
+    },
+    loadFn: resourceService.getDoctor,
+    mapLoad: (data) => ({
+      first_name: data.user?.first_name || "",
+      last_name: data.user?.last_name || "",
+      email: data.user?.email || "",
+      phone: data.user?.phone || "",
+      password: "",
+      specialization: data.specialization || "",
+      license_number: data.license_number || "",
+    }),
+    createFn: resourceService.createDoctor,
+    updateFn: resourceService.updateDoctor,
+    buildPayload: (f) => ({
+      first_name: f.first_name,
+      last_name: f.last_name,
+      email: f.email,
+      phone: f.phone,
+      specialization: f.specialization,
+      license_number: f.license_number,
+      ...(f.password ? { password: f.password } : {}),
+    }),
+    onSuccess: () => navigate("/admin/doctors"),
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const load = async () => {
-      if (!id) return;
-      try {
-        const res = await apiRequest(`/doctor/${id}`, { method: "GET" });
-        const data = res.success ? res.data : res;
-        setForm({
-          first_name: data.user?.first_name || "",
-          last_name: data.user?.last_name || "",
-          email: data.user?.email || "",
-          phone: data.user?.phone || "",
-          password: "",
-          specialization: data.specialization || "",
-          license_number: data.license_number || "",
-        });
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load doctor");
-      }
-    };
-    load();
-  }, [id]);
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const payload = {
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-        phone: form.phone,
-        password: form.password || undefined,
-        specialization: form.specialization,
-        license_number: form.license_number,
-      };
-      if (id) {
-        const res = await apiRequest(`/doctor/${id}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
-        if (res.success) navigate("/admin/doctors");
-      } else {
-        const res = await apiRequest("/doctor/", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-        if (res.success) navigate("/admin/doctors");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Save failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-vh-100 bg-light">
@@ -85,7 +48,7 @@ const DoctorForm = () => {
       <div className="container py-5">
         <h2 className="mb-4">{id ? "Edit Doctor" : "Create Doctor"}</h2>
         {error && <div className="alert alert-danger">{error}</div>}
-        <form onSubmit={handleSubmit} className="card p-4 mb-4">
+        <form onSubmit={submit} className="card p-4 mb-4">
           <div className="row">
             <div className="col-md-6 mb-3">
               <label className="form-label">First name</label>

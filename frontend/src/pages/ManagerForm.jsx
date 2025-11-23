@@ -1,76 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
+import { useEditableResource } from "../hooks/useEditableResource";
 
 const ManagerForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    password: "",
+  const { form, handleChange, submit, loading, error } = useEditableResource({
+    id,
+    initialValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      password: "",
+    },
+    loadFn: resourceService.getManager,
+    mapLoad: (data) => ({
+      first_name: data.first_name || "",
+      last_name: data.last_name || "",
+      email: data.email || "",
+      phone: data.phone || "",
+      password: "",
+    }),
+    createFn: resourceService.createManager,
+    updateFn: resourceService.updateManager,
+    buildPayload: (f) => ({
+      first_name: f.first_name,
+      last_name: f.last_name,
+      email: f.email,
+      phone: f.phone,
+      ...(id ? {} : { password: f.password }),
+    }),
+    onSuccess: () => navigate("/admin/managers"),
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const load = async () => {
-      if (!id) return;
-      try {
-        setLoading(true);
-        const data = await resourceService.getManager(id);
-        if (data)
-          setForm({
-            first_name: data.first_name || "",
-            last_name: data.last_name || "",
-            email: data.email || "",
-            phone: data.phone || "",
-            password: "",
-          });
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load manager");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      setLoading(true);
-      const payload = {
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-        phone: form.phone,
-      };
-      if (!id) payload.password = form.password;
-      if (id) await resourceService.updateManager(id, payload);
-      else
-        await resourceService.createManager({
-          ...payload,
-          password: form.password,
-        });
-      navigate("/admin/managers");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to save manager");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-vh-100 bg-light">
@@ -78,7 +42,7 @@ const ManagerForm = () => {
       <div className="container py-5">
         <h2 className="mb-4">{id ? "Edit Manager" : "Create Manager"}</h2>
         {error && <div className="alert alert-danger">{error}</div>}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={submit}>
           <div className="mb-3">
             <label className="form-label">First Name</label>
             <input

@@ -12,6 +12,28 @@ export const resourceService = {
     const res = await apiRequest(API_ENDPOINTS.DOCTORS_LIST, { method: "GET" });
     return unwrap(res);
   },
+  async getDoctor(id) {
+    const res = await apiRequest(`/doctor/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async createDoctor(payload) {
+    const res = await apiRequest(`/doctor/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async updateDoctor(id, payload) {
+    const res = await apiRequest(`/doctor/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async deleteDoctor(id) {
+    const res = await apiRequest(`/doctor/${id}`, { method: "DELETE" });
+    return res;
+  },
   async listNurses() {
     const res = await apiRequest(API_ENDPOINTS.NURSES_LIST, { method: "GET" });
     return unwrap(res);
@@ -21,6 +43,24 @@ export const resourceService = {
       method: "GET",
     });
     return unwrap(res);
+  },
+  async getPatient(id) {
+    const res = await apiRequest(`/patients/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+  async updatePatient(id, payload) {
+    const res = await apiRequest(`/patients/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+  async createPatientRegistration(payload) {
+    const res = await apiRequest(`/patients/register`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
   },
   async listReceptionists() {
     const res = await apiRequest(API_ENDPOINTS.RECEPTIONISTS_LIST, {

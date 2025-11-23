@@ -3,41 +3,44 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
 import { apiRequest } from "../services/apiClient";
+import { useEditableResource } from "../hooks/useEditableResource";
+import FormField from "../components/FormField";
 
 const VisitForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    reservation_id: "",
-    visit_note: "",
-    visit_date: "",
-    nurse_id: "",
+  const [nurses, setNurses] = useState([]);
+
+  const { form, handleChange, submit, loading, error } = useEditableResource({
+    id,
+    initialValues: {
+      reservation_id: "",
+      visit_note: "",
+      visit_date: "",
+      nurse_id: "",
+    },
+    loadFn: resourceService.getVisit,
+    mapLoad: (d) => ({
+      reservation_id: d.reservation_id || "",
+      visit_note: d.visit_note || "",
+      visit_date: d.visit_date || "",
+      nurse_id: d.nurse_id || "",
+    }),
+    createFn: resourceService.createVisit,
+    updateFn: resourceService.updateVisit,
+    buildPayload: (f) => ({
+      reservation_id: Number(f.reservation_id),
+      visit_note: f.visit_note,
+      visit_date: f.visit_date,
+      nurse_id: f.nurse_id ? Number(f.nurse_id) : null,
+    }),
+    onSuccess: () => navigate("/receptionist/visits"),
   });
 
-  const [nurses, setNurses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
   useEffect(() => {
-    const load = async () => {
+    const loadNurses = async () => {
       try {
-        setLoading(true);
-
-        // Pobranie wizyty (jeśli edycja)
-        if (id) {
-          const data = await resourceService.getVisit(id);
-          if (data) {
-            setForm({
-              reservation_id: data.reservation_id || "",
-              visit_note: data.visit_note || "",
-              visit_date: data.visit_date || "",
-              nurse_id: data.nurse_id || "",
-            });
-          }
-        }
-
-        // Pobranie pielęgniarek i użytkowników
         const [nursesRes, usersRes] = await Promise.all([
           apiRequest("/nurse"),
           apiRequest("/users"),
@@ -55,44 +58,10 @@ const VisitForm = () => {
         setNurses(nursesData);
       } catch (err) {
         console.error(err);
-        setError("Failed to load data");
-      } finally {
-        setLoading(false);
       }
     };
-    load();
-  }, [id]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      setLoading(true);
-      const payload = {
-        reservation_id: Number(form.reservation_id),
-        visit_note: form.visit_note,
-        visit_date: form.visit_date,
-        nurse_id: form.nurse_id ? Number(form.nurse_id) : null,
-      };
-
-      if (id) {
-        await resourceService.updateVisit(id, payload);
-      } else {
-        await resourceService.createVisit(payload);
-      }
-      navigate("/receptionist/visits");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to save visit");
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadNurses();
+  }, []);
 
   return (
     <div className="min-vh-100 bg-light">
@@ -119,7 +88,7 @@ const VisitForm = () => {
                   <p className="text-muted">Fill in visit details</p>{" "}
                 </div>
                 {error && <div className="alert alert-danger">{error}</div>}
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={submit}>
                   <div className="mb-3">
                     <label className="form-label fw-bold">
                       <i className="bi bi-person-lines-fill me-2"></i>Nurse
@@ -138,32 +107,29 @@ const VisitForm = () => {
                       ))}
                     </select>
                   </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">
-                      <i className="bi bi-journal-text me-2"></i>Notes
-                    </label>
-                    <textarea
-                      className="form-control"
-                      name="visit_note"
-                      value={form.visit_note}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">
-                      <i className="bi bi-calendar-event me-2"></i>Visit Date
-                    </label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="visit_date"
-                      value={form.visit_date}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                  <FormField
+                    type="textarea"
+                    name="visit_note"
+                    label={
+                      <>
+                        <i className="bi bi-journal-text me-2"></i>Notes
+                      </>
+                    }
+                    value={form.visit_note}
+                    onChange={handleChange}
+                  />
+                  <FormField
+                    type="date"
+                    name="visit_date"
+                    label={
+                      <>
+                        <i className="bi bi-calendar-event me-2"></i>Visit Date
+                      </>
+                    }
+                    value={form.visit_date}
+                    onChange={handleChange}
+                    required
+                  />
 
                   <div className="d-grid gap-3 mt-4">
                     <button

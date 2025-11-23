@@ -97,24 +97,40 @@ const DoctorAvailabilityReport = () => {
           filtered.forEach((doc) => {
             if (Array.isArray(doc.slots)) {
               doc.slots.forEach((s) => {
-                if (!map[s.date]) map[s.date] = { date: s.date, reserved: 0, free: 0 };
+                if (!map[s.date])
+                  map[s.date] = { date: s.date, reserved: 0, free: 0 };
                 map[s.date].reserved += s.reservedHours || 0;
                 map[s.date].free += s.freeHours || 0;
               });
             }
           });
-          return Object.values(map).sort((a, b) => new Date(a.date) - new Date(b.date));
+          return Object.values(map).sort(
+            (a, b) => new Date(a.date) - new Date(b.date)
+          );
         })();
         return (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dateAggregated} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <BarChart
+              data={dateAggregated}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="reserved" stackId="a" fill="#ff6961" name="Reserved Hours" />
-              <Bar dataKey="free" stackId="a" fill="#82ca9d" name="Free Hours" />
+              <Bar
+                dataKey="reserved"
+                stackId="a"
+                fill="#ff6961"
+                name="Reserved Hours"
+              />
+              <Bar
+                dataKey="free"
+                stackId="a"
+                fill="#82ca9d"
+                name="Free Hours"
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -130,14 +146,27 @@ const DoctorAvailabilityReport = () => {
         }));
         return (
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={doctorChartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <BarChart
+              data={doctorChartData}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="doctor" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="reserved" stackId="a" fill="#ff6961" name="Reserved Hours" />
-              <Bar dataKey="free" stackId="a" fill="#82ca9d" name="Free Hours" />
+              <Bar
+                dataKey="reserved"
+                stackId="a"
+                fill="#ff6961"
+                name="Reserved Hours"
+              />
+              <Bar
+                dataKey="free"
+                stackId="a"
+                fill="#82ca9d"
+                name="Free Hours"
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -146,7 +175,9 @@ const DoctorAvailabilityReport = () => {
   ];
 
   const buildExcelSheets = (all, { selectedDoctors }) => {
-    const filtered = selectedDoctors.length ? all.filter((d) => selectedDoctors.includes(d.doctor_id)) : all;
+    const filtered = selectedDoctors.length
+      ? all.filter((d) => selectedDoctors.includes(d.doctor_id))
+      : all;
     const summaryRows = filtered.map((d) => ({
       Doctor: `${d.first_name} ${d.last_name}`,
       Specialization: d.specialization || "",
@@ -170,9 +201,7 @@ const DoctorAvailabilityReport = () => {
         });
       });
     });
-    const sheets = [
-      { name: "Summary", rows: summaryRows },
-    ];
+    const sheets = [{ name: "Summary", rows: summaryRows }];
     if (slotsRows.length) sheets.push({ name: "Slots", rows: slotsRows });
     return sheets;
   };
