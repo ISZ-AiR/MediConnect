@@ -1,3 +1,7 @@
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+
 import VisitDetailsPanel from "../components/VisitDetailsPanel";
 import { useVisitDetails } from "../hooks/useVisitDetails";
 

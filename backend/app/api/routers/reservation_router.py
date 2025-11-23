@@ -118,7 +118,7 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
 @router.get("/", response_model=list[ReservationModel], description="Get all reservations (receptionist only).")
 async def get_all_reservations(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("receptionist"))
+    current_user: User = Depends(require_role(["receptionist", "doctor", "nurse"]))
 ):
     """Retrieve all reservations in the system."""
     result = await db.execute(select(Reservation))
@@ -171,6 +171,8 @@ async def update_reservation(
 
     # Update allowed fields
     for field, value in update_data.model_dump(exclude_unset=True).items():
+        if isinstance(value, datetime):
+            value = value.replace(tzinfo=None)
         setattr(reservation, field, value)
 
     await db.commit()
