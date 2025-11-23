@@ -171,6 +171,8 @@ async def update_reservation(
 
     # Update allowed fields
     for field, value in update_data.model_dump(exclude_unset=True).items():
+        if isinstance(value, datetime):
+            value = value.replace(tzinfo=None)
         setattr(reservation, field, value)
 
     await db.commit()
