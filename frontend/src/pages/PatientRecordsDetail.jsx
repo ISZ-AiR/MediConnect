@@ -97,7 +97,7 @@ const PatientRecordsDetail = () => {
         <Navbar />{" "}
         <div className="container py-5 text-center">
           {" "}
-          <div className="spinner-border text-warning" role="status"></div>{" "}
+          <div className="spinner-border text-success" role="status"></div>{" "}
         </div>{" "}
       </div>
     );
@@ -137,7 +137,7 @@ const PatientRecordsDetail = () => {
               {" "}
               <div className="card-body p-5 text-center">
                 <i
-                  className="bi bi-calendar-plus text-warning"
+                  className="bi bi-calendar-plus text-success"
                   style={{ fontSize: "3rem" }}
                 ></i>{" "}
                 <h2 className="fw-bold mt-3 mb-2">Visit Details</h2>{" "}
