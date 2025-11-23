@@ -174,7 +174,7 @@ const ReservationsList = () => {
           {error && <div className="alert alert-danger">{error}</div>}
           {!loading && !error && (
             <div className="table-responsive">
-              <table className="table table-striped">
+              <table className="table table-striped ">
                 <thead>
                   <tr>
                     <th>#</th>

@@ -124,6 +124,28 @@ const Navbar = () => {
                           </Link>
                         </li>
                       )}
+                      {user?.role === "manager" && (
+                        <li>
+                          <Link
+                            className="dropdown-item"
+                            to="/manager/dashboard"
+                          >
+                            <i className="bi bi-speedometer2 me-2"></i>
+                            Manager Dashboard
+                          </Link>
+                        </li>
+                      )}
+                      {user?.role === "receptionist" && (
+                        <li>
+                          <Link
+                            className="dropdown-item"
+                            to="/receptionist/dashboard"
+                          >
+                            <i className="bi bi-speedometer2 me-2"></i>
+                            Receptionist Dashboard
+                          </Link>
+                        </li>
+                      )}
                       {["doctor", "admin", "nurse"].includes(user?.role) && (
                         <li>
                           <Link className="dropdown-item" to="/patients">
