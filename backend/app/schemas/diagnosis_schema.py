@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import date
+from typing import Optional
 
 # ----- DIAGNOSIS -----
 
@@ -33,3 +34,27 @@ class DiagnosisModel(DiagnosisBase):
 
     class Config:
         from_attributes = True
+
+
+class DiagnosisCreate(DiagnosisBase):
+
+    """
+    Schema for creating a new diagnosis.
+    """
+
+    patient_id: int
+    visit_id: int
+    disease_id: int
+
+
+class DiagnosisUpdate(BaseModel):
+
+    """
+    Schema for updating an existing diagnosis.
+    """
+
+    diagnosis_date: Optional[date] = Field(None, description="Date when the diagnosis was made")
+    doctor_notes: Optional[str] = Field(None, description="Doctor's notes and observations about the diagnosis")
+    patient_id: Optional[int] = Field(None, description="ID of the patient")
+    visit_id: Optional[int] = Field(None, description="ID of the visit during which diagnosis was made")
+    disease_id: Optional[int] = Field(None, description="ID of the disease")
