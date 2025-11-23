@@ -107,7 +107,6 @@ const PatientForm = () => {
           <div className="col-md-9 col-lg-8">
             <div className="card shadow-sm border-0">
               <div className="card-body p-5">
-
                 <div className="text-center mb-4">
                   <i
                     className="bi bi-person-circle text-primary"
@@ -219,7 +218,9 @@ const PatientForm = () => {
                     <label className="form-label fw-semibold">
                       <i className="bi bi-lock me-2"></i>Password{" "}
                       {id && (
-                        <small className="text-muted">(leave empty to keep)</small>
+                        <small className="text-muted">
+                          (leave empty to keep)
+                        </small>
                       )}
                     </label>
                     <input
@@ -241,7 +242,6 @@ const PatientForm = () => {
                     </button>
                   </div>
                 </form>
-
               </div>
             </div>
           </div>

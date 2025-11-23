@@ -124,7 +124,9 @@ const PatientDetail = () => {
                   <button
                     className="btn btn-primary btn-lg"
                     onClick={() =>
-                      navigate(`/receptionist/patients/edit/${patient.patient_id}`)
+                      navigate(
+                        `/receptionist/patients/edit/${patient.patient_id}`
+                      )
                     }
                   >
                     Edit Patient

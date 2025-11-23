@@ -59,7 +59,9 @@ const PatientsList = () => {
       <Navbar />
       <div className="container py-5">
         <div className="row justify-content-center">
-          <div className="col-md-8"> {/* --- zawężenie --- */}
+          <div className="col-md-8">
+            {" "}
+            {/* --- zawężenie --- */}
             <div className="card shadow-sm border-0">
               <div className="card-body p-5">
                 <div className="text-center mb-4">
@@ -68,7 +70,9 @@ const PatientsList = () => {
                     style={{ fontSize: "3rem" }}
                   ></i>
                   <h2 className="fw-bold mt-3 mb-2">Patients</h2>
-                  <p className="text-muted">Manage patients and their details</p>
+                  <p className="text-muted">
+                    Manage patients and their details
+                  </p>
                 </div>
 
                 {/* --- Create Patient Button (full width, icon + ) --- */}
@@ -104,7 +108,10 @@ const PatientsList = () => {
 
                 {loading && (
                   <div className="text-center my-4">
-                    <div className="spinner-border text-primary" role="status"></div>
+                    <div
+                      className="spinner-border text-primary"
+                      role="status"
+                    ></div>
                   </div>
                 )}
 

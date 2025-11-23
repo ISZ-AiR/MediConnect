@@ -127,17 +127,20 @@ const PatientBooking = () => {
       <Navbar />
 
       <div className="container py-5" style={{ maxWidth: 800 }}>
-
         {message && (
           <div className={`alert alert-${message.type}`}>{message.text}</div>
         )}
 
         <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-
           <div className="text-center mb-4">
-            <i className="bi bi-calendar-check text-primary" style={{fontSize: "3rem"}}></i>
+            <i
+              className="bi bi-calendar-check text-primary"
+              style={{ fontSize: "3rem" }}
+            ></i>
             <h2 className="fw-bold mt-3 mb-1">Book an Appointment</h2>
-            <p className="text-muted">Choose a doctor and schedule your visit</p>
+            <p className="text-muted">
+              Choose a doctor and schedule your visit
+            </p>
           </div>
 
           {/* Specialization */}
@@ -146,19 +149,19 @@ const PatientBooking = () => {
               <i className="bi bi-bookmark me-2"></i> Doctor specialization
             </label>
             <Typeahead
-                id="specialization"
-                labelKey={(o) => o}
-                options={specializations}
-                placeholder="Start typing..."
-                onChange={(selected) => {
-                  setSpecialization(selected[0] || "");
-                  setFormDoctor("");
-                  setSelectedDate("");
-                  setSelectedSlot("");
-                }}
-                selected={specialization ? [specialization] : []}
-                clearButton
-                inputProps={{className: "form-control"}}
+              id="specialization"
+              labelKey={(o) => o}
+              options={specializations}
+              placeholder="Start typing..."
+              onChange={(selected) => {
+                setSpecialization(selected[0] || "");
+                setFormDoctor("");
+                setSelectedDate("");
+                setSelectedSlot("");
+              }}
+              selected={specialization ? [specialization] : []}
+              clearButton
+              inputProps={{ className: "form-control" }}
             />
           </div>
 
@@ -168,89 +171,90 @@ const PatientBooking = () => {
               <i className="bi bi-person-badge me-2"></i> Doctor
             </label>
             <Typeahead
-                id="doctor"
-                labelKey={(d) => `${d.first_name} ${d.last_name}`}
-                options={filteredDoctors}
-                placeholder="Start typing..."
-                onChange={(selected) => {
-                  const val = selected[0]?.doctor_id || "";
-                  setFormDoctor(val);
-                  setSelectedDate("");
-                  setSelectedSlot("");
-                }}
-                selected={
-                  formDoctor
-                      ? filteredDoctors.filter(
-                          (d) => d.doctor_id === Number(formDoctor)
-                      )
-                      : []
-                }
-                clearButton
-                disabled={!specialization}
-                inputProps={{className: "form-control"}}
+              id="doctor"
+              labelKey={(d) => `${d.first_name} ${d.last_name}`}
+              options={filteredDoctors}
+              placeholder="Start typing..."
+              onChange={(selected) => {
+                const val = selected[0]?.doctor_id || "";
+                setFormDoctor(val);
+                setSelectedDate("");
+                setSelectedSlot("");
+              }}
+              selected={
+                formDoctor
+                  ? filteredDoctors.filter(
+                      (d) => d.doctor_id === Number(formDoctor)
+                    )
+                  : []
+              }
+              clearButton
+              disabled={!specialization}
+              inputProps={{ className: "form-control" }}
             />
           </div>
 
           {/* Date */}
           {formDoctor && (
-              <div className="mb-3 d-flex align-items-center">
-                <div className="w-100 d-flex flex-column">
-                  <label className="form-label fw-bold mb-1">
-                    <i className="bi bi-calendar-date me-2"></i>Select date</label>
-                  <DatePicker
-                      selected={selectedDate ? new Date(selectedDate) : null}
-                      onChange={date => {
-                        setSelectedDate(date.toISOString().split("T")[0]);
-                      }}
-                      includeDates={schedules
-                          .filter(s => Number(s.doctor_id) === Number(formDoctor))
-                          .map(s => new Date(s.schedule_date))}
-                      dateFormat="yyyy-MM-dd"
-                      placeholderText="Select date..."
-                      className="form-control border-primary w-100"
-                  />
-                </div>
+            <div className="mb-3 d-flex align-items-center">
+              <div className="w-100 d-flex flex-column">
+                <label className="form-label fw-bold mb-1">
+                  <i className="bi bi-calendar-date me-2"></i>Select date
+                </label>
+                <DatePicker
+                  selected={selectedDate ? new Date(selectedDate) : null}
+                  onChange={(date) => {
+                    setSelectedDate(date.toISOString().split("T")[0]);
+                  }}
+                  includeDates={schedules
+                    .filter((s) => Number(s.doctor_id) === Number(formDoctor))
+                    .map((s) => new Date(s.schedule_date))}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select date..."
+                  className="form-control border-primary w-100"
+                />
               </div>
+            </div>
           )}
 
           {/* Time slots */}
           {selectedDate && (
-              <div className="mb-4">
-                <label className="fw-bold mb-2 d-flex align-items-center">
-                  <i className="bi bi-clock me-2"></i> Available time slots
-                </label>
+            <div className="mb-4">
+              <label className="fw-bold mb-2 d-flex align-items-center">
+                <i className="bi bi-clock me-2"></i> Available time slots
+              </label>
 
-                <div className="d-flex flex-wrap gap-2">
-                  {timeSlots.length > 0 ? (
-                      timeSlots.map((slot) => (
-                          <button
-                              key={slot.toISOString()}
-                              type="button"
-                              className={`btn px-3 py-2 ${
-                                  selectedSlot === slot.toISOString()
-                                      ? "btn-primary"
-                                      : "btn-outline-primary"
-                              }`}
-                              style={{borderRadius: 10}}
-                              onClick={() => setSelectedSlot(slot.toISOString())}
-                          >
-                            {slot.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </button>
-                      ))
-                  ) : (
-                      <div className="text-muted">No slots available.</div>
-                  )}
-                </div>
+              <div className="d-flex flex-wrap gap-2">
+                {timeSlots.length > 0 ? (
+                  timeSlots.map((slot) => (
+                    <button
+                      key={slot.toISOString()}
+                      type="button"
+                      className={`btn px-3 py-2 ${
+                        selectedSlot === slot.toISOString()
+                          ? "btn-primary"
+                          : "btn-outline-primary"
+                      }`}
+                      style={{ borderRadius: 10 }}
+                      onClick={() => setSelectedSlot(slot.toISOString())}
+                    >
+                      {slot.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-muted">No slots available.</div>
+                )}
               </div>
+            </div>
           )}
 
           <button
-              className="btn btn-primary w-100 py-2"
-              type="submit"
-              disabled={loading || !selectedSlot}
+            className="btn btn-primary w-100 py-2"
+            type="submit"
+            disabled={loading || !selectedSlot}
           >
             <i className="bi bi-check-circle me-2"></i>
             Confirm booking
