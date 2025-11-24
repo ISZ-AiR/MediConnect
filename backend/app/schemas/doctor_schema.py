@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field, EmailStr
-from schemas.user_schema import UserBase
+from schemas.user_schema import UserBase, UserModel
 from typing import Literal
 
 # ----- DOCTOR -----
+
+
 class DoctorBase(BaseModel):
     """
     Base schema for doctor-specific information.
@@ -35,7 +37,8 @@ class DoctorCreate(UserBase, DoctorBase):
     Includes professional credentials and specialization details.
     Additionally, a password to be hashed.
     """
-    password: str = Field(..., description="Password for user account", example="secret123")
+    password: str = Field(..., description="Password for user account",
+                          example="secret123")
     role: Literal["doctor"] = "doctor"
 
 
@@ -47,3 +50,7 @@ class DoctorUpdate(BaseModel):
     password: str | None = None
     specialization: str | None = None
     license_number: str | None = None
+
+
+class DoctorUserModel(DoctorModel):
+    user: UserModel
