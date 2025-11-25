@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from core import get_db
-from core.security import verify_token, require_role
+from core import verify_token, require_role_with_user, require_role
 from models import User
 from typing import List
 
@@ -80,7 +80,7 @@ async def update_user(
     user_id: int,
     payload: dict,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Update a user (admin only)."""
     result = await db.execute(select(User).where(User.user_id == user_id))
@@ -108,7 +108,7 @@ async def update_user(
 async def delete_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Delete a user (admin only)."""
     result = await db.execute(select(User).where(User.user_id == user_id))

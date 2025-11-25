@@ -11,7 +11,7 @@ from models.visit_model import Visit
 from models.patient_model import Patient
 from schemas.doctor_schema import DoctorCreate, DoctorModel, DoctorUpdate, DoctorUserModel
 from passlib.hash import bcrypt
-from .user_router import require_role
+from core import require_role_with_user
 
 router = APIRouter(
     prefix="/doctor",
@@ -20,7 +20,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=DoctorModel)
-async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role_with_user(["admin"]))):
     # 1. Check if email exists
     result = await db.execute(select(User).filter(User.email == doctor.email))
     existing_user = result.scalar_one_or_none()
@@ -63,7 +63,7 @@ async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)
 @router.get("/", response_model=list[dict])
 async def get_all_doctors(
         db: AsyncSession = Depends(get_db),
-        current_user=Depends(require_role(
+        current_user: User = Depends(require_role_with_user(
             ["admin", "manager", "receptionist", "patient", "doctor"]))
 ):
     # Pobierz lekarzy wraz z powiązanym userem
@@ -90,7 +90,7 @@ async def get_all_doctors(
 @router.get("/me", response_model=DoctorModel)
 async def get_my_doctor(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["doctor"]))
+    current_user: User = Depends(require_role_with_user(["doctor"]))
 ):
     result = await db.execute(select(Doctor).where(Doctor.user_id == current_user.user_id))
     doctor = result.scalar_one_or_none()
@@ -100,7 +100,7 @@ async def get_my_doctor(
 
 
 @router.get("/{doctor_id}", response_model=DoctorUserModel)
-async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "manager", "receptionist", "patient", "doctor"]))):
+async def get_doctor_by_id(doctor_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role_with_user(["admin", "manager", "receptionist", "patient", "doctor"]))):
     result = await db.execute(
         select(Doctor, User)
         .where(Doctor.doctor_id == doctor_id)
@@ -133,7 +133,7 @@ async def update_doctor(
     doctor_id: int,
     doctor_update: DoctorUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
     doctor = result.scalar_one_or_none()
@@ -174,7 +174,7 @@ async def update_doctor(
 async def delete_doctor(
     doctor_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     result = await db.execute(select(Doctor).where(Doctor.doctor_id == doctor_id))
     doctor = result.scalar_one_or_none()

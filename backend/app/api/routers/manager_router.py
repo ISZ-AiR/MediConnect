@@ -5,16 +5,17 @@ from core.database import get_db
 from models.user_model import User
 from schemas.manager_schema import ManagerBase, ManagerModel
 from passlib.hash import bcrypt
-from .user_router import require_role
+from core import require_role_with_user
 
 router = APIRouter(
     prefix="/managers",
     tags=["Managers"]
 )
 
+
 @router.post("/", response_model=ManagerModel)
 async def create_manager(manager: ManagerBase, db: AsyncSession = Depends(get_db),
-                       current_user: User = Depends(require_role("admin"))):
+                         current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Create a new manager user account.
     """
@@ -23,7 +24,8 @@ async def create_manager(manager: ManagerBase, db: AsyncSession = Depends(get_db
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
-        raise HTTPException(status_code=400, detail="User with this email already exists")
+        raise HTTPException(
+            status_code=400, detail="User with this email already exists")
 
     hashed_pwd = bcrypt.hash(manager.password)
 
@@ -45,7 +47,7 @@ async def create_manager(manager: ManagerBase, db: AsyncSession = Depends(get_db
 
 @router.get("/", response_model=list[ManagerModel])
 async def get_all_managers(db: AsyncSession = Depends(get_db),
-                         current_user: User = Depends(require_role("admin"))):
+                           current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Retrieve all managers.
     """
@@ -56,7 +58,7 @@ async def get_all_managers(db: AsyncSession = Depends(get_db),
 
 @router.get("/{manager_id}", response_model=ManagerModel)
 async def get_manager_by_id(manager_id: int, db: AsyncSession = Depends(get_db),
-                          current_user: User = Depends(require_role("admin"))):
+                            current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Retrieve a single manager by ID.
     """
@@ -73,7 +75,7 @@ async def get_manager_by_id(manager_id: int, db: AsyncSession = Depends(get_db),
 
 @router.delete("/{manager_id}")
 async def delete_manager(manager_id: int, db: AsyncSession = Depends(get_db),
-                       current_user: User = Depends(require_role("admin"))):
+                         current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Delete an manager user.
     """

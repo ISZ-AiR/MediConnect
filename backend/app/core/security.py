@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+
+if TYPE_CHECKING:
+    from models import User
 
 # Move this to environment variables in production
 SECRET_KEY = "your-secret-key-change-this-in-production"
@@ -70,25 +73,65 @@ def require_role(allowed_roles: list):
     return role_checker
 
 
+async def _get_db_session():
+    """Helper to get database session for dependency injection"""
+    from core.database import get_db
+    async for session in get_db():
+        return session
+
+
 async def get_current_user(
-    current_user: dict = Depends(verify_token),
-    db: AsyncSession = Depends(lambda: None)  # Will be overridden when used
-):
+    token_data: dict = Depends(verify_token),
+    db: AsyncSession = Depends(_get_db_session)
+) -> "User":
     """
     Get the full user object from the database based on the token.
-    This is useful when you need more than just the token data.
+    This dependency fetches the complete User model from the database.
+
+    Usage: current_user: User = Depends(get_current_user)
+
+    Returns the full User model instance with all attributes.
     """
-    from models import User
-    from core import get_db
+    # Import locally to avoid circular imports
+    from models.user_model import User
 
-    if db is None:
-        raise HTTPException(
-            status_code=500, detail="Database session not available")
-
-    result = await db.execute(select(User).where(User.user_id == current_user["user_id"]))
+    result = await db.execute(select(User).where(User.user_id == token_data["user_id"]))
     user = result.scalar_one_or_none()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+
+def require_role_with_user(allowed_roles: list):
+    """
+    Dependency that returns the full User model AND checks role permissions.
+    Combines get_current_user with role checking.
+
+    Usage: current_user: User = Depends(require_role_with_user(["admin", "receptionist"]))
+
+    This is more efficient than get_current_user + manual role check.
+    """
+    async def role_and_user_checker(
+        token_data: dict = Depends(verify_token),
+        db: AsyncSession = Depends(_get_db_session)
+    ) -> "User":
+        # Check role from token first (no DB query needed)
+        if token_data["role"] not in allowed_roles:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Insufficient permissions. Required roles: {', '.join(allowed_roles)}"
+            )
+
+        # Then fetch full user from database
+        from models.user_model import User
+        result = await db.execute(select(User).where(User.user_id == token_data["user_id"]))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return user
+
+    return role_and_user_checker

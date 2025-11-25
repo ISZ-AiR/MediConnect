@@ -5,7 +5,7 @@ from core.database import get_db
 from models.user_model import User
 from models.nurse_model import Nurse
 from schemas.nurse_schema import NurseCreate, NurseModel
-from .user_router import require_role
+from core import require_role_with_user
 from passlib.hash import bcrypt
 
 router = APIRouter(
@@ -13,8 +13,9 @@ router = APIRouter(
     tags=["Nurse"]
 )
 
+
 @router.post("/", response_model=NurseModel)
-async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role_with_user(["admin"]))):
     # 1. E-mail uniqueness
     result = await db.execute(select(User).filter(User.email == nurse.email))
     existing_user = result.scalar_one_or_none()
@@ -46,7 +47,8 @@ async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db), c
 @router.get("/", response_model=list[NurseModel])
 async def get_all_nurses(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "receptionist", "patient", "doctor"]))
+    current_user: User = Depends(require_role_with_user(
+        ["admin", "receptionist", "patient", "doctor"]))
 ):
     result = await db.execute(select(Nurse))
     nurses = result.scalars().all()
@@ -57,7 +59,7 @@ async def get_all_nurses(
 async def get_nurse_by_id(
     nurse_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     result = await db.execute(select(Nurse).where(Nurse.nurse_id == nurse_id))
     nurse = result.scalar_one_or_none()
@@ -70,7 +72,7 @@ async def get_nurse_by_id(
 async def delete_nurse(
     nurse_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     result = await db.execute(select(Nurse).where(Nurse.nurse_id == nurse_id))
     nurse = result.scalar_one_or_none()

@@ -3,18 +3,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from core.database import get_db
 from models.user_model import User
-from schemas.admin_schema import AdminBase, AdminModel
+from schemas.admin_schema import AdminModel, AdminBase
 from passlib.hash import bcrypt
-from .user_router import require_role
+from core import require_role_with_user
 
 router = APIRouter(
     prefix="/admins",
     tags=["Admins"]
 )
 
+
 @router.post("/", response_model=AdminModel)
 async def create_admin(admin: AdminBase, db: AsyncSession = Depends(get_db),
-                       current_user: User = Depends(require_role("admin"))):
+                       current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Create a new admin user account.
     """
@@ -23,7 +24,8 @@ async def create_admin(admin: AdminBase, db: AsyncSession = Depends(get_db),
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
-        raise HTTPException(status_code=400, detail="User with this email already exists")
+        raise HTTPException(
+            status_code=400, detail="User with this email already exists")
 
     hashed_pwd = bcrypt.hash(admin.password)
 
@@ -45,7 +47,7 @@ async def create_admin(admin: AdminBase, db: AsyncSession = Depends(get_db),
 
 @router.get("/", response_model=list[AdminModel])
 async def get_all_admins(db: AsyncSession = Depends(get_db),
-                         current_user: User = Depends(require_role("admin"))):
+                         current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Retrieve all admins.
     """
@@ -56,7 +58,7 @@ async def get_all_admins(db: AsyncSession = Depends(get_db),
 
 @router.get("/{admin_id}", response_model=AdminModel)
 async def get_admin_by_id(admin_id: int, db: AsyncSession = Depends(get_db),
-                          current_user: User = Depends(require_role("admin"))):
+                          current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Retrieve a single admin by ID.
     """
@@ -73,7 +75,7 @@ async def get_admin_by_id(admin_id: int, db: AsyncSession = Depends(get_db),
 
 @router.delete("/{admin_id}")
 async def delete_admin(admin_id: int, db: AsyncSession = Depends(get_db),
-                       current_user: User = Depends(require_role("admin"))):
+                       current_user: User = Depends(require_role_with_user(["admin"]))):
     """
     Delete an admin user.
     """

@@ -4,7 +4,7 @@ from sqlalchemy import select
 from datetime import datetime, time
 
 from core import get_db
-from core.security import require_role
+from core.security import require_role_with_user, require_role
 from models import Schedule, Doctor, User
 from schemas.schedule_schema import ScheduleCreate, ScheduleModel, ScheduleUpdate
 
@@ -15,7 +15,8 @@ router = APIRouter(prefix="/schedules", tags=["Schedules"])
 async def create_schedule(
     schedule_data: ScheduleCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(require_role(["admin", "receptionist"]))
+    current_user: User = Depends(
+        require_role_with_user(["admin", "receptionist"]))
 ):
     # Check if doctor exists
     result = await db.execute(select(Doctor).where(Doctor.doctor_id == schedule_data.doctor_id))
@@ -84,7 +85,8 @@ async def update_schedule(
     schedule_id: int,
     update_data: ScheduleUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(require_role(["admin", "receptionist"]))
+    current_user: User = Depends(
+        require_role_with_user(["admin", "receptionist"]))
 ):
     """Update an existing doctor's schedule (admin and receptionist only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))
@@ -111,7 +113,7 @@ async def update_schedule(
 async def delete_schedule(
     schedule_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Delete a schedule entry (admin only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))

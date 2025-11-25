@@ -6,10 +6,10 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy import select
-from core import get_current_user, require_role
+from core import get_current_user, require_role, require_role_with_user, logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core import get_db
+from core import get_db, get_current_user
 from models import Patient, User
 from schemas.patient_schema import PatientModel, PatientCreate, PatientUpdate
 
@@ -65,7 +65,11 @@ async def patient(new_patient: PatientCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=list[PatientModel], description="Retrieve all patients.")
-async def get_all_patients(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
+async def get_all_patients(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        require_role_with_user(["receptionist", "admin"]))
+):
     result = await db.execute(select(Patient))
     patients = result.scalars().all()
     return patients
@@ -78,9 +82,9 @@ async def get_all_patients(db: AsyncSession = Depends(get_db), current_user: Use
 )
 async def get_my_patient(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("patient")),
-
+    current_user: User = Depends(require_role_with_user(["patient"])),
 ):
+    logger.info(f"Fetching patient record for user_id: {current_user.user_id}")
     result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
     patient = result.scalars().first()
 
@@ -91,7 +95,12 @@ async def get_my_patient(
 
 
 @router.get("/{patient_id}", response_model=PatientModel, description="Retrieve a patient by ID.")
-async def get_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
+async def get_patient(
+    patient_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        require_role_with_user(["receptionist", "admin"]))
+):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()
     if not patient:
@@ -104,7 +113,8 @@ async def update_patient(
     patient_id: int,
     patient_update: PatientUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["receptionist", "admin"]))
+    current_user: User = Depends(
+        require_role_with_user(["receptionist", "admin"]))
 ):
     # Fetch patient WITH related user (async safe)
     result = await db.execute(
@@ -146,7 +156,12 @@ async def update_patient(
 
 
 @router.delete("/{patient_id}", description="Delete a patient account.")
-async def delete_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
+async def delete_patient(
+    patient_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        require_role_with_user(["receptionist", "admin"]))
+):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()
     if not patient:

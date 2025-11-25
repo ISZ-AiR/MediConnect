@@ -11,7 +11,7 @@ from models.patient_model import Patient
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
 from schemas.visit_schema import VisitBase, VisitModel, VisitUpdate
-from .user_router import require_role
+from core import require_role_with_user, require_role
 
 
 router = APIRouter(prefix="/visits", tags=["Visits"])
@@ -33,7 +33,8 @@ async def create_visit(reservation_id: int, visit: VisitBase, db: AsyncSession =
     result = await db.execute(select(Visit).where(Visit.reservation_id == reservation_id))
     existing_visit = result.scalar_one_or_none()
     if existing_visit:
-        raise HTTPException(status_code=400, detail="Visit for this reservation already exists")
+        raise HTTPException(
+            status_code=400, detail="Visit for this reservation already exists")
 
     # Create visit entry
     db_visit = Visit(
@@ -48,7 +49,6 @@ async def create_visit(reservation_id: int, visit: VisitBase, db: AsyncSession =
     await db.refresh(db_visit)
 
     return db_visit
-
 
 
 @router.get("/", response_model=List[VisitModel], description="Get all visits by reservation")
@@ -121,12 +121,12 @@ async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None):
     return output
 
 
-@router.get("/detailed", description="Get all visits with full details", dependencies=[Depends(require_role(["admin", "receptionist"]))])
+@router.get("/detailed", description="Get all visits with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist"]))])
 async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db)
 
 
-@router.get("/detailed/doctor/{doctor_id}", description="Get all visits with full details - per doctor", dependencies=[Depends(require_role("doctor"))])
+@router.get("/detailed/doctor/{doctor_id}", description="Get all visits with full details - per doctor", dependencies=[Depends(require_role_with_user(["doctor"]))])
 async def get_doctor_detailed_visits(doctor_id: int, db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db, doctor_id)
 
@@ -134,8 +134,8 @@ async def get_doctor_detailed_visits(doctor_id: int, db: AsyncSession = Depends(
 @router.get("/me", response_model=List[VisitModel])
 async def get_my_visits(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("patient"))
-    ):
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
     """
     Get all visits for the logged-in patient via reservation
     """
@@ -167,7 +167,8 @@ async def update_visit(
     visit_id: int,
     visit_data: VisitUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["nurse", "receptionist"]))
+    current_user: User = Depends(
+        require_role_with_user(["nurse", "receptionist"]))
 ):
     """
     Update an existing visit. Only the nurse who created it or admin can update.
@@ -195,7 +196,8 @@ async def update_visit(
 async def delete_visit(
     visit_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))  # Only admin can delete
+    current_user: User = Depends(require_role_with_user(
+        ["admin"]))  # Only admin can delete
 ):
     """
     Delete a visit entry. Only admin is allowed.
@@ -208,5 +210,3 @@ async def delete_visit(
     await db.delete(visit)
     await db.commit()
     return {"status": "Visit deleted successfully"}
-
-
