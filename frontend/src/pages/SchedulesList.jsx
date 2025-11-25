@@ -19,6 +19,11 @@ const SchedulesList = () => {
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
+  // Get user role from localStorage
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userRole = user.role;
+  console.log("User role:", userRole);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -40,6 +45,14 @@ const SchedulesList = () => {
     };
     loadData();
   }, []);
+
+  const handleCreateSchedule = () => {
+    if (userRole === "admin") {
+      navigate("/admin/schedules/create");
+    } else {
+      navigate("/receptionist/schedules/create");
+    }
+  };
 
   const getDoctorLabel = (doctor_id) => {
     const d = doctors.find((doc) => doc.doctor_id === doctor_id);
@@ -131,7 +144,7 @@ const SchedulesList = () => {
                 <div className="mb-4">
                   <button
                     className="btn btn-primary w-100"
-                    onClick={() => navigate("/receptionist/schedules/create")}
+                    onClick={handleCreateSchedule}
                   >
                     <i className="bi bi-plus-circle me-2"></i> Create Schedule
                   </button>
