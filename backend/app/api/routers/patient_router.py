@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy import select
-from .user_router import get_current_user, require_role
+from core import get_current_user, require_role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import get_db
@@ -70,6 +70,7 @@ async def get_all_patients(db: AsyncSession = Depends(get_db), current_user: Use
     patients = result.scalars().all()
     return patients
 
+
 @router.get(
     "/me",
     response_model=PatientModel,
@@ -87,6 +88,7 @@ async def get_my_patient(
         raise HTTPException(status_code=404, detail="Patient record not found")
 
     return patient
+
 
 @router.get("/{patient_id}", response_model=PatientModel, description="Retrieve a patient by ID.")
 async def get_patient(patient_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["receptionist", "admin"]))):
@@ -118,7 +120,8 @@ async def update_patient(
 
     user = patient.user
     if not user:
-        raise HTTPException(status_code=500, detail="Patient has no linked user")
+        raise HTTPException(
+            status_code=500, detail="Patient has no linked user")
 
     # Update USER fields
     if patient_update.first_name is not None:

@@ -185,6 +185,14 @@ const handle401Error = () => {
   throw new Error("Authentication failed");
 };
 
+const handle403Error = () => {
+  if (isDevelopment) {
+    console.warn("🚫 Access forbidden - insufficient permissions");
+    console.groupEnd();
+  }
+  throw new Error("You don't have permission to access this resource");
+};
+
 const handleClientError = (response, errorData) => {
   return {
     success: false,
@@ -288,6 +296,10 @@ export const apiRequest = async (endpoint, options = {}) => {
 
     if (response.status === 401) {
       handle401Error();
+    }
+
+    if (response.status === 403) {
+      handle403Error();
     }
 
     if (!response.ok) {

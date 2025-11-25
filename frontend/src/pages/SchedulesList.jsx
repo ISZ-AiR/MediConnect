@@ -46,12 +46,14 @@ const SchedulesList = () => {
     loadData();
   }, []);
 
+  // Helper function for role-based navigation
+  const getSchedulePath = (path) => {
+    const rolePrefix = userRole === "admin" ? "/admin" : "/receptionist";
+    return `${rolePrefix}${path}`;
+  };
+
   const handleCreateSchedule = () => {
-    if (userRole === "admin") {
-      navigate("/admin/schedules/create");
-    } else {
-      navigate("/receptionist/schedules/create");
-    }
+    navigate(getSchedulePath("/schedules/create"));
   };
 
   const getDoctorLabel = (doctor_id) => {
@@ -244,7 +246,9 @@ const SchedulesList = () => {
                                   className="btn btn-sm btn-outline-primary"
                                   onClick={() =>
                                     navigate(
-                                      `/receptionist/schedules/${s.schedule_id}`
+                                      getSchedulePath(
+                                        `/schedules/${s.schedule_id}`
+                                      )
                                     )
                                   }
                                 >
@@ -254,18 +258,22 @@ const SchedulesList = () => {
                                   className="btn btn-sm btn-outline-secondary"
                                   onClick={() =>
                                     navigate(
-                                      `/receptionist/schedules/edit/${s.schedule_id}`
+                                      getSchedulePath(
+                                        `/schedules/edit/${s.schedule_id}`
+                                      )
                                     )
                                   }
                                 >
                                   <i className="bi bi-pencil me-1"></i> Edit
                                 </button>
-                                <button
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleDelete(s.schedule_id)}
-                                >
-                                  <i className="bi bi-trash me-1"></i> Delete
-                                </button>
+                                {userRole === "admin" && (
+                                  <button
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={() => handleDelete(s.schedule_id)}
+                                  >
+                                    <i className="bi bi-trash me-1"></i> Delete
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
