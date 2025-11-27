@@ -214,7 +214,14 @@ function App() {
               }
             />
 
-            <Route path="/appointments" element={<AppointmentsIndex />} />
+            <Route
+              path="/appointments"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <AppointmentsIndex />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/appointments/book" element={<PatientBooking />} />
             <Route path="/book" element={<PatientBooking />} />
 
