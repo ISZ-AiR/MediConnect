@@ -13,7 +13,7 @@ const Navbar = () => {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-      <div className="container">
+      <div className="container-fluid">
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img
             className="me-2"
