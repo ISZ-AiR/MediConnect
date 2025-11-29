@@ -58,6 +58,7 @@ const VisitDetail = () => {
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-md-9 col-lg-8">
+
             <VisitDetailsPanel
               visit={visit}
               prescriptions={prescriptions}
@@ -66,36 +67,35 @@ const VisitDetail = () => {
               getNurseName={getNurseName}
               getDoctorName={getDoctorNameFromReservation}
               color="warning"
+              isDoctor={user?.role === "doctor"}
+
               onBack={() => navigate(`${rolePrefix}/visits`)}
 
-              onEdit={(section) => {
+                onEdit={(section, itemId) => {
                   if (section === "prescriptions")
-                    return navigate(`${rolePrefix}/prescriptions/edit/${visit.visit_id}`);
+                    return navigate(`${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`);
 
                   if (section === "referrals")
-                    return navigate(`${rolePrefix}/referrals/edit/${visit.visit_id}`);
+                    return navigate(`${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`);
 
                   if (section === "diagnoses")
-                    return navigate(`${rolePrefix}/diagnoses/edit/${visit.visit_id}`);
+                    return navigate(`${rolePrefix}/diagnoses/edit/${visit.visit_id}/${itemId}`);
 
                   return navigate(`${rolePrefix}/visits/edit/${visit.visit_id}`);
                 }}
 
-                onAdd={(section) => {
-                  if (section === "prescriptions")
-                    return navigate(`${rolePrefix}/prescriptions/add/${visit.visit_id}`);
+              onAdd={(section) => {
+                if (section === "prescriptions")
+                  return navigate(`${rolePrefix}/prescriptions/add/${visit.visit_id}`);
 
-                  if (section === "referrals")
-                    return navigate(`${rolePrefix}/referrals/add/${visit.visit_id}`);
+                if (section === "referrals")
+                  return navigate(`${rolePrefix}/referrals/add/${visit.visit_id}`);
 
-                  if (section === "diagnoses")
-                    return navigate(`${rolePrefix}/diagnoses/add/${visit.visit_id}`);
-
-                }}
-
-
-              isDoctor={user?.role === "doctor"}
+                if (section === "diagnoses")
+                  return navigate(`${rolePrefix}/diagnoses/add/${visit.visit_id}`);
+              }}
             />
+
           </div>
         </div>
       </div>

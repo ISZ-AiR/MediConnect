@@ -178,7 +178,7 @@ async def update_visit(
     visit_data: VisitUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(
-        require_role_with_user(["nurse", "receptionist"]))
+        require_role_with_user(["nurse", "receptionist", "doctor"]))
 ):
     """
     Update an existing visit. Only the nurse who created it or admin can update.

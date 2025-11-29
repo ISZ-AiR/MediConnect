@@ -30,12 +30,6 @@ async def create_prescription(
     if not visit:
         raise HTTPException(status_code=404, detail="Visit not found")
 
-    # Check if the visit already has a prescription
-    result = await db.execute(select(Prescription).where(Prescription.visit_id == visit_id))
-    existing = result.scalars().first()
-    if existing:
-        raise HTTPException(
-            status_code=400, detail="This visit already has a prescription")
 
     # Create new prescription
     db_prescription = Prescription(

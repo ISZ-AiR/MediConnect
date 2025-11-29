@@ -562,7 +562,7 @@ function App() {
             />
 
             <Route
-              path="/doctor/prescriptions/edit/:visit_id"
+              path="/doctor/prescriptions/edit/:visit_id/:prescription_id"
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
                   <PrescriptionForm mode="edit" />
@@ -603,7 +603,7 @@ function App() {
             />
 
             <Route
-              path="/doctor/referrals/edit/:visit_id"
+              path="/doctor/referrals/edit/:visit_id/:referral_id"
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
                   <ReferralForm mode="edit" />
