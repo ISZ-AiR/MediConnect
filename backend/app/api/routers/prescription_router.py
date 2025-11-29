@@ -107,3 +107,11 @@ async def delete_prescription(prescription_id: int, db: AsyncSession = Depends(g
     await db.delete(db_prescription)
     await db.commit()
     return {"status": "Prescription deleted"}
+
+@router.get("/visit/{visit_id}", response_model=PrescriptionModel)
+async def get_prescription_by_visit(visit_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Prescription).where(Prescription.visit_id == visit_id))
+    prescription = result.scalar_one_or_none()
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    return prescription
