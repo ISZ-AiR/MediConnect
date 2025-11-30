@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import date
+from typing import Optional
 
 # ----- REFERRAL -----
 
@@ -35,6 +36,14 @@ class ReferralModel(ReferralBase):
                                 description="ID of the examination being referred for")
     doctor_id: int = Field(...,
                            description="ID of the doctor who issued the referral")
+
+    patient_name: Optional[str] = None
+
+    doctor_name: Optional[str] = None
+
+    patient_pesel: Optional[str] = None
+
+    doctor_user_id: Optional[int] = None
 
     class Config:
         from_attributes = True

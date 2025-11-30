@@ -573,6 +573,14 @@ function App() {
               }
             />
             <Route
+              path="/doctor/prescriptions/edit/:prescription_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <PrescriptionForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/doctor/referrals"
               element={
                 <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
@@ -615,6 +623,15 @@ function App() {
             />
 
             <Route
+              path="/doctor/referrals/edit/:referral_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ReferralForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/doctor/diagnosis/add/:visit_id"
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
@@ -624,6 +641,14 @@ function App() {
             />
             <Route
               path="/doctor/diagnosis/edit/:visit_id/:diagnosis_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <DiagnosisForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/diagnosis/edit/:diagnosis_id"
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
                   <DiagnosisForm mode="edit" />

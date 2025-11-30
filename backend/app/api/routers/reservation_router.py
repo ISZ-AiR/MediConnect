@@ -137,7 +137,7 @@ async def get_my_reservations(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role_with_user(["patient"]))
 ):
-    # Find patient record for current user
+
     result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
     patient = result.scalar_one_or_none()
     if not patient:

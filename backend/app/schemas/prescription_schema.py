@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from datetime import date
 
 # ----- PRESCRIPTION -----
 
@@ -28,6 +29,15 @@ class PrescriptionModel(PrescriptionBase):
                                  description="Unique identifier for the prescription")
     visit_id: int = Field(...,
                           description="ID of the visit during which prescription was issued")
+    patient_name: Optional[str] = None
+
+    patient_pesel: Optional[str] = None
+
+    visit_date: Optional[date] = None
+
+    doctor_name: Optional[str] = None
+
+    doctor_user_id: Optional[int] = None
 
     class Config:
         from_attributes = True
