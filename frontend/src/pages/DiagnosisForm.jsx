@@ -28,8 +28,9 @@ const DiagnosisForm = () => {
         const diseasesRes = await resourceService.listDiseases();
         setDiseases(diseasesRes);
 
-        const visit = await resourceService.getVisit(visit_id);
-        setPatientId(visit.patient_id);
+        const visit = await resourceService.getDetailedVisit(visit_id);
+        setPatientId(visit.patient?.patient_id);
+        console.log("Visit loaded:", visit);
 
         if (isEdit) {
           const d = await resourceService.getDiagnosis(diagnosis_id);
@@ -72,6 +73,8 @@ const DiagnosisForm = () => {
       ...form,
       patient_id: patientId,
     };
+
+    console.log(payload);
 
     try {
       if (isEdit) {

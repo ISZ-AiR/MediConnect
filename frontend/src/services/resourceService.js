@@ -258,10 +258,13 @@ export const resourceService = {
     return res && res.success ? res.data : res;
   },
 
-  async createDiagnosis(payload) {
+  async createDiagnosis(visit_id, payload) {
     const res = await apiRequest(`/diagnosis/`, {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        visit_id: Number(visit_id)
+      }),
     });
     return res && res.success ? res.data : res;
   },
@@ -272,6 +275,11 @@ export const resourceService = {
       body: JSON.stringify(payload),
     });
     return res && res.success ? res.data : res;
+  },
+
+  async deleteDiagnosis(id) {
+    const res = await apiRequest(`/diagnosis/${id}`, { method: "DELETE" });
+    return res;
   },
 
   async getManager(id) {

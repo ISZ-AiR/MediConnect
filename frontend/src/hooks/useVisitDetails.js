@@ -29,6 +29,7 @@ export const useVisitDetails = (visitId) => {
           nursesRes,
           reservationsRes,
           doctorsRes,
+          patientsRes,
           prescriptionsRes,
           referralsRes,
           diagnosesRes,
@@ -38,6 +39,7 @@ export const useVisitDetails = (visitId) => {
           apiRequest("/nurse"),
           apiRequest("/reservation"),
           apiRequest("/doctor"),
+          apiRequest("/patients"),
           apiRequest("/prescriptions"),
           apiRequest("/referrals"),
           apiRequest("/diagnosis"),
@@ -47,6 +49,7 @@ export const useVisitDetails = (visitId) => {
         const nurses = nursesRes?.data || [];
         const reservations = reservationsRes?.data || [];
         const doctors = doctorsRes?.data || [];
+        const patients = patientsRes?.data || [];
         const prescriptions = (prescriptionsRes?.data || []).filter(
           (p) => p.visit_id === Number(visitId)
         );
@@ -62,6 +65,7 @@ export const useVisitDetails = (visitId) => {
           nurses,
           reservations,
           doctors,
+          patients,
           prescriptions,
           referrals,
           diagnoses,
@@ -76,10 +80,14 @@ export const useVisitDetails = (visitId) => {
     load();
   }, [visitId]);
 
-  // helper resolvers
   const getUserName = (user_id) => {
     const u = data.users.find((x) => x.user_id === user_id);
     return u ? `${u.first_name} ${u.last_name}` : "N/A";
+  };
+
+  const getPatientPESEL = (patient_id) => {
+    const u = data.patients.find((x) => x.patient_id === patient_id);
+    return u ? `${u.pesel}` : "N/A";
   };
 
   const getNurseName = (nurse_id) => {
@@ -100,11 +108,36 @@ export const useVisitDetails = (visitId) => {
     return getUserName(doctor.user_id);
   };
 
+  const getPatientNameFromReservation = (reservation_id) => {
+    const reservation = data.reservations.find(
+      (r) => r.reservation_id === reservation_id
+    );
+    if (!reservation) return "N/A";
+    const patient = data.patients.find(
+      (d) => d.patient_id === reservation.patient_id
+    );
+    if (!patient) return "N/A";
+    return getUserName(patient.user_id);
+  };
+
+  const getPatientPESELFromReservation = (reservation_id) => {
+    const reservation = data.reservations.find(
+      (r) => r.reservation_id === reservation_id
+    );
+    if (!reservation) return "N/A";
+    const patient = data.patients.find(
+      (d) => d.patient_id === reservation.patient_id
+    );
+    if (!patient) return "N/A";
+    return getPatientPESEL(patient.patient_id);
+  };
+
   return {
     ...data,
     loading,
     error,
-    getUserName,
+    getPatientNameFromReservation,
+    getPatientPESELFromReservation,
     getNurseName,
     getDoctorNameFromReservation,
   };

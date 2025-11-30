@@ -68,7 +68,7 @@ async def patient(new_patient: PatientCreate, db: Session = Depends(get_db)):
 async def get_all_patients(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(
-        require_role_with_user(["receptionist", "admin"]))
+        require_role_with_user(["receptionist", "admin", "doctor"]))
 ):
     result = await db.execute(select(Patient))
     patients = result.scalars().all()
@@ -99,7 +99,7 @@ async def get_patient(
     patient_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(
-        require_role_with_user(["receptionist", "admin"]))
+        require_role_with_user(["receptionist", "admin", "doctor"]))
 ):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()
@@ -167,6 +167,6 @@ async def delete_patient(
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    await db.delete(patient.user)  # Also deletes linked User via relationship
+    await db.delete(patient.user)
     await db.commit()
     return {"detail": "Patient deleted successfully"}
