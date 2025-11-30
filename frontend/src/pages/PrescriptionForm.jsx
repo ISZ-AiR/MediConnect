@@ -51,7 +51,7 @@ const PrescriptionForm = () => {
       } else {
         await resourceService.createPrescription(form, visit_id);
       }
-      navigate(`/doctor/visits/${visit_id}`);
+      navigate(`/doctor/visits`);
     } catch (err) {
       setError("Failed to save prescription");
     } finally {

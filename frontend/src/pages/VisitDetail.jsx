@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import VisitDetailsPanel from "../components/VisitDetailsPanel";
@@ -10,76 +10,41 @@ const VisitDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isDoctor = user?.role === "doctor";
+  const rolePrefix = isDoctor ? "doctor" : "receptionist";
 
   const {
     visit,
-    prescriptions: prescData,
-    referrals: refData,
-    diagnoses: diagData,
+    prescriptions,
+    referrals,
+    diagnoses,
     loading,
     error,
     getPatientNameFromReservation,
     getPatientPESELFromReservation,
     getNurseName,
     getDoctorNameFromReservation
-  } = useVisitDetails(id);
+  } = useVisitDetails(id, user?.role);
 
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [referrals, setReferrals] = useState([]);
-  const [diagnoses, setDiagnoses] = useState([]);
-
-  const [referralsWithName, setReferralsWithName] = useState([]);
-  const [diagnosesWithName, setDiagnosesWithName] = useState([]);
-
-  useEffect(() => {
-    setPrescriptions(prescData || []);
-    setReferrals(refData || []);
-    setDiagnoses(diagData || []);
-  }, [prescData, refData, diagData]);
-
-  useEffect(() => {
-    const enrichData = async () => {
-      try {
-        const examList = await resourceService.listExaminations();
-        const diseaseList = await resourceService.listDiseases();
-
-        setReferralsWithName(
-          (referrals || []).map(r => ({
-            ...r,
-            examination: examList.find(e => e.examination_id === r.examination_id) || { name: "N/A" }
-          }))
-        );
-
-        setDiagnosesWithName(
-          (diagnoses || []).map(d => ({
-            ...d,
-            disease: diseaseList.find(x => x.disease_id === d.disease_id) || { name: "N/A" }
-          }))
-        );
-      } catch (err) {
-        console.error("Failed to enrich referral/diagnosis data:", err);
-      }
-    };
-
-    enrichData();
-  }, [referrals, diagnoses]);
+  const prescriptionsData = isDoctor ? prescriptions : [];
+  const referralsData = isDoctor ? referrals : [];
+  const diagnosesData = isDoctor ? diagnoses : [];
 
   const handleDelete = async (type, itemId) => {
+    if (!isDoctor) return;
+
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
       switch(type) {
         case "prescriptions":
           await resourceService.deletePrescription(itemId);
-          setPrescriptions(prev => prev.filter(p => p.prescription_id !== itemId));
           break;
         case "referrals":
           await resourceService.deleteReferral(itemId);
-          setReferrals(prev => prev.filter(r => r.referral_id !== itemId));
           break;
         case "diagnoses":
           await resourceService.deleteDiagnosis(itemId);
-          setDiagnoses(prev => prev.filter(d => d.diagnosis_id !== itemId));
           break;
         default:
           console.warn("Unknown type for deletion:", type);
@@ -118,8 +83,6 @@ const VisitDetail = () => {
       </div>
     );
 
-  const rolePrefix = user?.role === "doctor" ? "/doctor" : "/receptionist";
-
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
@@ -128,35 +91,40 @@ const VisitDetail = () => {
           <div className="col-md-9 col-lg-8">
             <VisitDetailsPanel
               visit={visit}
-              prescriptions={prescriptions}
-              referrals={referralsWithName}
-              diagnoses={diagnosesWithName}
+              prescriptions={prescriptionsData}
+              referrals={referralsData}
+              diagnoses={diagnosesData}
               getPatientName={getPatientNameFromReservation}
               getPatientPESEL={getPatientPESELFromReservation}
               getNurseName={getNurseName}
               getDoctorName={getDoctorNameFromReservation}
               color="warning"
-              isDoctor={user?.role === "doctor"}
+              isDoctor={isDoctor}
 
-              onBack={() => navigate(`${rolePrefix}/visits`)}
+              onBack={() => navigate(`/${rolePrefix}/visits`)}
 
               onEdit={(section, itemId) => {
-                if (section === "prescriptions")
-                  return navigate(`${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`);
-                if (section === "referrals")
-                  return navigate(`${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`);
-                if (section === "diagnoses")
-                  return navigate(`${rolePrefix}/diagnosis/edit/${visit.visit_id}/${itemId}`);
-                return navigate(`${rolePrefix}/visits/edit/${visit.visit_id}`);
+                if (section === "prescriptions" || section === "referrals" || section === "diagnoses") {
+                  if (!isDoctor) return;
+                  if (section === "prescriptions")
+                    return navigate(`/${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`);
+                  if (section === "referrals")
+                    return navigate(`/${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`);
+                  if (section === "diagnoses")
+                    return navigate(`/${rolePrefix}/diagnosis/edit/${visit.visit_id}/${itemId}`);
+                } else {
+                  return navigate(`/${rolePrefix}/visits/edit/${visit.visit_id}`);
+                }
               }}
 
               onAdd={(section) => {
+                if (!isDoctor) return;
                 if (section === "prescriptions")
-                  return navigate(`${rolePrefix}/prescriptions/add/${visit.visit_id}`);
+                  return navigate(`/${rolePrefix}/prescriptions/add/${visit.visit_id}`);
                 if (section === "referrals")
-                  return navigate(`${rolePrefix}/referrals/add/${visit.visit_id}`);
+                  return navigate(`/${rolePrefix}/referrals/add/${visit.visit_id}`);
                 if (section === "diagnoses")
-                  return navigate(`${rolePrefix}/diagnosis/add/${visit.visit_id}`);
+                  return navigate(`/${rolePrefix}/diagnosis/add/${visit.visit_id}`);
               }}
 
               onDelete={handleDelete}

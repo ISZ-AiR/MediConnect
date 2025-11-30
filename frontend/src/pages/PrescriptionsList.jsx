@@ -178,8 +178,12 @@ const PrescriptionsList = () => {
                         <td>
                           <div className="btn-group">
                             <Link to={`/${rolePrefix}/prescriptions/${p.prescription_id}`} className="btn btn-sm btn-outline-primary">View</Link>
-                            <Link to={`/${rolePrefix}/prescriptions/edit/${p.prescription_id}`} className="btn btn-sm btn-outline-secondary">Edit</Link>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.prescription_id)}>Delete</button>
+                            {(p.doctor_user_id === user.user_id) && (
+                                <>
+                              <Link to={`/${rolePrefix}/prescriptions/edit/${p.prescription_id}`} className="btn btn-sm btn-outline-secondary">Edit</Link>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.prescription_id)}>Delete</button>
+                              </>
+                          )}
                           </div>
                         </td>
                       </tr>

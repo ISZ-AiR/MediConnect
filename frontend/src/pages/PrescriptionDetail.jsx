@@ -97,9 +97,11 @@ const PrescriptionDetail = () => {
 
           {/* Przyciski */}
           <div className="d-grid gap-2">
-            <button className="btn btn-warning btn-lg" onClick={handleEdit}>
-              Edit Prescription
-            </button>
+            {(item.doctor_user_id === user.user_id) && (
+              <button className="btn btn-warning btn-lg" onClick={handleEdit}>
+                Edit Prescription
+              </button>
+            )}
             <button className="btn btn-outline-secondary btn-lg" onClick={handleBack}>
               Back to List
             </button>

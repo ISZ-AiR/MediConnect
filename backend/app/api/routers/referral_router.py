@@ -110,19 +110,17 @@ async def get_referral(referral_id: int, db: AsyncSession = Depends(get_db)):
             .joinedload(Doctor.user)  # doctor.user
         )
     )
-    referrals = result.scalars().first()
+    referral = result.scalars().first()
 
-    if not referrals:
-        raise HTTPException(status_code=404, detail="Referral not found for this visit")
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
 
-    for r in referrals:
-        r.doctor_name = (f"{r.doctor.user.first_name} "
-                         f"{r.doctor.user.last_name}")
-        r.patient_name = (f"{r.patient.user.first_name} "
-                          f"{r.patient.user.last_name}")
-        r.patient_pesel = f"{r.patient.pesel}"
+    referral.doctor_name = f"{referral.doctor.user.first_name} {referral.doctor.user.last_name}"
+    referral.patient_name = f"{referral.patient.user.first_name} {referral.patient.user.last_name}"
+    referral.patient_pesel = referral.patient.pesel
+    referral.doctor_user_id = referral.doctor.user.user_id
 
-    return referrals
+    return referral
 
 
 @router.put("/{referral_id}", response_model=ReferralModel)

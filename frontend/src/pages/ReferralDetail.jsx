@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
+import { useAuth } from "../context/AuthContext";
 
 const ReferralDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const rolePrefix = user?.role === "doctor" ? "doctor" : "admin";
+
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,11 +32,11 @@ const ReferralDetail = () => {
   }, [id]);
 
   const handleEdit = () => {
-    navigate(`/admin/referrals/edit/${item.referral_id}`);
+    navigate(`/${rolePrefix}/referrals/edit/${item.referral_id}`);
   };
 
   const handleBack = () => {
-    navigate("/admin/referrals");
+    navigate(`/${rolePrefix}/referrals`);
   };
 
   if (loading)
@@ -93,9 +97,11 @@ const ReferralDetail = () => {
 
           {/* Przyciski */}
           <div className="d-grid gap-2">
+            {(item.doctor_user_id === user.user_id) && (
             <button className="btn btn-warning btn-lg" onClick={handleEdit}>
               Edit Referral
             </button>
+                )}
             <button className="btn btn-outline-secondary btn-lg" onClick={handleBack}>
               Back to List
             </button>

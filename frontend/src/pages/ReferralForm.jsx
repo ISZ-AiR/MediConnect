@@ -5,7 +5,7 @@ import FormField from "../components/FormField";
 import { resourceService } from "../services/resourceService";
 
 const ReferralForm = () => {
-  const { visit_id, referral_id } = useParams();
+  const { visit_id: visitIdFromUrl, referral_id } = useParams();
   const isEdit = !!referral_id;
   const navigate = useNavigate();
 
@@ -15,10 +15,13 @@ const ReferralForm = () => {
     notes: "",
     is_completed: false,
   });
+
   const [visitData, setVisitData] = useState({
     patient_id: "",
     doctor_id: "",
   });
+
+  const [visitId, setVisitId] = useState(null);
   const [examinations, setExaminations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,26 +30,38 @@ const ReferralForm = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const visit = await resourceService.getDetailedVisit(visit_id);
+        let resolvedVisitId = visitIdFromUrl;
+
+        let existingReferral = null;
+        if (isEdit) {
+          existingReferral = await resourceService.getReferral(referral_id);
+
+          // Jeśli brak visit_id w URL (np. wchodzimy z listy skierowań)
+          if (!resolvedVisitId) {
+            resolvedVisitId = existingReferral.visit_id;
+          }
+
+          setForm({
+            examination_id: existingReferral.examination_id || "",
+            referral_date: existingReferral.referral_date || "",
+            notes: existingReferral.notes || "",
+            is_completed: existingReferral.is_completed || false,
+          });
+        }
+
+        setVisitId(resolvedVisitId);
+
+        // Pobierz szczegóły wizyty
+        const visit = await resourceService.getDetailedVisit(resolvedVisitId);
         setVisitData({
           patient_id: visit.patient.patient_id,
           doctor_id: visit.doctor.doctor_id,
         });
 
-        if (isEdit) {
-          const existingReferral = await resourceService.getReferral(referral_id);
-          if (existingReferral) {
-            setForm({
-              examination_id: existingReferral.examination_id || "",
-              referral_date: existingReferral.referral_date || "",
-              notes: existingReferral.notes || "",
-              is_completed: existingReferral.is_completed || false,
-            });
-          }
-        }
-
+        // Pobierz listę badań
         const exams = await resourceService.listExaminations();
         setExaminations(exams);
+
       } catch (err) {
         console.error("Referral load error:", err);
         setError("Failed to load data");
@@ -56,7 +71,7 @@ const ReferralForm = () => {
     };
 
     loadData();
-  }, [visit_id, referral_id, isEdit]);
+  }, [visitIdFromUrl, referral_id, isEdit]);
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
@@ -71,7 +86,7 @@ const ReferralForm = () => {
     setError(null);
     try {
       const payload = {
-        visit_id: Number(visit_id),
+        visit_id: Number(visitId),
         patient_id: Number(visitData.patient_id),
         doctor_id: Number(visitData.doctor_id),
         examination_id: Number(form.examination_id),
@@ -83,16 +98,28 @@ const ReferralForm = () => {
       if (isEdit) {
         await resourceService.updateReferral(referral_id, payload);
       } else {
-        await resourceService.createReferral(payload, visit_id);
+        await resourceService.createReferral(payload, visitId);
       }
 
-      navigate(`/doctor/visits/${visit_id}`);
+      navigate(`/doctor/visits`);
     } catch (err) {
+      console.error(err);
       setError("Failed to save referral");
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-vh-100 bg-light">
+        <Navbar />
+        <div className="container py-5 text-center">
+          <div className="spinner-border text-warning" role="status" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-vh-100 bg-light">

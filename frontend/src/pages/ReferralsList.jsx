@@ -188,18 +188,23 @@ const ReferralsList = () => {
                             >
                               View
                             </Link>
-                            <Link
-                              to={`/${rolePrefix}/referrals/edit/${r.referral_id}`}
-                              className="btn btn-sm btn-outline-secondary"
-                            >
-                              Edit
-                            </Link>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleDelete(r.referral_id)}
-                            >
-                              Delete
-                            </button>
+
+                            {(r.doctor_user_id === user.user_id) && (
+                              <>
+                                <Link
+                                  to={`/${rolePrefix}/referrals/edit/${r.referral_id}`}
+                                  className="btn btn-sm btn-outline-secondary"
+                                >
+                                  Edit
+                                </Link>
+                                <button
+                                  className="btn btn-sm btn-outline-danger"
+                                  onClick={() => handleDelete(r.referral_id)}
+                                >
+                                  Delete
+                                </button>
+                            </>
+                          )}
                           </div>
                         </td>
                       </tr>
