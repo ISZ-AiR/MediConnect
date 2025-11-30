@@ -19,6 +19,11 @@ const SchedulesList = () => {
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
+  // Get user role from localStorage
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userRole = user.role;
+  console.log("User role:", userRole);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -40,6 +45,16 @@ const SchedulesList = () => {
     };
     loadData();
   }, []);
+
+  // Helper function for role-based navigation
+  const getSchedulePath = (path) => {
+    const rolePrefix = userRole === "admin" ? "/admin" : "/receptionist";
+    return `${rolePrefix}${path}`;
+  };
+
+  const handleCreateSchedule = () => {
+    navigate(getSchedulePath("/schedules/create"));
+  };
 
   const getDoctorLabel = (doctor_id) => {
     const d = doctors.find((doc) => doc.doctor_id === doctor_id);
@@ -131,7 +146,7 @@ const SchedulesList = () => {
                 <div className="mb-4">
                   <button
                     className="btn btn-primary w-100"
-                    onClick={() => navigate("/receptionist/schedules/create")}
+                    onClick={handleCreateSchedule}
                   >
                     <i className="bi bi-plus-circle me-2"></i> Create Schedule
                   </button>
@@ -231,7 +246,9 @@ const SchedulesList = () => {
                                   className="btn btn-sm btn-outline-primary"
                                   onClick={() =>
                                     navigate(
-                                      `/receptionist/schedules/${s.schedule_id}`
+                                      getSchedulePath(
+                                        `/schedules/${s.schedule_id}`
+                                      )
                                     )
                                   }
                                 >
@@ -241,18 +258,22 @@ const SchedulesList = () => {
                                   className="btn btn-sm btn-outline-secondary"
                                   onClick={() =>
                                     navigate(
-                                      `/receptionist/schedules/edit/${s.schedule_id}`
+                                      getSchedulePath(
+                                        `/schedules/edit/${s.schedule_id}`
+                                      )
                                     )
                                   }
                                 >
                                   <i className="bi bi-pencil me-1"></i> Edit
                                 </button>
-                                <button
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleDelete(s.schedule_id)}
-                                >
-                                  <i className="bi bi-trash me-1"></i> Delete
-                                </button>
+                                {userRole === "admin" && (
+                                  <button
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={() => handleDelete(s.schedule_id)}
+                                  >
+                                    <i className="bi bi-trash me-1"></i> Delete
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>

@@ -4,16 +4,19 @@ from sqlalchemy import select
 from datetime import datetime, time
 
 from core import get_db
+from core.security import require_role_with_user, require_role
 from models import Schedule, Doctor, User
 from schemas.schedule_schema import ScheduleCreate, ScheduleModel, ScheduleUpdate
-from .user_router import require_role
 
 router = APIRouter(prefix="/schedules", tags=["Schedules"])
+
 
 @router.post("/", response_model=ScheduleModel, description="Create a doctor's schedule entry.")
 async def create_schedule(
     schedule_data: ScheduleCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        require_role_with_user(["admin", "receptionist"]))
 ):
     # Check if doctor exists
     result = await db.execute(select(Doctor).where(Doctor.doctor_id == schedule_data.doctor_id))
@@ -23,7 +26,8 @@ async def create_schedule(
 
     # Validate times
     if schedule_data.start_time >= schedule_data.end_time:
-        raise HTTPException(status_code=400, detail="Start time must be before end time.")
+        raise HTTPException(
+            status_code=400, detail="Start time must be before end time.")
 
     # Prevent duplicate schedule for same doctor and date
     result = await db.execute(
@@ -34,7 +38,8 @@ async def create_schedule(
     )
     existing = result.scalar_one_or_none()
     if existing:
-        raise HTTPException(status_code=400, detail="Schedule for this doctor and date already exists.")
+        raise HTTPException(
+            status_code=400, detail="Schedule for this doctor and date already exists.")
 
     # Create schedule
     schedule = Schedule(**schedule_data.model_dump())
@@ -45,14 +50,14 @@ async def create_schedule(
     return schedule
 
 
-
 # ----- READ ALL -----
 @router.get("/", response_model=list[ScheduleModel], description="Get all schedules.")
 async def get_all_schedules(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "receptionist", "patient", "doctor"]))
+    current_user: dict = Depends(require_role(
+        ["admin", "receptionist", "patient", "doctor", "nurse", "manager"]))
 ):
-    """Retrieve all schedule entries (admin only)."""
+    """Retrieve all schedule entries."""
     result = await db.execute(select(Schedule))
     schedules = result.scalars().all()
     return schedules
@@ -63,9 +68,10 @@ async def get_all_schedules(
 async def get_schedule_by_id(
     schedule_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "receptionist"]))
+    current_user: dict = Depends(require_role(
+        ["admin", "receptionist", "doctor", "nurse", "manager"]))
 ):
-    """Retrieve a single schedule entry (admin only)."""
+    """Retrieve a single schedule entry."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))
     schedule = result.scalar_one_or_none()
     if not schedule:
@@ -79,9 +85,10 @@ async def update_schedule(
     schedule_id: int,
     update_data: ScheduleUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "receptionist"]))
+    current_user: User = Depends(
+        require_role_with_user(["admin", "receptionist"]))
 ):
-    """Update an existing doctor's schedule (admin only)."""
+    """Update an existing doctor's schedule (admin and receptionist only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))
     schedule = result.scalar_one_or_none()
     if not schedule:
@@ -93,7 +100,8 @@ async def update_schedule(
 
     # Validate times if changed
     if schedule.start_time >= schedule.end_time:
-        raise HTTPException(status_code=400, detail="Start time must be before end time.")
+        raise HTTPException(
+            status_code=400, detail="Start time must be before end time.")
 
     await db.commit()
     await db.refresh(schedule)
@@ -105,7 +113,7 @@ async def update_schedule(
 async def delete_schedule(
     schedule_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "receptionist"]))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Delete a schedule entry (admin only)."""
     result = await db.execute(select(Schedule).where(Schedule.schedule_id == schedule_id))

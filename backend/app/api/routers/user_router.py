@@ -1,77 +1,44 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from core import get_db
+from core import verify_token, require_role_with_user, require_role
 from models import User
-from api.routers.login_router import oauth2_scheme, SECRET_KEY, ALGORITHM
-from typing import Union, List
+from typing import List
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-# --- Dependency to get current user ---
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("user_id")
-        if user_id is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-
-    result = await db.execute(select(User).where(User.user_id == user_id))
-    user = result.scalars().first()
-    if user is None:
-        raise credentials_exception
-
-    return user
-
-
 # --- /me endpoint ---
 @router.get("/me")
-async def read_current_user(current_user: User = Depends(get_current_user)):
+async def read_current_user(
+    current_user: dict = Depends(verify_token),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get the currently authenticated user's information."""
+    result = await db.execute(select(User).where(User.user_id == current_user["user_id"]))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     return {
-        "user_id": current_user.user_id,
-        "email": current_user.email,
-        "role": current_user.role,
+        "user_id": user.user_id,
+        "email": user.email,
+        "role": user.role,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
     }
 
 
-def require_role(roles: Union[str, List[str]]):
-    """
-    Dependency that checks if the current user has one of the required roles.
-
-    :param roles: a role string or a list of role strings allowed
-    """
-    if isinstance(roles, str):
-        roles_list = [roles]
-    else:
-        roles_list = roles
-
-    async def role_checker(current_user: User = Depends(get_current_user)):
-        if current_user.role not in roles_list:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Access denied. Required role(s): {', '.join(roles_list)}."
-            )
-        return current_user
-
-    return role_checker
-
-
 @router.get("/", response_model=List[dict])
-async def read_users(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(["admin", "receptionist", "patient", "doctor", "nurse"]))):
+async def read_users(
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_role(
+        ["admin", "receptionist", "patient", "doctor", "nurse", "manager"]))
+):
+    """Get all users (accessible by most roles)."""
     result = await db.execute(select(User))
     users = result.scalars().all()
     return [
@@ -88,7 +55,13 @@ async def read_users(db: AsyncSession = Depends(get_db), current_user: User = De
 
 
 @router.get("/{user_id}", response_model=dict)
-async def read_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def read_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_role(
+        ["admin", "receptionist", "manager"]))
+):
+    """Get a specific user by ID (admin, receptionist, and manager only)."""
     result = await db.execute(select(User).where(User.user_id == user_id))
     user = result.scalars().first()
     if not user:
@@ -103,7 +76,13 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db), current_us
 
 
 @router.put("/{user_id}", response_model=dict)
-async def update_user(user_id: int, payload: dict, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def update_user(
+    user_id: int,
+    payload: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["admin"]))
+):
+    """Update a user (admin only)."""
     result = await db.execute(select(User).where(User.user_id == user_id))
     user = result.scalars().first()
     if not user:
@@ -126,7 +105,12 @@ async def update_user(user_id: int, payload: dict, db: AsyncSession = Depends(ge
 
 
 @router.delete("/{user_id}", status_code=204)
-async def delete_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+async def delete_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["admin"]))
+):
+    """Delete a user (admin only)."""
     result = await db.execute(select(User).where(User.user_id == user_id))
     user = result.scalars().first()
     if not user:

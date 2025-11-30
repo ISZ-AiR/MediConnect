@@ -148,6 +148,10 @@ export const resourceService = {
     const res = await apiRequest(`/visits/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
   },
+  async getDetailedVisit(id) {
+    const res = await apiRequest(`/visits/detailed/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
   async createVisit(payload) {
     const res = await apiRequest(`/visits/`, {
       method: "POST",
@@ -170,19 +174,35 @@ export const resourceService = {
     const res = await apiRequest(`/prescriptions/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
   },
-  async createPrescription(payload) {
-    const res = await apiRequest(`/prescriptions/`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    return res && res.success ? res.data : res;
+  getPrescriptionByVisit: async (visit_id) => {
+  try {
+      const res = await apiRequest(`/prescriptions/visit/${visit_id}`);
+      return res.data;
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   },
-  async updatePrescription(id, payload) {
-    const res = await apiRequest(`/prescriptions/${id}`, {
+  createPrescription: async (form, visit_id) => {
+    const res = await apiRequest(`/prescriptions/?visit_id=${visit_id}`, {
+      method: "POST",
+      body: JSON.stringify({
+        medication: form.medication,
+        dosage: form.dosage,
+        instruction: form.instruction,
+      }),
+    });
+    return res.data;
+  },
+
+  updatePrescription: async (prescription_id, payload) => {
+    const res = await apiRequest(`/prescriptions/${prescription_id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
-    return res && res.success ? res.data : res;
+    return res.data;
   },
   async deletePrescription(id) {
     const res = await apiRequest(`/prescriptions/${id}`, { method: "DELETE" });
@@ -192,6 +212,19 @@ export const resourceService = {
     const res = await apiRequest(`/referrals/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
   },
+
+  getReferralByVisit: async (visit_id) => {
+      try {
+        const res = await apiRequest(`/referrals/visit/${visit_id}`);
+        return res.data;
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
+
   async createReferral(payload) {
     const res = await apiRequest(`/referrals/`, {
       method: "POST",

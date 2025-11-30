@@ -104,6 +104,24 @@ const AdminDashboard = () => {
             </Link>
           </div>
           <div className="col-md-6 col-lg-3">
+            <Link to="/admin/schedules" className="text-decoration-none">
+              <div className="card border-0 shadow-sm h-100 hover-shadow">
+                <div className="card-body text-center p-4">
+                  <div
+                    className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                    style={{ width: "80px", height: "80px" }}
+                  >
+                    <i className="bi bi-calendar2-check-fill text-info fs-1"></i>
+                  </div>
+                  <h5 className="card-title fw-bold mb-3">Manage Schedules</h5>
+                  <p className="card-text text-muted">
+                    View and schedules of the doctors and nurses
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="col-md-6 col-lg-3">
             <Link to="/admin/nurses" className="text-decoration-none">
               <div className="card border-0 shadow-sm h-100 hover-shadow">
                 <div className="card-body text-center p-4">

@@ -6,7 +6,7 @@ from models.receptionist_model import Receptionist
 from models.user_model import User
 from schemas.receptionist_schema import ReceptionistCreate, ReceptionistModel
 from passlib.hash import bcrypt
-from .user_router import require_role
+from core import require_role_with_user
 
 router = APIRouter(
     prefix="/receptionist",
@@ -16,7 +16,7 @@ router = APIRouter(
 
 @router.post("/", response_model=ReceptionistModel)
 async def create_receptionist(receptionist: ReceptionistCreate, db: AsyncSession = Depends(get_db),
-                              current_user: User = Depends(require_role("admin"))):
+                              current_user: User = Depends(require_role_with_user(["admin"]))):
     # 1. Check if email exists
     result = await db.execute(select(User).filter(User.email == receptionist.email))
     existing_user = result.scalar_one_or_none()
@@ -51,7 +51,7 @@ async def create_receptionist(receptionist: ReceptionistCreate, db: AsyncSession
 @router.get("/", response_model=list[ReceptionistModel])
 async def get_all_receptionists(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Get a list of all receptionists (admin only)."""
     result = await db.execute(select(Receptionist))
@@ -64,7 +64,7 @@ async def get_all_receptionists(
 async def get_receptionist_by_id(
     receptionist_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Retrieve a specific receptionist by ID (admin only)."""
     result = await db.execute(select(Receptionist).where(Receptionist.receptionist_id == receptionist_id))
@@ -79,7 +79,7 @@ async def get_receptionist_by_id(
 async def delete_receptionist(
     receptionist_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    current_user: User = Depends(require_role_with_user(["admin"]))
 ):
     """Delete a receptionist and their linked user account (admin only)."""
     result = await db.execute(select(Receptionist).where(Receptionist.receptionist_id == receptionist_id))

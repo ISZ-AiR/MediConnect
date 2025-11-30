@@ -36,38 +36,43 @@ const Homepage = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="bg-primary text-white py-5">
-        <div className="container py-5">
-          <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0">
-              <h1 className="display-4 fw-bold mb-3">Welcome to MediConnect</h1>
-              <p className="lead mb-4">
-                Your trusted partner in healthcare management. Modern,
-                efficient, and patient-centered medical practice management
-                system.
-              </p>
-              <div className="d-flex gap-3 flex-wrap">
-                <button
-                  className="btn btn-light btn-lg"
-                  onClick={handleBookAppointment}
-                >
-                  <i className="bi bi-calendar-plus me-2"></i>
-                  Book Appointment
-                </button>
-                <button
-                  className="btn btn-outline-light btn-lg"
-                  onClick={handlePatientPortal}
-                >
-                  <i className="bi bi-file-medical me-2"></i>
-                  Patient Portal
-                </button>
+      <section>
+        <div className="container-fluid p-0">
+          <div className="row g-0 align-items-stretch min-vh-50">
+            <div className="col-lg-6 bg-primary text-white d-flex align-items-center px-5">
+              <div className="container py-5">
+                <h1 className="display-4 fw-bold mb-3">
+                  Welcome to MediConnect
+                </h1>
+                <p className="lead mb-4">
+                  Your trusted partner in healthcare management. Modern,
+                  efficient, and patient-centered medical practice management
+                  system.
+                </p>
+                <div className="d-flex gap-3 flex-wrap">
+                  <button
+                    className="btn btn-light btn-lg"
+                    onClick={handleBookAppointment}
+                  >
+                    <i className="bi bi-calendar-plus me-2"></i>
+                    Book Appointment
+                  </button>
+                  <button
+                    className="btn btn-outline-light btn-lg"
+                    onClick={handlePatientPortal}
+                  >
+                    <i className="bi bi-file-medical me-2"></i>
+                    Patient Portal
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="col-lg-6 text-center">
-              <i
-                className="bi bi-hospital display-1"
-                style={{ fontSize: "10rem" }}
-              ></i>
+            <div className="col-lg-6 bg-white d-flex align-items-center justify-content-center py-5">
+              <img
+                src="/icon.png"
+                alt="MediConnect"
+                style={{ width: "20rem", height: "20rem" }}
+              />
             </div>
           </div>
         </div>

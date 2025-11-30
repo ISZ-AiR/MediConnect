@@ -13,9 +13,14 @@ const Navbar = () => {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-      <div className="container">
+      <div className="container-fluid">
         <Link className="navbar-brand d-flex align-items-center" to="/">
-          <i className="bi bi-hospital fs-3 text-primary me-2"></i>
+          <img
+            className="me-2"
+            src="/icon.png"
+            alt="MediConnect"
+            style={{ width: "3rem", height: "3rem" }}
+          />
           <span className="fw-bold text-primary">MediConnect</span>
         </Link>
 
