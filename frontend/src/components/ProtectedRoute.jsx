@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 /**
  * Protected Route component that requires authentication
  * Redirects to login page if user is not authenticated
+ * Verifies token with backend to prevent localStorage tampering
  * @param {Object} props - Component props
  * @param {React.Component} props.children - Child components to render if authenticated
  * @param {Array<string>} props.allowedRoles - Optional array of allowed user roles

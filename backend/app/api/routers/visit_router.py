@@ -2,14 +2,16 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, aliased
 from core.database import get_db
 from models.visit_model import Visit
 from models.reservation_model import Reservation
 from models.user_model import User
 from models.patient_model import Patient
+from models.doctor_model import Doctor
+from models.nurse_model import Nurse
 from schemas.visit_schema import VisitBase, VisitModel, VisitUpdate
-from .user_router import require_role
+from core import require_role_with_user, require_role
 
 
 router = APIRouter(prefix="/visits", tags=["Visits"])
@@ -31,7 +33,8 @@ async def create_visit(reservation_id: int, visit: VisitBase, db: AsyncSession =
     result = await db.execute(select(Visit).where(Visit.reservation_id == reservation_id))
     existing_visit = result.scalar_one_or_none()
     if existing_visit:
-        raise HTTPException(status_code=400, detail="Visit for this reservation already exists")
+        raise HTTPException(
+            status_code=400, detail="Visit for this reservation already exists")
 
     # Create visit entry
     db_visit = Visit(
@@ -57,11 +60,92 @@ async def get_all_visits(db: AsyncSession = Depends(get_db)):
     visits = result.scalars().all()
     return visits
 
+
+async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
+                               visit_id: int | None = None):
+    doctor_user = aliased(User)
+    nurse_user = aliased(User)
+    patient_user = aliased(User)
+
+    stmt = (
+        select(
+            Visit,
+            Reservation,
+            Doctor,
+            doctor_user,
+            Nurse,
+            nurse_user,
+            Patient,
+            patient_user
+        )
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .join(Doctor, Doctor.doctor_id == Reservation.doctor_id)
+        .join(doctor_user, doctor_user.user_id == Doctor.user_id)
+        .join(Nurse, Nurse.nurse_id == Visit.nurse_id)
+        .join(nurse_user, nurse_user.user_id == Nurse.user_id)
+        .join(Patient, Patient.patient_id == Reservation.patient_id)
+        .join(patient_user, patient_user.user_id == Patient.user_id)
+    )
+
+    if doctor_id is not None:
+        stmt = stmt.where(Doctor.doctor_id == doctor_id)
+
+    if visit_id is not None:
+        stmt = stmt.where(Visit.visit_id == visit_id)
+
+    result = await db.execute(stmt)
+    rows = result.all()
+
+    output = []
+    for v, r, d, d_u, n, n_u, p, p_u in rows:
+        output.append({
+            "visit_id": v.visit_id,
+            "visit_date": v.visit_date,
+            "visit_note": v.visit_note,
+            "doctor": {
+                "doctor_id": d.doctor_id,
+                "first_name": d_u.first_name,
+                "last_name": d_u.last_name
+            },
+            "nurse": {
+                "nurse_id": n.nurse_id,
+                "first_name": n_u.first_name,
+                "last_name": n_u.last_name
+            },
+            "patient": {
+                "patient_id": p.patient_id,
+                "first_name": p_u.first_name,
+                "last_name": p_u.last_name
+            },
+            "reservation": {
+                "reservation_id": r.reservation_id,
+                "reservation_time": r.reservation_time
+            }
+        })
+    if visit_id is not None:
+        return output[0] if output else None
+    else:
+        return output
+
+@router.get("/detailed/{visit_id}", description="Get a specific visit with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist", "doctor"]))])
+async def get_all_detailed_visits(visit_id: int, db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_visits(db, doctor_id=None, visit_id=visit_id)
+
+@router.get("/detailed", description="Get all visits with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist"]))])
+async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_visits(db)
+
+
+@router.get("/detailed/doctor/{doctor_id}", description="Get all visits with full details - per doctor", dependencies=[Depends(require_role_with_user(["doctor"]))])
+async def get_doctor_detailed_visits(doctor_id: int, db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_visits(db, doctor_id=doctor_id, visit_id=None)
+
+
 @router.get("/me", response_model=List[VisitModel])
 async def get_my_visits(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("patient"))
-    ):
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
     """
     Get all visits for the logged-in patient via reservation
     """
@@ -93,7 +177,8 @@ async def update_visit(
     visit_id: int,
     visit_data: VisitUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["nurse", "receptionist"]))
+    current_user: User = Depends(
+        require_role_with_user(["nurse", "receptionist", "doctor"]))
 ):
     """
     Update an existing visit. Only the nurse who created it or admin can update.
@@ -121,7 +206,8 @@ async def update_visit(
 async def delete_visit(
     visit_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))  # Only admin can delete
+    current_user: User = Depends(require_role_with_user(
+        ["admin"]))  # Only admin can delete
 ):
     """
     Delete a visit entry. Only admin is allowed.
@@ -134,5 +220,3 @@ async def delete_visit(
     await db.delete(visit)
     await db.commit()
     return {"status": "Visit deleted successfully"}
-
-

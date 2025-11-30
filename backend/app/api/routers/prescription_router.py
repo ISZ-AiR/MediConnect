@@ -6,7 +6,7 @@ from models.prescription_model import Prescription
 from models.user_model import User
 from models.visit_model import Visit
 from schemas.prescription_schema import PrescriptionBase, PrescriptionModel, PrescriptionUpdate
-from .user_router import require_role
+from core import require_role_with_user
 
 router = APIRouter(
     prefix="/prescriptions",
@@ -19,7 +19,7 @@ async def create_prescription(
     prescription: PrescriptionBase,
     visit_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["doctor", "nurse"]))
+    current_user: User = Depends(require_role_with_user(["doctor", "nurse"]))
 ):
     """
     Create a new prescription for a given visit.
@@ -30,11 +30,6 @@ async def create_prescription(
     if not visit:
         raise HTTPException(status_code=404, detail="Visit not found")
 
-    # Check if the visit already has a prescription
-    result = await db.execute(select(Prescription).where(Prescription.visit_id == visit_id))
-    existing = result.scalars().first()
-    if existing:
-        raise HTTPException(status_code=400, detail="This visit already has a prescription")
 
     # Create new prescription
     db_prescription = Prescription(
@@ -73,13 +68,12 @@ async def get_prescription_by_id(prescription_id: int, db: AsyncSession = Depend
     return prescription
 
 
-
 @router.put("/{prescription_id}", response_model=PrescriptionModel)
 async def update_prescription(
     prescription_id: int,
     prescription_update: PrescriptionUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["doctor", "nurse"]))
+    current_user: User = Depends(require_role_with_user(["doctor", "nurse"]))
 ):
     result = await db.execute(select(Prescription).where(Prescription.prescription_id == prescription_id))
     db_prescription = result.scalars().first()
@@ -98,7 +92,7 @@ async def update_prescription(
 
 @router.delete("/{prescription_id}", response_model=dict)
 async def delete_prescription(prescription_id: int, db: AsyncSession = Depends(get_db),
-                              current_user: User = Depends(require_role("admin"))):
+                              current_user: User = Depends(require_role_with_user(["admin"]))):
     result = await db.execute(select(Prescription).where(Prescription.prescription_id == prescription_id))
     db_prescription = result.scalars().first()
     if not db_prescription:
@@ -107,3 +101,11 @@ async def delete_prescription(prescription_id: int, db: AsyncSession = Depends(g
     await db.delete(db_prescription)
     await db.commit()
     return {"status": "Prescription deleted"}
+
+@router.get("/visit/{visit_id}", response_model=PrescriptionModel)
+async def get_prescription_by_visit(visit_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Prescription).where(Prescription.visit_id == visit_id))
+    prescription = result.scalar_one_or_none()
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    return prescription

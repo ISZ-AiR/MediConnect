@@ -59,6 +59,22 @@ async def get_all_referrals(db: AsyncSession = Depends(get_db)):
     referrals = result.scalars().all()
     return referrals
 
+@router.get("/visit/{visit_id}", response_model=ReferralModel)
+async def get_referral_by_visit(visit_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Retrieve a referral assigned to a specific visit.
+    """
+    result = await db.execute(
+        select(Referral).where(Referral.visit_id == visit_id)
+    )
+    referral = result.scalars().first()
+
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found for this visit")
+
+    return referral
+
+
 
 @router.get("/{referral_id}", response_model=ReferralModel)
 async def get_referral(referral_id: int, db: AsyncSession = Depends(get_db)):

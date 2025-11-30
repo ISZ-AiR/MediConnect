@@ -1,10 +1,11 @@
+from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, case, and_
 from datetime import date
 from core.database import get_db
 from models import Doctor, Visit, Reservation, Referral, Prescription, User, Schedule
-from .user_router import require_role
+from core import require_role_with_user, require_role
 from pydantic import BaseModel
 from sqlalchemy import cast, Date
 from datetime import datetime, timedelta
@@ -18,10 +19,12 @@ router = APIRouter(
 # Pydantic Models
 # -------------------
 
+
 class DailyData(BaseModel):
     date: date
     reservations: int
     visits: int
+
 
 class DoctorWorkload(BaseModel):
     doctor_id: int
@@ -29,15 +32,18 @@ class DoctorWorkload(BaseModel):
     last_name: str
     daily: list[DailyData]
 
+
 class ReservationSummary(BaseModel):
     date: date
     total_reservations: int
     cancelled_reservations: int
     completed_visits: int
 
+
 class ExaminationStat(BaseModel):
     examination_id: int
     count: int
+
 
 class MedicationStat(BaseModel):
     medication: str
@@ -48,14 +54,13 @@ class MedicationStat(BaseModel):
 # DOCTOR WORKLOAD REPORT
 # -----------------------
 
-from datetime import timedelta
 
 @router.get("/doctor-workload", response_model=list[DoctorWorkload])
 async def doctor_workload_report_daily(
     start_date: date,
     end_date: date,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_role(["manager"]))
+    current_user=Depends(require_role_with_user(["manager"]))
 ):
     """
     Workload report for all doctors, aggregated per day, in a date range.
@@ -96,11 +101,13 @@ async def doctor_workload_report_daily(
 
     daily_map = {}
     for doctor_id, date_, count in reservations_rows:
-        daily_map.setdefault(doctor_id, {}).setdefault(date_, {"reservations": 0, "visits": 0})
+        daily_map.setdefault(doctor_id, {}).setdefault(
+            date_, {"reservations": 0, "visits": 0})
         daily_map[doctor_id][date_]["reservations"] = count
 
     for doctor_id, date_, count in visits_rows:
-        daily_map.setdefault(doctor_id, {}).setdefault(date_, {"reservations": 0, "visits": 0})
+        daily_map.setdefault(doctor_id, {}).setdefault(
+            date_, {"reservations": 0, "visits": 0})
         daily_map[doctor_id][date_]["visits"] = count
 
     doctor_ids = list(daily_map.keys())
@@ -110,11 +117,13 @@ async def doctor_workload_report_daily(
         .where(Doctor.doctor_id.in_(doctor_ids))
     )
     doctor_rows = (await db.execute(doctors_stmt)).all()
-    doctor_map = {row[0]: {"first_name": row[1], "last_name": row[2]} for row in doctor_rows}
+    doctor_map = {row[0]: {"first_name": row[1], "last_name": row[2]}
+                  for row in doctor_rows}
 
     results = []
     for doctor_id, days in daily_map.items():
-        doctor_info = doctor_map.get(doctor_id, {"first_name": "", "last_name": ""})
+        doctor_info = doctor_map.get(
+            doctor_id, {"first_name": "", "last_name": ""})
         daily_list = []
         current_date = start_date
         while current_date <= end_date:
@@ -142,7 +151,7 @@ async def doctor_workload_report_daily(
 @router.get("/visits")
 async def all_visits_report(
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_role(["manager"]))
+    current_user=Depends(require_role_with_user(["manager"]))
 ):
     """Returns all visits."""
     result = await db.execute(select(Visit))
@@ -158,7 +167,7 @@ async def reservations_summary_daily(
     start_date: date,
     end_date: date,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_role(["manager"]))
+    current_user=Depends(require_role_with_user(["manager"]))
 ):
     """Daily summary of reservations in a date range."""
 
@@ -192,13 +201,15 @@ async def reservations_summary_daily(
     visits_map = {v[0]: v[1] for v in visits_rows}
 
     # Mapowanie danych
-    rows_map = {r[0]: {"total_reservations": r[1], "cancelled_reservations": r[2]} for r in reservations_rows}
+    rows_map = {r[0]: {"total_reservations": r[1],
+                       "cancelled_reservations": r[2]} for r in reservations_rows}
 
     # Generowanie pełnego zakresu dat
     results = []
     current_date = start_date
     while current_date <= end_date:
-        day_data = rows_map.get(current_date, {"total_reservations": 0, "cancelled_reservations": 0})
+        day_data = rows_map.get(
+            current_date, {"total_reservations": 0, "cancelled_reservations": 0})
         completed = visits_map.get(current_date, 0)
         results.append(
             ReservationSummary(
@@ -220,7 +231,7 @@ async def reservations_summary_daily(
 @router.get("/examinations", response_model=list[ExaminationStat])
 async def examinations_report(
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_role(["manager"]))
+    current_user=Depends(require_role_with_user(["manager"]))
 ):
     """Returns statistics about examinations."""
 
@@ -245,7 +256,7 @@ async def examinations_report(
 @router.get("/prescriptions")
 async def prescriptions_report(
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_role(["manager"]))
+    current_user=Depends(require_role_with_user(["manager"]))
 ):
     """Statistics on prescriptions."""
 
@@ -278,7 +289,7 @@ async def doctor_availability_report(
     start_date: str,
     end_date: str,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_role(["admin", "manager"]))
+    current_user=Depends(require_role_with_user(["admin", "manager"]))
 ):
 
     try:
@@ -288,7 +299,8 @@ async def doctor_availability_report(
         raise HTTPException(status_code=400, detail="Invalid date format")
 
     if start > end:
-        raise HTTPException(status_code=400, detail="Start date must be before end date")
+        raise HTTPException(
+            status_code=400, detail="Start date must be before end date")
 
     # Pobierz grafiki w zakresie dat
     result = await db.execute(

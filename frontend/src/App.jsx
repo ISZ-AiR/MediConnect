@@ -217,7 +217,14 @@ function App() {
               }
             />
 
-            <Route path="/appointments" element={<AppointmentsIndex />} />
+            <Route
+              path="/appointments"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <AppointmentsIndex />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/appointments/book" element={<PatientBooking />} />
             <Route path="/book" element={<PatientBooking />} />
 
@@ -549,10 +556,19 @@ function App() {
               }
             />
             <Route
-              path="/doctor/prescriptions/edit/:id"
+              path="/doctor/prescriptions/add/:visit_id"
               element={
-                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
-                  <PrescriptionForm />
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <PrescriptionForm mode="add" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/prescriptions/edit/:visit_id/:prescription_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <PrescriptionForm mode="edit" />
                 </ProtectedRoute>
               }
             />
@@ -581,10 +597,19 @@ function App() {
               }
             />
             <Route
-              path="/doctor/referrals/edit/:id"
+              path="/doctor/referrals/add/:visit_id"
               element={
-                <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
-                  <ReferralForm />
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ReferralForm mode="add" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/referrals/edit/:visit_id/:referral_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ReferralForm mode="edit" />
                 </ProtectedRoute>
               }
             />
