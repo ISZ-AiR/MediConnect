@@ -31,6 +31,7 @@ import ReservationsList from "./pages/ReservationsList";
 import VisitsList from "./pages/VisitsList";
 import PrescriptionsList from "./pages/PrescriptionsList";
 import ReferralsList from "./pages/ReferralsList";
+//import DiagnosisList from "./pages/DiagnosisList";
 import ExaminationsList from "./pages/ExaminationsList";
 import SchedulesList from "./pages/SchedulesList";
 import ManagersList from "./pages/ManagersList";
@@ -51,6 +52,8 @@ import PrescriptionDetail from "./pages/PrescriptionDetail";
 import PrescriptionForm from "./pages/PrescriptionForm";
 import ReferralDetail from "./pages/ReferralDetail";
 import ReferralForm from "./pages/ReferralForm";
+import DiagnosisForm from "./pages/DiagnosisForm.jsx";
+//import DiagnosisDetail from "./pages/DiagnosisDetail.jsx";
 import ManagerDetail from "./pages/ManagerDetail";
 import ManagerForm from "./pages/ManagerForm";
 import DoctorWorkload from "./pages/reports/DoctorWorkload";
@@ -582,6 +585,23 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
                   <ReferralForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/diagnosis/add/:visit_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <DiagnosisForm mode="add" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/diagnosis/edit/:visit_id/:diagnosis_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <DiagnosisForm mode="edit" />
                 </ProtectedRoute>
               }
             />

@@ -92,6 +92,10 @@ export const resourceService = {
     const res = await apiRequest("/referrals/", { method: "GET" });
     return unwrap(res);
   },
+  async listDiseases() {
+    const res = await apiRequest("/disease/", { method: "GET" });
+    return unwrap(res);
+  },
   async listExaminations() {
     const res = await apiRequest("/examinations/", { method: "GET" });
     return unwrap(res);
@@ -148,6 +152,10 @@ export const resourceService = {
     const res = await apiRequest(`/visits/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
   },
+  async getDetailedVisit(id) {
+    const res = await apiRequest(`/visits/detailed/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
   async createVisit(payload) {
     const res = await apiRequest(`/visits/`, {
       method: "POST",
@@ -170,19 +178,35 @@ export const resourceService = {
     const res = await apiRequest(`/prescriptions/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
   },
-  async createPrescription(payload) {
-    const res = await apiRequest(`/prescriptions/`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    return res && res.success ? res.data : res;
+  getPrescriptionByVisit: async (visit_id) => {
+  try {
+      const res = await apiRequest(`/prescriptions/visit/${visit_id}`);
+      return res.data;
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   },
-  async updatePrescription(id, payload) {
-    const res = await apiRequest(`/prescriptions/${id}`, {
+  createPrescription: async (form, visit_id) => {
+    const res = await apiRequest(`/prescriptions/?visit_id=${visit_id}`, {
+      method: "POST",
+      body: JSON.stringify({
+        medication: form.medication,
+        dosage: form.dosage,
+        instruction: form.instruction,
+      }),
+    });
+    return res.data;
+  },
+
+  updatePrescription: async (prescription_id, payload) => {
+    const res = await apiRequest(`/prescriptions/${prescription_id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
-    return res && res.success ? res.data : res;
+    return res.data;
   },
   async deletePrescription(id) {
     const res = await apiRequest(`/prescriptions/${id}`, { method: "DELETE" });
@@ -192,6 +216,19 @@ export const resourceService = {
     const res = await apiRequest(`/referrals/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
   },
+
+  getReferralByVisit: async (visit_id) => {
+      try {
+        const res = await apiRequest(`/referrals/visit/${visit_id}`);
+        return res.data;
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
+
   async createReferral(payload) {
     const res = await apiRequest(`/referrals/`, {
       method: "POST",
@@ -210,6 +247,33 @@ export const resourceService = {
     const res = await apiRequest(`/referrals/${id}`, { method: "DELETE" });
     return res;
   },
+
+  async getDisease(id) {
+    const res = await apiRequest(`/disease/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+
+  async getDiagnosis(id) {
+    const res = await apiRequest(`/diagnosis/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+
+  async createDiagnosis(payload) {
+    const res = await apiRequest(`/diagnosis/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+
+  async updateDiagnosis(id, payload) {
+    const res = await apiRequest(`/diagnosis/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+
   async getManager(id) {
     const res = await apiRequest(`/managers/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;
