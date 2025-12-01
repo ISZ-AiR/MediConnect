@@ -188,12 +188,28 @@ function App() {
               }
             />
 
-            <Route path="/doctors" element={<DoctorsList />} />
+            <Route
+              path="/doctors"
+              element={
+                <ProtectedRoute
+                  allowedRoles={[
+                    "admin",
+                    "doctor",
+                    "nurse",
+                    "manager",
+                    "receptionist",
+                    "user",
+                  ]}
+                >
+                  <DoctorsList />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/patients"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "doctor", "nurse"]}>
                   <PatientsList />
                 </ProtectedRoute>
               }
