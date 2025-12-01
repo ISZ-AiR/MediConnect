@@ -129,6 +129,17 @@ const Navbar = () => {
                           </Link>
                         </li>
                       )}
+                      {user?.role === "doctor" && (
+                        <li>
+                          <Link
+                            className="dropdown-item"
+                            to="/doctor/dashboard"
+                          >
+                            <i className="bi bi-speedometer2 me-2"></i>
+                            Doctor Dashboard
+                          </Link>
+                        </li>
+                      )}
                       {user?.role === "manager" && (
                         <li>
                           <Link
