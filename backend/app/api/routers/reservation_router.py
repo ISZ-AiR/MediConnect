@@ -124,7 +124,7 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
 async def get_all_reservations(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role_with_user(
-        ["receptionist", "doctor", "nurse"]))
+        ["receptionist", "doctor", "nurse", "admin"]))
 ):
     """Retrieve all reservations in the system."""
     result = await db.execute(select(Reservation))

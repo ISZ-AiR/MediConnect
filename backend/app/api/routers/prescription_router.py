@@ -17,6 +17,7 @@ router = APIRouter(
     tags=["Prescriptions"]
 )
 
+
 @router.post("/", response_model=PrescriptionModel)
 async def create_prescription(
     prescription: PrescriptionBase,
@@ -49,7 +50,7 @@ async def create_prescription(
 
 @router.get("/", response_model=list[PrescriptionModel])
 async def list_prescriptions(db: AsyncSession = Depends(get_db),
-                             current_user: User = Depends(require_role_with_user(["doctor", "nurse"]))):
+                             current_user: User = Depends(require_role_with_user(["doctor", "nurse", "admin"]))):
     result = await db.execute(
         select(Prescription)
         .options(
@@ -153,6 +154,7 @@ async def delete_prescription(prescription_id: int, db: AsyncSession = Depends(g
     await db.delete(db_prescription)
     await db.commit()
     return {"status": "Prescription deleted"}
+
 
 @router.get("/visit/{visit_id}", response_model=PrescriptionModel)
 async def get_prescription_by_visit(visit_id: int, db: AsyncSession = Depends(get_db)):
