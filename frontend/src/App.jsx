@@ -198,7 +198,7 @@ function App() {
                     "nurse",
                     "manager",
                     "receptionist",
-                    "user",
+                    "patient",
                   ]}
                 >
                   <DoctorsList />
@@ -241,8 +241,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/appointments/book" element={<PatientBooking />} />
-            <Route path="/book" element={<PatientBooking />} />
+            <Route
+              path="/appointments/book"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientBooking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/book"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientBooking />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />

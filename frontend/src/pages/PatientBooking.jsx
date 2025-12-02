@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { apiRequest } from "../services/apiClient";
 import { resourceService } from "../services/resourceService";
@@ -10,6 +11,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const PatientBooking = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [specialization, setSpecialization] = useState("");
   const [doctors, setDoctors] = useState([]);
@@ -104,162 +106,266 @@ const PatientBooking = () => {
         }),
       });
 
-      if (resp.success)
+      if (resp.success) {
         setMessage({
           type: "success",
-          text: "Reservation created successfully!",
+          text: "Reservation created successfully! Redirecting...",
         });
-      else
+        // Redirect to appointments page after a short delay
+        setTimeout(() => {
+          navigate("/appointments");
+        }, 1500);
+      } else {
         setMessage({
           type: "danger",
           text: resp.detail || "Failed to create reservation.",
         });
+        setLoading(false);
+      }
     } catch (err) {
       setMessage({ type: "danger", text: "Server error." });
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  if (!patient) return <div>Loading patient...</div>;
+  if (!patient) {
+    return (
+      <div className="min-vh-100 bg-light">
+        <Navbar />
+        <div className="container py-5">
+          <div className="d-flex justify-content-center my-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
 
-      <div className="container py-5" style={{ maxWidth: 800 }}>
-        {message && (
-          <div className={`alert alert-${message.type}`}>{message.text}</div>
-        )}
+      <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-md-10 col-lg-8">
+            <div className="card shadow-sm border-0 mt-3">
+              <div className="card-body p-5">
+                {/* Header */}
+                <div className="text-center mb-4">
+                  <i
+                    className="bi bi-calendar-check-fill text-primary"
+                    style={{ fontSize: "3rem" }}
+                  ></i>
+                  <h2 className="fw-bold mt-3 mb-2">Book an Appointment</h2>
+                  <p className="text-muted">
+                    Choose a doctor and schedule your visit
+                  </p>
+                </div>
 
-        <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-          <div className="text-center mb-4">
-            <i
-              className="bi bi-calendar-check text-primary"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h2 className="fw-bold mt-3 mb-1">Book an Appointment</h2>
-            <p className="text-muted">
-              Choose a doctor and schedule your visit
-            </p>
-          </div>
-
-          {/* Specialization */}
-          <div className="mb-4">
-            <label className="fw-bold mb-1 d-flex align-items-center">
-              <i className="bi bi-bookmark me-2"></i> Doctor specialization
-            </label>
-            <Typeahead
-              id="specialization"
-              labelKey={(o) => o}
-              options={specializations}
-              placeholder="Start typing..."
-              onChange={(selected) => {
-                setSpecialization(selected[0] || "");
-                setFormDoctor("");
-                setSelectedDate("");
-                setSelectedSlot("");
-              }}
-              selected={specialization ? [specialization] : []}
-              clearButton
-              inputProps={{ className: "form-control" }}
-            />
-          </div>
-
-          {/* Doctor */}
-          <div className="mb-4">
-            <label className="fw-bold mb-1 d-flex align-items-center">
-              <i className="bi bi-person-badge me-2"></i> Doctor
-            </label>
-            <Typeahead
-              id="doctor"
-              labelKey={(d) => `${d.first_name} ${d.last_name}`}
-              options={filteredDoctors}
-              placeholder="Start typing..."
-              onChange={(selected) => {
-                const val = selected[0]?.doctor_id || "";
-                setFormDoctor(val);
-                setSelectedDate("");
-                setSelectedSlot("");
-              }}
-              selected={
-                formDoctor
-                  ? filteredDoctors.filter(
-                      (d) => d.doctor_id === Number(formDoctor)
-                    )
-                  : []
-              }
-              clearButton
-              disabled={!specialization}
-              inputProps={{ className: "form-control" }}
-            />
-          </div>
-
-          {/* Date */}
-          {formDoctor && (
-            <div className="mb-3 d-flex align-items-center">
-              <div className="w-100 d-flex flex-column">
-                <label className="form-label fw-bold mb-1">
-                  <i className="bi bi-calendar-date me-2"></i>Select date
-                </label>
-                <DatePicker
-                  selected={selectedDate ? new Date(selectedDate) : null}
-                  onChange={(date) => {
-                    setSelectedDate(date.toISOString().split("T")[0]);
-                  }}
-                  includeDates={schedules
-                    .filter((s) => Number(s.doctor_id) === Number(formDoctor))
-                    .map((s) => new Date(s.schedule_date))}
-                  dateFormat="yyyy-MM-dd"
-                  placeholderText="Select date..."
-                  className="form-control border-primary w-100"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Time slots */}
-          {selectedDate && (
-            <div className="mb-4">
-              <label className="fw-bold mb-2 d-flex align-items-center">
-                <i className="bi bi-clock me-2"></i> Available time slots
-              </label>
-
-              <div className="d-flex flex-wrap gap-2">
-                {timeSlots.length > 0 ? (
-                  timeSlots.map((slot) => (
-                    <button
-                      key={slot.toISOString()}
-                      type="button"
-                      className={`btn px-3 py-2 ${
-                        selectedSlot === slot.toISOString()
-                          ? "btn-primary"
-                          : "btn-outline-primary"
-                      }`}
-                      style={{ borderRadius: 10 }}
-                      onClick={() => setSelectedSlot(slot.toISOString())}
-                    >
-                      {slot.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-muted">No slots available.</div>
+                {/* Alerts */}
+                {message && (
+                  <div
+                    className={`alert alert-${message.type} border-0 d-flex align-items-center`}
+                    role="alert"
+                  >
+                    <i
+                      className={`bi ${
+                        message.type === "success"
+                          ? "bi-check-circle-fill"
+                          : "bi-exclamation-triangle-fill"
+                      } me-2 fs-5`}
+                    ></i>
+                    <div>{message.text}</div>
+                  </div>
                 )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit}>
+                  <div className="bg-light border rounded p-4 mb-4">
+                    {/* Specialization */}
+                    <div className="mb-4">
+                      <label className="form-label fw-semibold text-secondary small mb-2 d-block">
+                        <i className="bi bi-bookmark me-1"></i>
+                        Doctor Specialization *
+                      </label>
+                      <Typeahead
+                        id="specialization"
+                        labelKey={(o) => o}
+                        options={specializations}
+                        placeholder="Select or type specialization..."
+                        onChange={(selected) => {
+                          setSpecialization(selected[0] || "");
+                          setFormDoctor("");
+                          setSelectedDate("");
+                          setSelectedSlot("");
+                        }}
+                        selected={specialization ? [specialization] : []}
+                        clearButton
+                      />
+                    </div>
+
+                    {/* Doctor */}
+                    <div className="mb-4">
+                      <label className="form-label fw-semibold text-secondary small mb-2 d-block">
+                        <i className="bi bi-person-badge me-1"></i>
+                        Doctor *
+                      </label>
+                      <Typeahead
+                        id="doctor"
+                        labelKey={(d) => `${d.first_name} ${d.last_name}`}
+                        options={filteredDoctors}
+                        placeholder={
+                          specialization
+                            ? "Select or type doctor name..."
+                            : "Please select specialization first"
+                        }
+                        onChange={(selected) => {
+                          const val = selected[0]?.doctor_id || "";
+                          setFormDoctor(val);
+                          setSelectedDate("");
+                          setSelectedSlot("");
+                        }}
+                        selected={
+                          formDoctor
+                            ? filteredDoctors.filter(
+                                (d) => d.doctor_id === Number(formDoctor)
+                              )
+                            : []
+                        }
+                        clearButton
+                        disabled={!specialization}
+                      />
+                    </div>
+
+                    {/* Date */}
+                    {formDoctor && (
+                      <div className="mb-4">
+                        <label className="form-label fw-semibold text-secondary small mb-2 d-block">
+                          <i className="bi bi-calendar-event me-1"></i>
+                          Select Date *
+                        </label>
+                        <DatePicker
+                          selected={
+                            selectedDate
+                              ? new Date(selectedDate + "T00:00:00")
+                              : null
+                          }
+                          onChange={(date) => {
+                            if (date) {
+                              const year = date.getFullYear();
+                              const month = String(
+                                date.getMonth() + 1
+                              ).padStart(2, "0");
+                              const day = String(date.getDate()).padStart(
+                                2,
+                                "0"
+                              );
+                              setSelectedDate(`${year}-${month}-${day}`);
+                              setSelectedSlot("");
+                            }
+                          }}
+                          includeDates={schedules
+                            .filter(
+                              (s) => Number(s.doctor_id) === Number(formDoctor)
+                            )
+                            .map(
+                              (s) => new Date(s.schedule_date + "T00:00:00")
+                            )}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="Select available date..."
+                          className="form-control"
+                          minDate={new Date()}
+                        />
+                        {formDoctor &&
+                          schedules.filter(
+                            (s) => Number(s.doctor_id) === Number(formDoctor)
+                          ).length === 0 && (
+                            <small className="text-muted d-block mt-2">
+                              <i className="bi bi-info-circle me-1"></i>
+                              No schedules available for this doctor
+                            </small>
+                          )}
+                      </div>
+                    )}
+
+                    <div className="mt-3">
+                      <small className="text-muted">
+                        <i className="bi bi-info-circle me-1"></i>
+                        All fields marked with * are required
+                      </small>
+                    </div>
+                  </div>
+
+                  {/* Time slots */}
+                  {selectedDate && (
+                    <div className="mb-4">
+                      <label className="form-label fw-semibold mb-3">
+                        <i className="bi bi-clock me-2"></i>
+                        Available Time Slots
+                      </label>
+
+                      <div className="d-flex flex-wrap gap-2">
+                        {timeSlots.length > 0 ? (
+                          timeSlots.map((slot) => (
+                            <button
+                              key={slot.toISOString()}
+                              type="button"
+                              className={`btn px-4 py-2 ${
+                                selectedSlot === slot.toISOString()
+                                  ? "btn-primary"
+                                  : "btn-outline-primary"
+                              }`}
+                              onClick={() =>
+                                setSelectedSlot(slot.toISOString())
+                              }
+                            >
+                              {slot.toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="alert alert-info border-0 w-100">
+                            <i className="bi bi-info-circle me-2"></i>
+                            No time slots available for this date.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="d-grid gap-2">
+                    <button
+                      className="btn btn-primary btn-lg py-2"
+                      type="submit"
+                      disabled={loading || !selectedSlot}
+                    >
+                      {loading ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-check-circle me-2"></i>
+                          Confirm Booking
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-          )}
-
-          <button
-            className="btn btn-primary w-100 py-2"
-            type="submit"
-            disabled={loading || !selectedSlot}
-          >
-            <i className="bi bi-check-circle me-2"></i>
-            Confirm booking
-          </button>
-        </form>
+          </div>
+        </div>
       </div>
     </div>
   );
