@@ -308,25 +308,35 @@ const PatientBooking = () => {
 
                       <div className="d-flex flex-wrap gap-2">
                         {timeSlots.length > 0 ? (
-                          timeSlots.map((slot) => (
-                            <button
-                              key={slot.toISOString()}
-                              type="button"
-                              className={`btn px-4 py-2 ${
-                                selectedSlot === slot.toISOString()
-                                  ? "btn-primary"
-                                  : "btn-outline-primary"
-                              }`}
-                              onClick={() =>
-                                setSelectedSlot(slot.toISOString())
-                              }
-                            >
-                              {slot.toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </button>
-                          ))
+                          timeSlots.map((slot) => {
+                            const hours = String(slot.getHours()).padStart(
+                              2,
+                              "0"
+                            );
+                            const minutes = String(slot.getMinutes()).padStart(
+                              2,
+                              "0"
+                            );
+                            const seconds = "00";
+                            const localSlot = `${selectedDate}T${hours}:${minutes}:${seconds}`;
+                            return (
+                              <button
+                                key={localSlot}
+                                type="button"
+                                className={`btn px-4 py-2 ${
+                                  selectedSlot === localSlot
+                                    ? "btn-primary"
+                                    : "btn-outline-primary"
+                                }`}
+                                onClick={() => setSelectedSlot(localSlot)}
+                              >
+                                {slot.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </button>
+                            );
+                          })
                         ) : (
                           <div className="alert alert-info border-0 w-100">
                             <i className="bi bi-info-circle me-2"></i>

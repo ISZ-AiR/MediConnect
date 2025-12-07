@@ -127,9 +127,11 @@ async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
     else:
         return output
 
+
 @router.get("/detailed/{visit_id}", description="Get a specific visit with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist", "doctor"]))])
 async def get_all_detailed_visits(visit_id: int, db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db, doctor_id=None, visit_id=visit_id)
+
 
 @router.get("/detailed", description="Get all visits with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist"]))])
 async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):

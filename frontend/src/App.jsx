@@ -149,7 +149,14 @@ function App() {
               }
             />
 
-            <Route path="/book" element={<PatientBooking />} />
+            <Route
+              path="/book"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientBooking />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin-only Staff Registration */}
             <Route

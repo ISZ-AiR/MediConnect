@@ -44,7 +44,8 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
     raw_time = reservation.reservation_time
     reservation_time = to_naive_utc(raw_time)
 
-    if reservation_time < datetime.utcnow():
+    # Compare against local current time to avoid UTC shifts when input is naive local
+    if reservation_time < datetime.now():
         raise HTTPException(
             status_code=400, detail="The reservation time must be in the future.")
 
@@ -239,17 +240,4 @@ def to_naive_utc(dt: datetime) -> datetime:
     return dt
 
 
-@router.get("/me", response_model=list[ReservationModel], description="Get reservations for current patient.")
-async def get_my_reservations(
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(require_role_with_user(["patient"]))
-):
-    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
-    patient = result.scalar_one_or_none()
-    if not patient:
-        raise HTTPException(
-            status_code=404, detail="Patient record not found for current user.")
-
-    result = await db.execute(select(Reservation).where(Reservation.patient_id == patient.patient_id))
-    reservations = result.scalars().all()
-    return reservations
+# Duplicate route removed: get_my_reservations defined earlier already
