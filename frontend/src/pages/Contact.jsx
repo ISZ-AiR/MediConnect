@@ -25,9 +25,9 @@ const Contact = () => {
     setMessage("");
   };
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-light d-flex flex-column">
       <Navbar />
-      <div className="container py-5">
+      <div className="container py-5 flex-grow-1">
         <h1 className="display-6">Contact Us</h1>
         <p className="text-muted">We'd love to hear from you.</p>
 
@@ -88,7 +88,9 @@ const Contact = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 };
