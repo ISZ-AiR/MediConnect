@@ -6,6 +6,7 @@ from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from core.database import get_db
 
 if TYPE_CHECKING:
     from models import User
@@ -73,16 +74,9 @@ def require_role(allowed_roles: list):
     return role_checker
 
 
-async def _get_db_session():
-    """Helper to get database session for dependency injection"""
-    from core.database import get_db
-    async for session in get_db():
-        return session
-
-
 async def get_current_user(
     token_data: dict = Depends(verify_token),
-    db: AsyncSession = Depends(_get_db_session)
+    db: AsyncSession = Depends(get_db)
 ) -> "User":
     """
     Get the full user object from the database based on the token.
@@ -115,7 +109,7 @@ def require_role_with_user(allowed_roles: list):
     """
     async def role_and_user_checker(
         token_data: dict = Depends(verify_token),
-        db: AsyncSession = Depends(_get_db_session)
+        db: AsyncSession = Depends(get_db)
     ) -> "User":
         # Check role from token first (no DB query needed)
         if token_data["role"] not in allowed_roles:
