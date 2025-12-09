@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
 import { apiRequest } from "../services/apiClient";
+import { useAuth } from "../context/AuthContext";
 
 const PatientsList = () => {
   const [items, setItems] = useState([]);
@@ -14,6 +15,8 @@ const PatientsList = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const rolePrefix = user?.role ? `/${user.role}` : "";
 
   useEffect(() => {
     const loadData = async () => {
@@ -76,14 +79,16 @@ const PatientsList = () => {
                 </div>
 
                 {/* --- Create Patient Button (full width, icon + ) --- */}
-                <div className="mb-4">
-                  <button
-                    className="btn btn-primary btn-lg w-100"
-                    onClick={() => navigate("/receptionist/patients/create")}
-                  >
-                    <i className="bi bi-plus-lg me-2"></i>Create Patient
-                  </button>
-                </div>
+                {["receptionist", "admin"].includes(user?.role) && (
+                  <div className="mb-4">
+                    <button
+                      className="btn btn-primary btn-lg w-100"
+                      onClick={() => navigate("/receptionist/patients/create")}
+                    >
+                      <i className="bi bi-plus-lg me-2"></i>Create Patient
+                    </button>
+                  </div>
+                )}
 
                 {/* --- Filters --- */}
                 <div className="mb-4">
@@ -138,17 +143,19 @@ const PatientsList = () => {
                             <td>{p.birth_date}</td>
                             <td>
                               <Link
-                                to={`/receptionist/patients/${p.patient_id}`}
+                                to={`${rolePrefix}/patients/${p.patient_id}`}
                                 className="btn btn-sm btn-outline-primary me-2"
                               >
                                 View
                               </Link>
-                              <Link
-                                to={`/receptionist/patients/edit/${p.patient_id}`}
-                                className="btn btn-sm btn-outline-secondary"
-                              >
-                                Edit
-                              </Link>
+                              {["receptionist", "admin"].includes(user?.role) && (
+                                <Link
+                                  to={`${rolePrefix}/patients/edit/${p.patient_id}`}
+                                  className="btn btn-sm btn-outline-secondary"
+                                >
+                                  Edit
+                                </Link>
+                              )}
                               {/* DELETE — removed */}
                             </td>
                           </tr>

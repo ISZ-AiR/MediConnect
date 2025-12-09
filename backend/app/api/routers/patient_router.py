@@ -68,7 +68,7 @@ async def patient(new_patient: PatientCreate, db: Session = Depends(get_db)):
 async def get_all_patients(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(
-        require_role_with_user(["receptionist", "admin", "doctor"]))
+        require_role_with_user(["receptionist", "admin", "doctor", "nurse"]))
 ):
     result = await db.execute(select(Patient))
     patients = result.scalars().all()
@@ -99,7 +99,7 @@ async def get_patient(
     patient_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(
-        require_role_with_user(["receptionist", "admin", "doctor"]))
+        require_role_with_user(["receptionist", "admin", "doctor", "nurse"]))
 ):
     result = await db.execute(select(Patient).where(Patient.patient_id == patient_id))
     patient = result.scalar_one_or_none()

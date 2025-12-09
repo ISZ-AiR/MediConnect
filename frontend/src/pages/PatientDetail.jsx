@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { apiRequest } from "../services/apiClient";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const PatientDetail = () => {
   const { id } = useParams();
@@ -12,6 +13,11 @@ const PatientDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Zalogowany użytkownik
+  const { user: authUser } = useAuth();
+  const rolePrefix = authUser?.role ? `/${authUser.role}` : "";
+
+  // Ładowanie danych pacjenta + powiązanego usera
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -38,9 +44,10 @@ const PatientDetail = () => {
     if (id) loadData();
   }, [id]);
 
-  const getUser = (user_id) => {
-    return users.find((u) => u.user_id === user_id);
-  };
+  // Dane użytkownika powiązanego z pacjentem
+  const patientUser = users.find((u) => u.user_id === patient?.user_id);
+
+  // ----- UI STATES -----
 
   if (loading)
     return (
@@ -68,7 +75,7 @@ const PatientDetail = () => {
       </div>
     );
 
-  const user = getUser(patient.user_id);
+  // ----- MAIN VIEW -----
 
   return (
     <div className="min-vh-100 bg-light">
@@ -85,7 +92,7 @@ const PatientDetail = () => {
                 ></i>
 
                 <h2 className="fw-bold mt-3 mb-2">Patient Details</h2>
-                <p className="text-muted">Review Patient Details</p>
+                <p className="text-muted">Review Patient Information</p>
 
                 <div className="text-start mt-4">
                   <h5 className="mb-3">
@@ -94,16 +101,16 @@ const PatientDetail = () => {
                   </h5>
 
                   <div className="mb-3">
-                    <strong>First Name:</strong> {user?.first_name}
+                    <strong>First Name:</strong> {patientUser?.first_name}
                   </div>
                   <div className="mb-3">
-                    <strong>Last Name:</strong> {user?.last_name}
+                    <strong>Last Name:</strong> {patientUser?.last_name}
                   </div>
                   <div className="mb-3">
-                    <strong>Email:</strong> {user?.email}
+                    <strong>Email:</strong> {patientUser?.email}
                   </div>
                   <div className="mb-3">
-                    <strong>Phone:</strong> {user?.phone}
+                    <strong>Phone:</strong> {patientUser?.phone}
                   </div>
                   <div className="mb-3">
                     <strong>PESEL:</strong> {patient.pesel}
@@ -116,21 +123,23 @@ const PatientDetail = () => {
                 <div className="mt-4 d-grid gap-2">
                   <button
                     className="btn btn-outline-secondary btn-lg"
-                    onClick={() => navigate("/receptionist/patients")}
+                    onClick={() => navigate(`${rolePrefix}/patients`)}
                   >
                     Back
                   </button>
 
-                  <button
-                    className="btn btn-primary btn-lg"
-                    onClick={() =>
-                      navigate(
-                        `/receptionist/patients/edit/${patient.patient_id}`
-                      )
-                    }
-                  >
-                    Edit Patient
-                  </button>
+                  {["receptionist", "admin"].includes(authUser?.role) && (
+                    <button
+                      className="btn btn-primary btn-lg"
+                      onClick={() =>
+                        navigate(
+                          `${rolePrefix}/patients/edit/${patient.patient_id}`
+                        )
+                      }
+                    >
+                      Edit Patient
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -14,7 +14,8 @@ export const VisitDetailsPanel = ({
   onEdit,
   onAdd,
   onDelete,
-  isDoctor = false
+  isDoctor = false,
+  isNurse = false
 }) => {
   if (!visit) return <div className="text-center py-5">Visit not found</div>;
 
@@ -129,7 +130,7 @@ const sectionItem = (title, items, type) => {
         {/* FOOTER */}
         <div className="mt-4 d-grid gap-2">
           {onBack && <button className="btn btn-outline-secondary btn-lg" onClick={onBack}>Back</button>}
-          {onEdit && <button className={`btn btn-${color} btn-lg`} onClick={() => onEdit("visit")}>Edit Visit</button>}
+          {onEdit && <button className={`btn btn-${color} btn-lg`} onClick={() => onEdit("visit")} disabled={isNurse}>Edit Visit</button>}
         </div>
       </div>
     </div>

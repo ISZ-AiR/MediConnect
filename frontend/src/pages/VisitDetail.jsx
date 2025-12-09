@@ -11,7 +11,8 @@ const VisitDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isDoctor = user?.role === "doctor";
-  const rolePrefix = isDoctor ? "doctor" : "receptionist";
+  const isNurse = user?.role === "nurse";
+  const rolePrefix = isDoctor ? "doctor" : isNurse ? "nurse" : "receptionist";
 
   const {
     visit,
@@ -100,6 +101,7 @@ const VisitDetail = () => {
               getDoctorName={getDoctorNameFromReservation}
               color="warning"
               isDoctor={isDoctor}
+              isNurse={isNurse}
 
               onBack={() => navigate(`/${rolePrefix}/visits`)}
 

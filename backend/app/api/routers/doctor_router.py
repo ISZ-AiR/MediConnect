@@ -64,7 +64,7 @@ async def create_doctor(doctor: DoctorCreate, db: AsyncSession = Depends(get_db)
 async def get_all_doctors(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(require_role_with_user(
-            ["admin", "manager", "receptionist", "patient", "doctor"]))
+            ["admin", "manager", "receptionist", "patient", "doctor", "nurse"]))
 ):
     # Pobierz lekarzy wraz z powiązanym userem
     result = await db.execute(

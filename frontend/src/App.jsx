@@ -735,6 +735,40 @@ function App() {
             />
 
             <Route
+              path="/nurse/visits"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <VisitsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nurse/visits/:id"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <VisitDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/nurse/patients"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <PatientsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nurse/patients/:id"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <PatientDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/receptionist/dashboard"
               element={
                 <ProtectedRoute allowedRoles={["receptionist"]}>

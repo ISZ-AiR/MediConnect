@@ -17,27 +17,45 @@ const NurseDashboard = () => {
         </div>
 
         <div className="row g-4">
-          <div className="col-md-4">
-            <Link to="/admin/visits" className="btn btn-outline-primary w-100">
-              Assigned Visits
-            </Link>
+          {/* Assigned Visits */}
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body text-center p-4">
+                <i className="bi bi-clipboard2-pulse text-primary fs-1 mb-3"></i>
+                <h5 className="card-title">Assigned Visits</h5>
+                <p className="card-text text-muted small">
+                  View and complete your assigned patient visits
+                </p>
+                <Link
+                  to="/nurse/visits"
+                  className="btn btn-primary btn-sm"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
           </div>
-          <div className="col-md-4">
-            <Link
-              to="/admin/schedules"
-              className="btn btn-outline-warning w-100"
-            >
-              Schedules
-            </Link>
+
+
+          {/* Patient List */}
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body text-center p-4">
+                <i className="bi bi-people text-success fs-1 mb-3"></i>
+                <h5 className="card-title">Patient List</h5>
+                <p className="card-text text-muted small">
+                  Browse assigned or nearby patient records
+                </p>
+                <Link
+                  to="/nurse/patients"
+                  className="btn btn-success btn-sm"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
           </div>
-          <div className="col-md-4">
-            <Link
-              to="/admin/patients"
-              className="btn btn-outline-success w-100"
-            >
-              Patient List
-            </Link>
-          </div>
+
         </div>
       </div>
     </div>
