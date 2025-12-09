@@ -44,11 +44,26 @@ async def create_nurse(nurse: NurseCreate, db: AsyncSession = Depends(get_db), c
     return db_nurse
 
 
+@router.get("/me", response_model=NurseModel)
+async def get_my_nurse(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["nurse"]))
+):
+    """
+    Get logged-in nurse info
+    """
+    result = await db.execute(select(Nurse).where(Nurse.user_id == current_user.user_id))
+    nurse = result.scalar_one_or_none()
+    if not nurse:
+        raise HTTPException(status_code=404, detail="Nurse not found")
+    return nurse
+
+
 @router.get("/", response_model=list[NurseModel])
 async def get_all_nurses(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role_with_user(
-        ["admin", "receptionist", "patient", "doctor"]))
+        ["admin", "receptionist", "patient", "doctor", "nurse"]))
 ):
     result = await db.execute(select(Nurse))
     nurses = result.scalars().all()

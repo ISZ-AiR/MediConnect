@@ -62,7 +62,7 @@ async def get_all_visits(db: AsyncSession = Depends(get_db)):
 
 
 async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
-                               visit_id: int | None = None):
+                                nurse_id: int | None = None, visit_id: int | None = None):
     doctor_user = aliased(User)
     nurse_user = aliased(User)
     patient_user = aliased(User)
@@ -89,6 +89,9 @@ async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
 
     if doctor_id is not None:
         stmt = stmt.where(Doctor.doctor_id == doctor_id)
+
+    if nurse_id is not None:
+        stmt = stmt.where(Nurse.nurse_id == nurse_id)
 
     if visit_id is not None:
         stmt = stmt.where(Visit.visit_id == visit_id)
@@ -127,9 +130,11 @@ async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
     else:
         return output
 
+
 @router.get("/detailed/{visit_id}", description="Get a specific visit with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist", "doctor"]))])
 async def get_all_detailed_visits(visit_id: int, db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db, doctor_id=None, visit_id=visit_id)
+
 
 @router.get("/detailed", description="Get all visits with full details", dependencies=[Depends(require_role_with_user(["admin", "receptionist"]))])
 async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):
@@ -139,6 +144,14 @@ async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):
 @router.get("/detailed/doctor/{doctor_id}", description="Get all visits with full details - per doctor", dependencies=[Depends(require_role_with_user(["doctor"]))])
 async def get_doctor_detailed_visits(doctor_id: int, db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db, doctor_id=doctor_id, visit_id=None)
+
+@router.get(
+    "/detailed/nurse/{nurse_id}",
+    description="Get all visits with full details - per nurse",
+    dependencies=[Depends(require_role_with_user(["nurse"]))]
+)
+async def get_nurse_detailed_visits(nurse_id: int, db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_visits(db, nurse_id=nurse_id)
 
 
 @router.get("/me", response_model=List[VisitModel])

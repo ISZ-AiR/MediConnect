@@ -15,7 +15,10 @@ const VisitsList = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const rolePrefix = user?.role === "doctor" ? "/doctor" : "/receptionist";
+  const rolePrefix =
+  user?.role === "doctor" ? "/doctor" :
+  user?.role === "nurse" ? "/nurse" :
+  "/receptionist";
 
   useEffect(() => {
     const loadData = async () => {
@@ -27,11 +30,11 @@ const VisitsList = () => {
         if (user?.role === "doctor") {
           const myDoctorRes = await apiRequest("/doctor/me");
           const myDoctor = myDoctorRes.data;
-          if (!myDoctor) {
-            setVisits([]);
-            return;
-          }
           visitsRes = await apiRequest(`/visits/detailed/doctor/${myDoctor.doctor_id}`);
+        } else if (user?.role === "nurse") {
+          const myNurseRes = await apiRequest("/nurse/me");
+          const myNurse = myNurseRes.data;
+          visitsRes = await apiRequest(`/visits/detailed/nurse/${myNurse.nurse_id}`);
         } else {
           visitsRes = await apiRequest("/visits/detailed");
         }
@@ -121,19 +124,21 @@ const VisitsList = () => {
                 ))}
               </select>
             </div>
-            <div className="flex-grow-1" style={{ minWidth: "200px" }}>
-              <label className="fw-bold">Nurse</label>
-              <select
-                className="form-select"
-                value={filters.nurse}
-                onChange={(e) => { setFilters({ ...filters, nurse: e.target.value }); setPage(1); }}
-              >
-                <option value="">All</option>
-                {nurses.map(n => (
-                  <option key={n.nurse_id} value={n.user_id}>{n.first_name} {n.last_name}</option>
-                ))}
-              </select>
-            </div>
+            {user?.role !== "nurse" && (
+              <div className="flex-grow-1" style={{ minWidth: "200px" }}>
+                <label className="fw-bold">Nurse</label>
+                <select
+                  className="form-select"
+                  value={filters.nurse}
+                  onChange={(e) => { setFilters({ ...filters, nurse: e.target.value }); setPage(1); }}
+                >
+                  <option value="">All</option>
+                  {nurses.map(n => (
+                    <option key={n.nurse_id} value={n.user_id}>{n.first_name} {n.last_name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="flex-grow-1" style={{ minWidth: "200px" }}>
               <label className="fw-bold">Start Date</label>
               <input
@@ -171,23 +176,49 @@ const VisitsList = () => {
               </thead>
               <tbody>
                 {paginatedVisits.map((v, idx) => (
-                  <tr key={v.visit_id}>
-                    <td>{(page - 1) * pageSize + idx + 1}</td>
-                    <td>{v.visit_id}</td>
-                    <td>{v.reservation.reservation_id}</td>
-                    <td>{v.visit_date}</td>
-                    <td>{v.nurse.first_name} {v.nurse.last_name}</td>
-                    <td>{v.doctor.first_name} {v.doctor.last_name}</td>
-                    <td>{v.patient.first_name} {v.patient.last_name}</td>
-                    <td>{v.visit_note || ""}</td>
-                    <td>
-                      <Link to={`${rolePrefix}/visits/${v.visit_id}`} className="btn btn-sm btn-outline-primary me-2">View</Link>
-                      <Link to={`${rolePrefix}/visits/edit/${v.visit_id}`} className="btn btn-sm btn-outline-secondary me-2">Edit</Link>
-                      {user?.role !== "doctor" && (
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(v.visit_id)}>Delete</button>
-                      )}
-                    </td>
-                  </tr>
+                    <tr key={v.visit_id}>
+                      <td>{(page - 1) * pageSize + idx + 1}</td>
+                      <td>{v.visit_id}</td>
+                      <td>{v.reservation.reservation_id}</td>
+                      <td>{v.visit_date}</td>
+                      <td>{v.nurse.first_name} {v.nurse.last_name}</td>
+                      <td>{v.doctor.first_name} {v.doctor.last_name}</td>
+                      <td>{v.patient.first_name} {v.patient.last_name}</td>
+                      <td>{v.visit_note || ""}</td>
+                      <td>
+                        {/* View dostępny dla wszystkich */}
+                        <Link
+                            to={`${rolePrefix}/visits/${v.visit_id}`}
+                            className="btn btn-sm btn-outline-primary me-2"
+                        >
+                          View
+                        </Link>
+
+                        {/* Edit: aktywny dla doctor, receptionist i admin */}
+                        {["doctor", "receptionist", "admin"].includes(user?.role) ? (
+                            <Link
+                                to={`${rolePrefix}/visits/edit/${v.visit_id}`}
+                                className="btn btn-sm btn-outline-secondary me-2"
+                            >
+                              Edit
+                            </Link>
+                        ) : (
+                            <button className="btn btn-sm btn-outline-secondary me-2" disabled>
+                              Edit
+                            </button>
+                        )}
+
+                        {/* Delete: tylko dla receptionist i admin */}
+                        {["receptionist", "admin"].includes(user?.role) && (
+                            <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDelete(v.visit_id)}
+                            >
+                              Delete
+                            </button>
+                        )}
+                      </td>
+                    </tr>
                 ))}
               </tbody>
             </table>
@@ -195,16 +226,18 @@ const VisitsList = () => {
             {/* Paginacja */}
             <div className="d-flex justify-content-between mt-3">
               <button
-                className="btn btn-outline-secondary"
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >Previous</button>
+                  className="btn btn-outline-secondary"
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+              >Previous
+              </button>
               <span>Page {page} of {totalPages}</span>
               <button
-                className="btn btn-outline-secondary"
-                disabled={page >= totalPages}
-                onClick={() => setPage(page + 1)}
-              >Next</button>
+                  className="btn btn-outline-secondary"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(page + 1)}
+              >Next
+              </button>
             </div>
           </div>
 

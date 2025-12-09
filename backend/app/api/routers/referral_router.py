@@ -3,8 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from core.database import get_db
 from models.referral_model import Referral
+from models.patient_model import Patient
+from models.doctor_model import Doctor
 from schemas.referral_schema import ReferralCreate, ReferralModel, ReferralUpdate
 from datetime import date
+from sqlalchemy.orm import joinedload
 
 router = APIRouter(
     prefix="/referrals",
@@ -55,8 +58,25 @@ async def get_all_referrals(db: AsyncSession = Depends(get_db)):
     """
     Retrieve all referrals from the database.
     """
-    result = await db.execute(select(Referral))
+    result = await db.execute(
+        select(Referral)
+        .options(
+            joinedload(Referral.patient)
+            .joinedload(Patient.user),  # patient.user
+            joinedload(Referral.doctor)
+            .joinedload(Doctor.user)    # doctor.user
+        )
+    )
     referrals = result.scalars().all()
+
+    for r in referrals:
+        r.doctor_name = (f"{r.doctor.user.first_name} "
+                         f"{r.doctor.user.last_name}")
+        r.patient_name = (f"{r.patient.user.first_name} "
+                          f"{r.patient.user.last_name}")
+        r.patient_pesel = f"{r.patient.pesel}"
+        r.doctor_user_id = r.doctor.user.user_id
+
     return referrals
 
 @router.get("/visit/{visit_id}", response_model=ReferralModel)
@@ -75,16 +95,31 @@ async def get_referral_by_visit(visit_id: int, db: AsyncSession = Depends(get_db
     return referral
 
 
-
 @router.get("/{referral_id}", response_model=ReferralModel)
 async def get_referral(referral_id: int, db: AsyncSession = Depends(get_db)):
     """
     Retrieve a specific referral by its ID.
     """
-    result = await db.execute(select(Referral).where(Referral.referral_id == referral_id))
+    result = await db.execute(
+        select(Referral)
+        .where(Referral.referral_id == referral_id)
+        .options(
+            joinedload(Referral.patient)
+            .joinedload(Patient.user),  # patient.user
+            joinedload(Referral.doctor)
+            .joinedload(Doctor.user)  # doctor.user
+        )
+    )
     referral = result.scalars().first()
+
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
+
+    referral.doctor_name = f"{referral.doctor.user.first_name} {referral.doctor.user.last_name}"
+    referral.patient_name = f"{referral.patient.user.first_name} {referral.patient.user.last_name}"
+    referral.patient_pesel = referral.patient.pesel
+    referral.doctor_user_id = referral.doctor.user.user_id
+
     return referral
 
 

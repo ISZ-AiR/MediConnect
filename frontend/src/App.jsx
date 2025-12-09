@@ -31,6 +31,7 @@ import ReservationsList from "./pages/ReservationsList";
 import VisitsList from "./pages/VisitsList";
 import PrescriptionsList from "./pages/PrescriptionsList";
 import ReferralsList from "./pages/ReferralsList";
+//import DiagnosisList from "./pages/DiagnosisList";
 import ExaminationsList from "./pages/ExaminationsList";
 import SchedulesList from "./pages/SchedulesList";
 import ManagersList from "./pages/ManagersList";
@@ -51,6 +52,8 @@ import PrescriptionDetail from "./pages/PrescriptionDetail";
 import PrescriptionForm from "./pages/PrescriptionForm";
 import ReferralDetail from "./pages/ReferralDetail";
 import ReferralForm from "./pages/ReferralForm";
+import DiagnosisForm from "./pages/DiagnosisForm.jsx";
+//import DiagnosisDetail from "./pages/DiagnosisDetail.jsx";
 import ManagerDetail from "./pages/ManagerDetail";
 import ManagerForm from "./pages/ManagerForm";
 import DoctorWorkload from "./pages/reports/DoctorWorkload";
@@ -146,7 +149,14 @@ function App() {
               }
             />
 
-            <Route path="/book" element={<PatientBooking />} />
+            <Route
+              path="/book"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientBooking />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin-only Staff Registration */}
             <Route
@@ -185,12 +195,28 @@ function App() {
               }
             />
 
-            <Route path="/doctors" element={<DoctorsList />} />
+            <Route
+              path="/doctors"
+              element={
+                <ProtectedRoute
+                  allowedRoles={[
+                    "admin",
+                    "doctor",
+                    "nurse",
+                    "manager",
+                    "receptionist",
+                    "patient",
+                  ]}
+                >
+                  <DoctorsList />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/patients"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "doctor", "nurse"]}>
                   <PatientsList />
                 </ProtectedRoute>
               }
@@ -222,8 +248,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/appointments/book" element={<PatientBooking />} />
-            <Route path="/book" element={<PatientBooking />} />
+            <Route
+              path="/appointments/book"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientBooking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/book"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PatientBooking />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
@@ -570,6 +610,14 @@ function App() {
               }
             />
             <Route
+              path="/doctor/prescriptions/edit/:prescription_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <PrescriptionForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/doctor/referrals"
               element={
                 <ProtectedRoute allowedRoles={["doctor", "doctor"]}>
@@ -607,6 +655,40 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
                   <ReferralForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/referrals/edit/:referral_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <ReferralForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/diagnosis/add/:visit_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <DiagnosisForm mode="add" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/diagnosis/edit/:visit_id/:diagnosis_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <DiagnosisForm mode="edit" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor/diagnosis/edit/:diagnosis_id"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <DiagnosisForm mode="edit" />
                 </ProtectedRoute>
               }
             />
@@ -648,6 +730,40 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["nurse"]}>
                   <NurseDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/nurse/visits"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <VisitsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nurse/visits/:id"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <VisitDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/nurse/patients"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <PatientsList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nurse/patients/:id"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <PatientDetail />
                 </ProtectedRoute>
               }
             />

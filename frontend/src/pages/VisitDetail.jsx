@@ -4,11 +4,15 @@ import Navbar from "../components/Navbar";
 import VisitDetailsPanel from "../components/VisitDetailsPanel";
 import { useVisitDetails } from "../hooks/useVisitDetails";
 import { useAuth } from "../context/AuthContext";
+import { resourceService } from "../services/resourceService";
 
 const VisitDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isDoctor = user?.role === "doctor";
+  const isNurse = user?.role === "nurse";
+  const rolePrefix = isDoctor ? "doctor" : isNurse ? "nurse" : "receptionist";
 
   const {
     visit,
@@ -17,9 +21,40 @@ const VisitDetail = () => {
     diagnoses,
     loading,
     error,
+    getPatientNameFromReservation,
+    getPatientPESELFromReservation,
     getNurseName,
-    getDoctorNameFromReservation,
-  } = useVisitDetails(id);
+    getDoctorNameFromReservation
+  } = useVisitDetails(id, user?.role);
+
+  const prescriptionsData = isDoctor ? prescriptions : [];
+  const referralsData = isDoctor ? referrals : [];
+  const diagnosesData = isDoctor ? diagnoses : [];
+
+  const handleDelete = async (type, itemId) => {
+    if (!isDoctor) return;
+
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+      switch(type) {
+        case "prescriptions":
+          await resourceService.deletePrescription(itemId);
+          break;
+        case "referrals":
+          await resourceService.deleteReferral(itemId);
+          break;
+        case "diagnoses":
+          await resourceService.deleteDiagnosis(itemId);
+          break;
+        default:
+          console.warn("Unknown type for deletion:", type);
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete item. Try again.");
+    }
+  };
 
   if (loading)
     return (
@@ -49,53 +84,53 @@ const VisitDetail = () => {
       </div>
     );
 
-  const rolePrefix = user?.role === "doctor" ? "/doctor" : "/receptionist";
-
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
-
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-md-9 col-lg-8">
-
             <VisitDetailsPanel
               visit={visit}
-              prescriptions={prescriptions}
-              referrals={referrals}
-              diagnoses={diagnoses}
+              prescriptions={prescriptionsData}
+              referrals={referralsData}
+              diagnoses={diagnosesData}
+              getPatientName={getPatientNameFromReservation}
+              getPatientPESEL={getPatientPESELFromReservation}
               getNurseName={getNurseName}
               getDoctorName={getDoctorNameFromReservation}
               color="warning"
-              isDoctor={user?.role === "doctor"}
+              isDoctor={isDoctor}
+              isNurse={isNurse}
 
-              onBack={() => navigate(`${rolePrefix}/visits`)}
+              onBack={() => navigate(`/${rolePrefix}/visits`)}
 
-                onEdit={(section, itemId) => {
+              onEdit={(section, itemId) => {
+                if (section === "prescriptions" || section === "referrals" || section === "diagnoses") {
+                  if (!isDoctor) return;
                   if (section === "prescriptions")
-                    return navigate(`${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`);
-
+                    return navigate(`/${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`);
                   if (section === "referrals")
-                    return navigate(`${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`);
-
+                    return navigate(`/${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`);
                   if (section === "diagnoses")
-                    return navigate(`${rolePrefix}/diagnoses/edit/${visit.visit_id}/${itemId}`);
-
-                  return navigate(`${rolePrefix}/visits/edit/${visit.visit_id}`);
-                }}
+                    return navigate(`/${rolePrefix}/diagnosis/edit/${visit.visit_id}/${itemId}`);
+                } else {
+                  return navigate(`/${rolePrefix}/visits/edit/${visit.visit_id}`);
+                }
+              }}
 
               onAdd={(section) => {
+                if (!isDoctor) return;
                 if (section === "prescriptions")
-                  return navigate(`${rolePrefix}/prescriptions/add/${visit.visit_id}`);
-
+                  return navigate(`/${rolePrefix}/prescriptions/add/${visit.visit_id}`);
                 if (section === "referrals")
-                  return navigate(`${rolePrefix}/referrals/add/${visit.visit_id}`);
-
+                  return navigate(`/${rolePrefix}/referrals/add/${visit.visit_id}`);
                 if (section === "diagnoses")
-                  return navigate(`${rolePrefix}/diagnoses/add/${visit.visit_id}`);
+                  return navigate(`/${rolePrefix}/diagnosis/add/${visit.visit_id}`);
               }}
-            />
 
+              onDelete={handleDelete}
+            />
           </div>
         </div>
       </div>

@@ -92,6 +92,10 @@ export const resourceService = {
     const res = await apiRequest("/referrals/", { method: "GET" });
     return unwrap(res);
   },
+  async listDiseases() {
+    const res = await apiRequest("/disease/", { method: "GET" });
+    return unwrap(res);
+  },
   async listExaminations() {
     const res = await apiRequest("/examinations/", { method: "GET" });
     return unwrap(res);
@@ -243,6 +247,41 @@ export const resourceService = {
     const res = await apiRequest(`/referrals/${id}`, { method: "DELETE" });
     return res;
   },
+
+  async getDisease(id) {
+    const res = await apiRequest(`/disease/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+
+  async getDiagnosis(id) {
+    const res = await apiRequest(`/diagnosis/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
+  },
+
+  async createDiagnosis(visit_id, payload) {
+    const res = await apiRequest(`/diagnosis/`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...payload,
+        visit_id: Number(visit_id)
+      }),
+    });
+    return res && res.success ? res.data : res;
+  },
+
+  async updateDiagnosis(id, payload) {
+    const res = await apiRequest(`/diagnosis/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    return res && res.success ? res.data : res;
+  },
+
+  async deleteDiagnosis(id) {
+    const res = await apiRequest(`/diagnosis/${id}`, { method: "DELETE" });
+    return res;
+  },
+
   async getManager(id) {
     const res = await apiRequest(`/managers/${id}`, { method: "GET" });
     return res && res.success ? res.data : res;

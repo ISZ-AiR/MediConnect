@@ -2,16 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
+import { useAuth } from "../context/AuthContext";
 
 const ReferralDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const rolePrefix = user?.role === "doctor" ? "doctor" : "admin";
+
+
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadReferral = async () => {
       try {
         setLoading(true);
         const data = await resourceService.getReferral(id);
@@ -23,74 +28,85 @@ const ReferralDetail = () => {
         setLoading(false);
       }
     };
-    if (id) load();
+    if (id) loadReferral();
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!window.confirm("Delete this referral?")) return;
-    try {
-      await resourceService.deleteReferral(id);
-      navigate("/admin/referrals");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete referral");
-    }
+  const handleEdit = () => {
+    navigate(`/${rolePrefix}/referrals/edit/${item.referral_id}`);
   };
+
+  const handleBack = () => {
+    navigate(`/${rolePrefix}/referrals`);
+  };
+
+  if (loading)
+    return (
+      <div className="min-vh-100 bg-light">
+        <Navbar />
+        <div className="container py-5 text-center">
+          <div className="spinner-border text-warning" role="status" />
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="min-vh-100 bg-light">
+        <Navbar />
+        <div className="container py-5">
+          <div className="alert alert-danger">{error}</div>
+        </div>
+      </div>
+    );
+
+  if (!item)
+    return (
+      <div className="min-vh-100 bg-light">
+        <Navbar />
+        <div className="container py-5 text-center">Referral not found</div>
+      </div>
+    );
 
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
-      <div className="container py-5">
-        <h2 className="mb-4">Referral Details</h2>
-        {loading && <div className="spinner-border" role="status" />}
-        {error && <div className="alert alert-danger">{error}</div>}
-        {!loading && !error && item && (
-          <div className="card">
-            <div className="card-body">
-              <p>
-                <strong>Referral ID:</strong> {item.referral_id}
-              </p>
-              <p>
-                <strong>Visit ID:</strong> {item.visit_id}
-              </p>
-              <p>
-                <strong>Patient ID:</strong> {item.patient_id}
-              </p>
-              <p>
-                <strong>Examination ID:</strong> {item.examination_id}
-              </p>
-              <p>
-                <strong>Doctor ID:</strong> {item.doctor_id}
-              </p>
-              <p>
-                <strong>Referral Date:</strong> {item.referral_date}
-              </p>
-              <p>
-                <strong>Notes:</strong> {item.notes}
-              </p>
+      <div className="container py-5 d-flex justify-content-center">
+        <div className="bg-white p-4 rounded shadow-sm" style={{ maxWidth: "600px", width: "100%" }}>
 
-              <div className="mt-3">
-                <button
-                  className="btn btn-secondary me-2"
-                  onClick={() =>
-                    navigate(`/admin/referrals/edit/${item.referral_id}`)
-                  }
-                >
-                  Edit
-                </button>
-                <button className="btn btn-danger" onClick={handleDelete}>
-                  Delete
-                </button>
-                <button
-                  className="btn btn-link ms-2"
-                  onClick={() => navigate("/admin/referrals")}
-                >
-                  Back to list
-                </button>
-              </div>
-            </div>
+          {/* Ikonka i nagłówek */}
+          <div className="text-center mb-4">
+            <i className="bi bi-card-checklist text-warning" style={{ fontSize: "3rem" }}></i>
+            <h2 className="fw-bold mt-3">Referral Details</h2>
           </div>
-        )}
+
+          {/* Sekcja: wizyta i pacjent */}
+          <div className="mb-3 pb-3 border-bottom">
+            <p><span className="fw-bold">Referral ID:</span> {item.referral_id}</p>
+            <p><span className="fw-bold">Visit ID:</span> {item.visit_id}</p>
+            <p><span className="fw-bold">Patient:</span> {item.patient_name || item.patient_id}</p>
+            <p><span className="fw-bold">PESEL:</span> {item.patient_pesel || "-"}</p>
+            <p><span className="fw-bold">Doctor:</span> {item.doctor_name || item.doctor_id}</p>
+            <p><span className="fw-bold">Referral Date:</span> {item.referral_date}</p>
+          </div>
+
+          {/* Sekcja: szczegóły skierowania */}
+          <div className="mb-4">
+            <p><span className="fw-bold">Examination:</span> {item.examination_name || item.examination_id}</p>
+            <p><span className="fw-bold">Notes:</span> {item.notes || "-"}</p>
+          </div>
+
+          {/* Przyciski */}
+          <div className="d-grid gap-2">
+            {(item.doctor_user_id === user.user_id) && (
+            <button className="btn btn-warning btn-lg" onClick={handleEdit}>
+              Edit Referral
+            </button>
+                )}
+            <button className="btn btn-outline-secondary btn-lg" onClick={handleBack}>
+              Back to List
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
