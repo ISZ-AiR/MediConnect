@@ -62,6 +62,7 @@ import Examinations from "./pages/reports/Examinations";
 import DoctorAvailability from "./pages/reports/DoctorAvailability.jsx";
 import PatientRecordsList from "./pages/PatientRecordsList.jsx";
 import PatientRecordsDetail from "./pages/PatientRecordsDetail.jsx";
+import VisitsCalendar from "./pages/VisitsCalendar.jsx";
 
 function App() {
   return (
@@ -532,6 +533,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
                   <DoctorDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/visits/calendar"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <VisitsCalendar />
                 </ProtectedRoute>
               }
             />

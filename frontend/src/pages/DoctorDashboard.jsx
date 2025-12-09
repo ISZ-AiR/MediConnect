@@ -28,7 +28,7 @@ const DoctorDashboard = () => {
         <div className="row g-4 mb-4">
 
           {/* Appointments */}
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-calendar-week text-primary fs-1 mb-3"></i>
@@ -41,8 +41,22 @@ const DoctorDashboard = () => {
             </div>
           </div>
 
+          {/* My Calendar */}
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body text-center p-4">
+                <i className="bi bi-calendar-check text-warning fs-1 mb-3"></i>
+                <h5 className="card-title">My Calendar</h5>
+                <p className="text-muted small">View your visits in calendar format</p>
+                <Link to="/doctor/visits/calendar" className="btn btn-warning btn-sm">
+                  Open
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {/* Prescriptions */}
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-prescription2 text-success fs-1 mb-3"></i>
@@ -56,7 +70,7 @@ const DoctorDashboard = () => {
           </div>
 
           {/* Referrals */}
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-file-earmark-medical text-info fs-1 mb-3"></i>
