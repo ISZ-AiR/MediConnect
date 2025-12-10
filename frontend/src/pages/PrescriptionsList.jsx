@@ -8,7 +8,14 @@ const PAGE_SIZE = 10;
 
 const PrescriptionsList = () => {
   const { user } = useAuth();
-  const rolePrefix = user?.role === "doctor" ? "doctor" : "admin";
+
+  // Określamy prefix w URL i zachowanie przycisków
+  const rolePrefix =
+    user?.role === "doctor"
+      ? "doctor"
+      : user?.role === "patient"
+      ? "patient"
+      : "admin";
 
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +33,16 @@ const PrescriptionsList = () => {
   const fetchPrescriptions = async () => {
     setLoading(true);
     try {
-      const data = await resourceService.listPrescriptions();
+      let data = [];
+
+      if (user.role === "patient") {
+        // Endpoint dla pacjenta, zwraca tylko jego recepty
+        data = await resourceService.listPrescriptionsByPatient();
+      } else {
+        // Lekarz i admin
+        data = await resourceService.listPrescriptions();
+      }
+
       setPrescriptions(data);
     } catch (err) {
       console.error(err);
@@ -40,7 +56,7 @@ const PrescriptionsList = () => {
     if (!window.confirm("Are you sure you want to delete this prescription?")) return;
     try {
       await resourceService.deletePrescription(id);
-      setPrescriptions(prev => prev.filter(p => p.prescription_id !== id));
+      setPrescriptions((prev) => prev.filter((p) => p.prescription_id !== id));
     } catch (err) {
       console.error(err);
       alert("Failed to delete prescription");
@@ -51,19 +67,22 @@ const PrescriptionsList = () => {
     fetchPrescriptions();
   }, []);
 
-
-  const filteredPrescriptions = prescriptions.filter(p => {
+  const filteredPrescriptions = prescriptions.filter((p) => {
     const patientMatch = p.patient_name?.toLowerCase().includes(filterPatient.toLowerCase());
     const peselMatch = p.patient_pesel?.includes(filterPESEL);
     const medicationMatch = p.medication?.toLowerCase().includes(filterMedication.toLowerCase());
     const dateMatch = filterDate ? p.visit_date === filterDate : true;
-    const mineMatch = filterMine ? p.doctor_user_id === user.user_id : true;
+    const mineMatch =
+      filterMine && user.role === "doctor" ? p.doctor_user_id === user.user_id : true;
 
     return patientMatch && peselMatch && medicationMatch && dateMatch && mineMatch;
   });
 
   const totalPages = Math.ceil(filteredPrescriptions.length / PAGE_SIZE);
-  const paginated = filteredPrescriptions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paginated = filteredPrescriptions.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="min-vh-100 bg-light">
@@ -86,6 +105,7 @@ const PrescriptionsList = () => {
                   className="form-control"
                   value={filterPatient}
                   onChange={(e) => setFilterPatient(e.target.value)}
+                  disabled={user.role === "patient"} // pacjent nie filtruje innych
                 />
               </div>
               <div className="col-md-6">
@@ -95,6 +115,7 @@ const PrescriptionsList = () => {
                   className="form-control"
                   value={filterPESEL}
                   onChange={(e) => setFilterPESEL(e.target.value)}
+                  disabled={user.role === "patient"}
                 />
               </div>
             </div>
@@ -165,7 +186,7 @@ const PrescriptionsList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginated.map(p => (
+                    {paginated.map((p) => (
                       <tr key={p.prescription_id}>
                         <td>{p.visit_id}</td>
                         <td>{p.visit_date}</td>
@@ -177,13 +198,29 @@ const PrescriptionsList = () => {
                         <td>{p.instruction || ""}</td>
                         <td>
                           <div className="btn-group">
-                            <Link to={`/${rolePrefix}/prescriptions/${p.prescription_id}`} className="btn btn-sm btn-outline-primary">View</Link>
-                            {(p.doctor_user_id === user.user_id) && (
-                                <>
-                              <Link to={`/${rolePrefix}/prescriptions/edit/${p.prescription_id}`} className="btn btn-sm btn-outline-secondary">Edit</Link>
-                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.prescription_id)}>Delete</button>
+                            <Link
+                              to={`/${rolePrefix}/prescriptions/${p.prescription_id}`}
+                              className="btn btn-sm btn-outline-primary"
+                            >
+                              View
+                            </Link>
+
+                            {user.role !== "patient" && p.doctor_user_id === user.user_id && (
+                              <>
+                                <Link
+                                  to={`/${rolePrefix}/prescriptions/edit/${p.prescription_id}`}
+                                  className="btn btn-sm btn-outline-secondary"
+                                >
+                                  Edit
+                                </Link>
+                                <button
+                                  className="btn btn-sm btn-outline-danger"
+                                  onClick={() => handleDelete(p.prescription_id)}
+                                >
+                                  Delete
+                                </button>
                               </>
-                          )}
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -201,15 +238,17 @@ const PrescriptionsList = () => {
                 <button
                   className="btn btn-outline-secondary"
                   disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => prev - 1)}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
                 >
                   Previous
                 </button>
-                <span>Page {currentPage} of {totalPages}</span>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
                 <button
                   className="btn btn-outline-secondary"
                   disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
                 >
                   Next
                 </button>

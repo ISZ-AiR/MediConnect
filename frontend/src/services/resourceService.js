@@ -189,6 +189,10 @@ export const resourceService = {
       throw err;
     }
   },
+  async listPrescriptionsByPatient() {
+    const res = await apiRequest("/prescriptions/me", { method: "GET" });
+    return unwrap(res);
+  },
   createPrescription: async (form, visit_id) => {
     const res = await apiRequest(`/prescriptions/?visit_id=${visit_id}`, {
       method: "POST",

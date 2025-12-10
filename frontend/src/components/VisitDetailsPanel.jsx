@@ -114,7 +114,7 @@ const sectionItem = (title, items, type) => {
           <h5 className="mb-3"><i className="bi bi-info-circle me-2"></i>General Information</h5>
           <div className="mb-3 border-bottom pb-2"><strong>Visit ID:</strong> {visit.visit_id}</div>
           <div className="mb-3 border-bottom pb-2"><strong>Reservation ID:</strong> {visit.reservation_id}</div>
-          <div className="mb-3 border-bottom pb-2"><strong>Visit Date:</strong> {visit.visit_date}</div>
+          <div className="mb-3 border-bottom pb-2"><strong>Visit Date:</strong> {visit.visit_date + " " + visit.visit_time}</div>
           <div className="mb-3 border-bottom pb-2"><strong>Patient:</strong> {getPatientName(visit.reservation_id)}</div>
           <div className="mb-3 border-bottom pb-2"><strong>Patient PESEL:</strong> {getPatientPESEL(visit.reservation_id)}</div>
           <div className="mb-3 border-bottom pb-2"><strong>Nurse:</strong> {getNurseName(visit.nurse_id)}</div>

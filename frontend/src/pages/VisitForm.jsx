@@ -50,6 +50,7 @@ initialValues: {
 reservation_id: "",
 visit_note: "",
 visit_date: "",
+visit_time: "",
 nurse_id: "",
 },
 loadFn: stableLoadFn,
@@ -57,6 +58,7 @@ mapLoad: useCallback((d) => ({
 reservation_id: d.reservation_id || "",
 visit_note: d.visit_note || "",
 visit_date: d.visit_date || "",
+visit_time: d.visit_time || "",
 nurse_id: d.nurse_id || "",
 }), []),
 createFn: stableCreateFn,
@@ -65,6 +67,7 @@ buildPayload: useCallback((f) => ({
 reservation_id: Number(f.reservation_id),
 visit_note: f.visit_note,
 visit_date: f.visit_date,
+visit_time: f.visit_time,
 nurse_id: f.nurse_id ? Number(f.nurse_id) : null,
 }), []),
 onSuccess: () => navigate("/receptionist/visits"),
@@ -109,6 +112,15 @@ return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="contai
                 name="visit_date"
                 label={<><i className="bi bi-calendar-event me-2"></i>Visit Date</>}
                 value={form.visit_date}
+                onChange={handleChange}
+                required
+              />
+
+              <FormField
+                type="time"
+                name="visit_time"
+                label={<><i className="bi bi-calendar-event me-2"></i>Visit Time</>}
+                value={form.visit_time}
                 onChange={handleChange}
                 required
               />

@@ -78,6 +78,45 @@ async def list_prescriptions(db: AsyncSession = Depends(get_db),
     return prescriptions
 
 
+@router.get("/me", response_model=list[PrescriptionModel],
+            description="Get all prescriptions for the logged-in patient",
+            dependencies=[Depends(require_role_with_user(["patient"]))])
+async def get_my_prescriptions(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
+    # Pobierz pacjenta powiązanego z current_user
+    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    # Pobierz wszystkie recepty dla jego wizyt
+    result = await db.execute(
+        select(Prescription)
+        .join(Visit, Prescription.visit_id == Visit.visit_id)
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .where(Reservation.patient_id == patient.patient_id)
+        .options(
+            joinedload(Prescription.visit)
+            .joinedload(Visit.reservation)
+            .joinedload(Reservation.doctor)
+            .joinedload(Doctor.user)
+        )
+    )
+    prescriptions = result.scalars().all()
+
+    for p in prescriptions:
+        p.visit_date = f"{p.visit.visit_date}"
+        p.doctor_user_id = p.visit.reservation.doctor.user.user_id
+        p.doctor_name = f"{p.visit.reservation.doctor.user.first_name} {p.visit.reservation.doctor.user.last_name}"
+        p.patient_name = f"{patient.user.first_name} {patient.user.last_name}"
+        p.patient_pesel = f"{patient.pesel}"
+
+    return prescriptions
+
+
+
 @router.get("/{prescription_id}", response_model=PrescriptionModel)
 async def get_prescription_by_id(
     prescription_id: int,
