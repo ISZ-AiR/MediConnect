@@ -36,7 +36,6 @@ const NurseDashboard = () => {
             </div>
           </div>
 
-
           {/* Patient List */}
           <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
@@ -49,6 +48,25 @@ const NurseDashboard = () => {
                 <Link
                   to="/nurse/patients"
                   className="btn btn-success btn-sm"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Visits Calendar */}
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body text-center p-4">
+                <i className="bi bi-calendar-week text-warning fs-1 mb-3"></i>
+                <h5 className="card-title">Visits Calendar</h5>
+                <p className="card-text text-muted small">
+                  View all your scheduled visits in the calendar
+                </p>
+                <Link
+                  to="/nurse/visits/calendar"
+                  className="btn btn-warning btn-sm"
                 >
                   Open
                 </Link>

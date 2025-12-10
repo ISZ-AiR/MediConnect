@@ -2,6 +2,11 @@
   background-color: #A5D6A7 !important;
 }
 
+.reservation-event {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
 .fc .fc-col-header-cell-cushion {
     color: black;
     font-weight: bold;

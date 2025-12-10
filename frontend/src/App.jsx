@@ -745,6 +745,15 @@ function App() {
             />
 
             <Route
+              path="/nurse/visits/calendar"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <VisitsCalendar />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/nurse/visits"
               element={
                 <ProtectedRoute allowedRoles={["nurse"]}>

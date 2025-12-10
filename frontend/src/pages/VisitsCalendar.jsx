@@ -104,7 +104,8 @@ const reservationEvents = reservations
       end,
       url: null,
       color: "blue",
-      editable: false
+      editable: false,
+      classNames: ['reservation-event']
     };
   });
 
