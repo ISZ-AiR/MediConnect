@@ -13,47 +13,110 @@ const VisitsCalendar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [visits, setVisits] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Pobieranie wizyt dla lekarza/pielęgniarki
   useEffect(() => {
-    const loadVisits = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        let visitsRes;
+
+        let visitsRes, reservationsRes;
 
         if (user?.role === "doctor") {
           const myDoctorRes = await apiRequest("/doctor/me");
           const myDoctor = myDoctorRes.data;
           visitsRes = await apiRequest(`/visits/detailed/doctor/${myDoctor.doctor_id}`);
+          reservationsRes = await apiRequest(`/reservation/detailed/doctor/${myDoctor.doctor_id}`);
         } else if (user?.role === "nurse") {
           const myNurseRes = await apiRequest("/nurse/me");
           const myNurse = myNurseRes.data;
           visitsRes = await apiRequest(`/visits/detailed/nurse/${myNurse.nurse_id}`);
+          reservationsRes = await apiRequest(`/reservation/detailed/nurse/${myNurse.nurse_id}`);
         } else {
           visitsRes = await apiRequest("/visits/detailed");
+          reservationsRes = await apiRequest("/reservation/detailed");
         }
 
         setVisits(visitsRes.data || []);
+        setReservations(reservationsRes.data || []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load visits");
+        setError("Failed to load calendar data");
       } finally {
         setLoading(false);
       }
     };
 
-    loadVisits();
+    loadData();
   }, [user]);
 
-  // Przygotowanie wydarzeń do FullCalendar
-  const events = visits.map(v => ({
-    title: `${v.patient.first_name} ${v.patient.last_name}`,
-    start: v.visit_date + "T" + (v.visit_time || "09:00"),
-    end: v.visit_date + "T" + (v.visit_time_end || "09:30"),
-    url: `/${user.role}/visits/${v.visit_id}`
-  }));
+  useEffect(() => {
+  const loadSchedule = async () => {
+    if (!user) return;
+
+    try {
+      let res;
+      if (user.role === "doctor") {
+        const myDoctorRes = await apiRequest("/doctor/me");
+        const myDoctor = myDoctorRes.data;
+        res = await apiRequest(`/schedules?doctor_id=${myDoctor.doctor_id}`);
+      } else if (user.role === "nurse") {
+        const myNurseRes = await apiRequest("/nurse/me");
+        // jeśli nurse ma też schedule
+        res = await apiRequest(`/schedules?nurse_id=${myNurseRes.nurse_id}`);
+      }
+
+      setSchedule(res?.data || []);
+    } catch (err) {
+      console.error("Failed to load schedule", err);
+    }
+  };
+
+  loadSchedule();
+}, [user]);
+
+
+
+const visitEvents = visits.map(v => {
+  const start = new Date(`${v.visit_date}T${v.visit_time}`);
+  const end = new Date(start.getTime() + 15 * 60 * 1000);
+  return {
+    title: `${v.patient.first_name} ${v.patient.last_name} (Visit)`,
+    start,
+    end,
+    url: `/${user.role}/visits/${v.visit_id}`,
+    color: "green"
+  };
+});
+
+const reservationEvents = reservations
+  .filter(r => !visits.some(v => v.reservation.reservation_id === r.reservation_id))
+  .map(r => {
+    const start = new Date(r.reservation_time);
+    const end = new Date(start.getTime() + 15 * 60 * 1000);
+    return {
+      title: `${r.patient.first_name} ${r.patient.last_name} (Reservation)`,
+      start,
+      end,
+      url: null,
+      color: "blue",
+      editable: false
+    };
+  });
+
+const events = [...visitEvents, ...reservationEvents];
+
+const businessHours = user?.role === "doctor" ? schedule.map(s => ({
+  daysOfWeek: [new Date(s.schedule_date).getDay()],
+  startTime: s.start_time,
+  endTime: s.end_time,
+  display: 'background',
+  className: 'doctor-schedule'
+})) : [];
 
   if (loading)
     return (
@@ -78,17 +141,23 @@ const VisitsCalendar = () => {
 
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
+            initialView="timeGridDay" // można ustawić default
             headerToolbar={{
               left: "prev,next today",
               center: "title",
               right: "dayGridMonth,timeGridDay,timeGridWeek,listWeek"
             }}
+            hiddenDays={[0, 6]}
             events={events}
             themeSystem="bootstrap"
             height="auto"
+            businessHours={businessHours}
+            slotMinTime="06:00"
+            slotMaxTime="22:00"
+            slotDuration="00:10:00"
             eventClick={(info) => {
-              info.jsEvent.preventDefault(); // nie otwieraj nowej karty
+              info.jsEvent.preventDefault();
+              if (!info.event.url) return;
               navigate(info.event.url);
             }}
             eventTimeFormat={{
@@ -96,6 +165,17 @@ const VisitsCalendar = () => {
               minute: '2-digit',
               hour12: false
             }}
+            eventContent={(arg) => (
+              <div style={{
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                fontSize: '0.85rem',
+                lineHeight: '1.1'
+              }}>
+                {arg.timeText && <strong>{arg.timeText} - </strong>}
+                <span>{arg.event.title}</span>
+              </div>
+            )}
           />
         </div>
       </div>

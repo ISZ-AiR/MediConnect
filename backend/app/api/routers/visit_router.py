@@ -41,6 +41,7 @@ async def create_visit(reservation_id: int, visit: VisitBase, db: AsyncSession =
         reservation_id=reservation_id,
         visit_note=visit.visit_note,
         visit_date=visit.visit_date,
+        visit_time=visit.visit_time,
         nurse_id=visit.nurse_id
     )
 
@@ -104,6 +105,7 @@ async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
         output.append({
             "visit_id": v.visit_id,
             "visit_date": v.visit_date,
+            "visit_time": v.visit_time,
             "visit_note": v.visit_note,
             "doctor": {
                 "doctor_id": d.doctor_id,
