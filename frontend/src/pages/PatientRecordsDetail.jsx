@@ -63,6 +63,7 @@ const PatientRecordsDetail = () => {
               getNurseName={getNurseName}
               getDoctorName={getDoctorNameFromReservation}
               color="success"
+              hidePatientInfo={true}
               onBack={() => navigate(-1)}
             />
           </div>

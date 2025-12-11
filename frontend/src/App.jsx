@@ -526,6 +526,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/patient/prescriptions/:id"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PrescriptionDetail />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Placeholder routes for other roles - add components later */}
             <Route
