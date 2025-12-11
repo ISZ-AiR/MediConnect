@@ -25,21 +25,37 @@ export const useVisitDetails = (visitId, role) => {
         setLoading(true);
         setError(null);
 
-        const requests = [
-          apiRequest(`/visits/${visitId}`),
-          apiRequest("/users"),
-          apiRequest("/nurse"),
-          apiRequest("/reservation"),
-          apiRequest("/doctor"),
-          apiRequest("/patients"),
-        ];
+        let requests;
 
-        if (role === "doctor") {
-          requests.push(
-            apiRequest("/prescriptions"),
-            apiRequest("/referrals"),
-            apiRequest("/diagnosis")
-          );
+        if (role === "patient") {
+          // Patient-specific endpoints
+          requests = [
+            apiRequest(`/visits/me/${visitId}`),
+            apiRequest("/users"),
+            apiRequest("/nurse"),
+            apiRequest("/reservation/me"),
+            apiRequest("/doctor"),
+            apiRequest("/patients/me"), // Get own patient data
+            apiRequest("/prescriptions/me"),
+          ];
+        } else {
+          // Staff endpoints
+          requests = [
+            apiRequest(`/visits/${visitId}`),
+            apiRequest("/users"),
+            apiRequest("/nurse"),
+            apiRequest("/reservation"),
+            apiRequest("/doctor"),
+            apiRequest("/patients"),
+          ];
+
+          if (role === "doctor") {
+            requests.push(
+              apiRequest("/prescriptions"),
+              apiRequest("/referrals"),
+              apiRequest("/diagnosis")
+            );
+          }
         }
 
         const responses = await Promise.all(requests);
@@ -49,15 +65,39 @@ export const useVisitDetails = (visitId, role) => {
         const nurses = responses[2]?.data || [];
         const reservations = responses[3]?.data || [];
         const doctors = responses[4]?.data || [];
-        const patients = responses[5]?.data || [];
+        let patients = [];
         let prescriptions = [];
         let referrals = [];
         let diagnoses = [];
 
-        if (role === "doctor") {
-          prescriptions = (responses[6]?.data || []).filter(p => p.visit_id === Number(visitId));
-          referrals = (responses[7]?.data || []).filter(r => r.visit_id === Number(visitId));
-          diagnoses = (responses[8]?.data || []).filter(d => d.visit_id === Number(visitId));
+        if (role === "patient") {
+          // For patient role, wrap single patient data in array for consistency
+          const patientData = responses[5]?.data;
+          patients = patientData ? [patientData] : [];
+
+          // Filter prescriptions for this specific visit
+          prescriptions = (responses[6]?.data || []).filter(
+            (p) => p.visit_id === Number(visitId)
+          );
+          // Patients currently don't have access to referrals/diagnoses endpoints
+          referrals = [];
+          diagnoses = [];
+        } else if (role === "doctor") {
+          patients = responses[5]?.data || [];
+        } else if (role === "doctor") {
+          patients = responses[5]?.data || [];
+          prescriptions = (responses[6]?.data || []).filter(
+            (p) => p.visit_id === Number(visitId)
+          );
+          referrals = (responses[7]?.data || []).filter(
+            (r) => r.visit_id === Number(visitId)
+          );
+          diagnoses = (responses[8]?.data || []).filter(
+            (d) => d.visit_id === Number(visitId)
+          );
+        } else {
+          // For other roles (nurse, receptionist, etc.)
+          patients = responses[5]?.data || [];
         }
 
         setData({

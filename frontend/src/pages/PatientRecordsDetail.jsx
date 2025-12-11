@@ -17,7 +17,9 @@ const PatientRecordsDetail = () => {
     error,
     getNurseName,
     getDoctorNameFromReservation,
-  } = useVisitDetails(id);
+    getPatientNameFromReservation,
+    getPatientPESELFromReservation,
+  } = useVisitDetails(id, "patient");
 
   if (loading)
     return (
@@ -56,6 +58,8 @@ const PatientRecordsDetail = () => {
               prescriptions={prescriptions}
               referrals={referrals}
               diagnoses={diagnoses}
+              getPatientName={getPatientNameFromReservation}
+              getPatientPESEL={getPatientPESELFromReservation}
               getNurseName={getNurseName}
               getDoctorName={getDoctorNameFromReservation}
               color="success"

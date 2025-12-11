@@ -63,7 +63,7 @@ async def get_all_visits(db: AsyncSession = Depends(get_db)):
 
 
 async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
-                                nurse_id: int | None = None, visit_id: int | None = None):
+                               nurse_id: int | None = None, visit_id: int | None = None):
     doctor_user = aliased(User)
     nurse_user = aliased(User)
     patient_user = aliased(User)
@@ -147,6 +147,7 @@ async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):
 async def get_doctor_detailed_visits(doctor_id: int, db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db, doctor_id=doctor_id, visit_id=None)
 
+
 @router.get(
     "/detailed/nurse/{nurse_id}",
     description="Get all visits with full details - per nurse",
@@ -173,6 +174,31 @@ async def get_my_visits(
     )
     visits = result.scalars().all()
     return visits
+
+
+@router.get("/me/{visit_id}", response_model=VisitModel, description="Get a specific visit for the logged-in patient", dependencies=[Depends(require_role_with_user(["patient"]))])
+async def get_my_visit(
+    visit_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
+    """
+    Get a specific visit for the logged-in patient via reservation
+    """
+    result = await db.execute(
+        select(Visit)
+        .options(joinedload(Visit.reservation))
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .join(Patient, Reservation.patient_id == Patient.patient_id)
+        .where(
+            Patient.user_id == current_user.user_id,
+            Visit.visit_id == visit_id
+        )
+    )
+    visit = result.scalar_one_or_none()
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit not found")
+    return visit
 
 
 @router.get("/{visit_id}", response_model=VisitModel)
