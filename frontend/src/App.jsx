@@ -737,7 +737,7 @@ function App() {
             <Route
               path="/doctor/examinations/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "doctor"]}>
                   <ExaminationForm />
                 </ProtectedRoute>
               }
@@ -944,6 +944,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Settings />
                 </ProtectedRoute>
               }
             />
