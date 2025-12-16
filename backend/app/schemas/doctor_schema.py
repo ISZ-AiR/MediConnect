@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, EmailStr
-from schemas.user_schema import UserBase, UserModel
 from typing import Literal
+
+from pydantic import BaseModel, EmailStr, Field
+from schemas.user_schema import UserBase, UserModel
 
 # ----- DOCTOR -----
 

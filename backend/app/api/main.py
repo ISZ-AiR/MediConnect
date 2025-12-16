@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
-from .routers import (health_router, doctor_router, nurse_router,
-                      referral_router, visit_router, prescription_router,
-                      login_router, receptionist_router, patient_router,
-                      reservation_router, user_router, schedule_router,
-                      examination_router, admin_router, manager_router,
-                      manager_report_router, examination_router, admin_router, disease_router, diagnosis_router)
+from .routers import (admin_router, diagnosis_router, disease_router,
+                      doctor_router, examination_router, health_router,
+                      login_router, manager_report_router, manager_router,
+                      nurse_router, patient_router, prescription_router,
+                      receptionist_router, referral_router, reservation_router,
+                      schedule_router, user_router, visit_router)
 
 api_router = APIRouter()
 

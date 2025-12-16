@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from core.database import get_db
-from models.user_model import User
-from schemas.manager_schema import ManagerBase, ManagerModel
-from passlib.hash import bcrypt
 from core import require_role_with_user
+from core.database import get_db
+from fastapi import APIRouter, Depends, HTTPException
+from models.user_model import User
+from passlib.hash import bcrypt
+from schemas.manager_schema import ManagerBase, ManagerModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(
     prefix="/managers",

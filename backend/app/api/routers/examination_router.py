@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
 from core.database import get_db
+from fastapi import APIRouter, Depends, HTTPException
 from models.examination_model import Examination
 from schemas.examination_schema import ExaminationBase, ExaminationModel
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(
     prefix="/examinations",

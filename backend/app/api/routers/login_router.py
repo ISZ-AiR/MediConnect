@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.future import select
 from datetime import timedelta
 
 from core import get_db
-from core.security import verify_password, create_access_token
+from core.security import create_access_token, verify_password
+from fastapi import APIRouter, Depends, HTTPException
 from models import User
+from sqlalchemy.future import select
+from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["Login"])
 

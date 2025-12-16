@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Boolean, Text, Integer, ForeignKey, Date
-from sqlalchemy.orm import relationship
 from core.database import Base
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, Text
+from sqlalchemy.orm import relationship
 
 
 class Referral(Base):

@@ -8,13 +8,13 @@ all necessary tables and performing any required setup operations.
 import asyncio
 import logging
 
-from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy import select
-from passlib.context import CryptContext
 import models
+from passlib.context import CryptContext
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from .config import logger
-from .database import Base, engine, async_session
+from .database import Base, async_session, engine
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

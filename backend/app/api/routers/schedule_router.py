@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from datetime import datetime, time
 
 from core import get_db
-from core.security import require_role_with_user, require_role
-from models import Schedule, Doctor, User
-from schemas.schedule_schema import ScheduleCreate, ScheduleModel, ScheduleUpdate
+from core.security import require_role, require_role_with_user
+from fastapi import APIRouter, Depends, HTTPException
+from models import Doctor, Schedule, User
+from schemas.schedule_schema import (ScheduleCreate, ScheduleModel,
+                                     ScheduleUpdate)
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/schedules", tags=["Schedules"])
 

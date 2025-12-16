@@ -1,16 +1,17 @@
+from core import require_role_with_user
+from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from models.doctor_model import Doctor
+from models.patient_model import Patient
+from models.prescription_model import Prescription
+from models.reservation_model import Reservation
+from models.user_model import User
+from models.visit_model import Visit
+from schemas.prescription_schema import (PrescriptionBase, PrescriptionModel,
+                                         PrescriptionUpdate)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
-from core.database import get_db
-from models.prescription_model import Prescription
-from models.user_model import User
-from models.visit_model import Visit
-from models.patient_model import Patient
-from models.doctor_model import Doctor
-from models.reservation_model import Reservation
-from schemas.prescription_schema import PrescriptionBase, PrescriptionModel, PrescriptionUpdate
-from core import require_role_with_user
 
 router = APIRouter(
     prefix="/prescriptions",

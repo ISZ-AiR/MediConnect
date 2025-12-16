@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
 from datetime import date
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 # ----- REFERRAL -----
 
@@ -60,9 +61,11 @@ class ReferralCreate(ReferralBase):
     doctor_id: int
 
 
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import date
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class ReferralUpdate(BaseModel):
     """

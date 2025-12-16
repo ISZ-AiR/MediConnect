@@ -1,18 +1,18 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload, aliased
+
+from core import require_role, require_role_with_user
 from core.database import get_db
-from models.visit_model import Visit
-from models.reservation_model import Reservation
-from models.user_model import User
-from models.patient_model import Patient
+from fastapi import APIRouter, Depends, HTTPException
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
+from models.patient_model import Patient
+from models.reservation_model import Reservation
+from models.user_model import User
+from models.visit_model import Visit
 from schemas.visit_schema import VisitBase, VisitModel, VisitUpdate
-from core import require_role_with_user, require_role
-
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased, joinedload
 
 router = APIRouter(prefix="/visits", tags=["Visits"])
 

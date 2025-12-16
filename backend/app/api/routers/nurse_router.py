@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
-from models.user_model import User
-from models.nurse_model import Nurse
-from schemas.nurse_schema import NurseCreate, NurseModel
 from core import require_role_with_user
+from core.database import get_db
+from fastapi import APIRouter, Depends, HTTPException
+from models.nurse_model import Nurse
+from models.user_model import User
 from passlib.hash import bcrypt
+from schemas.nurse_schema import NurseCreate, NurseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 router = APIRouter(
     prefix="/nurse",

@@ -1,22 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, Form, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
-from typing import Annotated
-from sqlalchemy.orm import Session, aliased
-from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-from jose import jwt
-from sqlalchemy import select, and_
+from typing import Annotated
 
-from models.reservation_model import Reservation
-from models.patient_model import Patient
+from core import require_role_with_user
+from core.database import get_db
+from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
+from models.patient_model import Patient
 from models.receptionist_model import Receptionist
+from models.reservation_model import Reservation
 from models.user_model import User
-from schemas.reservation_schema import ReservationModel, ReservationCreate, ReservationUpdate
-from core import require_role_with_user
+from passlib.context import CryptContext
+from schemas.reservation_schema import (ReservationCreate, ReservationModel,
+                                        ReservationUpdate)
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session, aliased
 
 router = APIRouter(prefix="/reservation", tags=["Reservations"])
 

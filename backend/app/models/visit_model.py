@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Text, Integer, ForeignKey, Date, Time
-from sqlalchemy.orm import relationship
 from core.database import Base
+from sqlalchemy import Column, Date, ForeignKey, Integer, Text, Time
+from sqlalchemy.orm import relationship
 
 
 class Visit(Base):

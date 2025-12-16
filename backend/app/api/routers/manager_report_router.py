@@ -1,14 +1,13 @@
-from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case, and_
-from datetime import date
+from datetime import date, datetime, timedelta
+
+from core import require_role, require_role_with_user
 from core.database import get_db
-from models import Doctor, Visit, Reservation, Referral, Prescription, User, Schedule
-from core import require_role_with_user, require_role
+from fastapi import APIRouter, Depends, HTTPException
+from models import (Doctor, Prescription, Referral, Reservation, Schedule,
+                    User, Visit)
 from pydantic import BaseModel
-from sqlalchemy import cast, Date
-from datetime import datetime, timedelta
+from sqlalchemy import Date, and_, case, cast, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(
     prefix="/reports",
