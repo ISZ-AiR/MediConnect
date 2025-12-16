@@ -84,8 +84,6 @@ export const useVisitDetails = (visitId, role) => {
           diagnoses = [];
         } else if (role === "doctor") {
           patients = responses[5]?.data || [];
-        } else if (role === "doctor") {
-          patients = responses[5]?.data || [];
           prescriptions = (responses[6]?.data || []).filter(
             (p) => p.visit_id === Number(visitId)
           );
