@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Form
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from typing import Annotated
-from sqlalchemy.orm import Session, selectinload
-from passlib.context import CryptContext
 from datetime import datetime, timedelta
+from typing import Annotated
+
+from core import (get_current_user, get_db, logger, require_role,
+                  require_role_with_user)
+from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
-from sqlalchemy import select
-from core import get_current_user, require_role, require_role_with_user, logger
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from core import get_db, get_current_user
 from models import Patient, User
-from schemas.patient_schema import PatientModel, PatientCreate, PatientUpdate
-
+from passlib.context import CryptContext
+from schemas.patient_schema import PatientCreate, PatientModel, PatientUpdate
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session, selectinload
 
 router = APIRouter(prefix="/patients", tags=["Patients"])
 

@@ -179,7 +179,7 @@ export const resourceService = {
     return res && res.success ? res.data : res;
   },
   getPrescriptionByVisit: async (visit_id) => {
-  try {
+    try {
       const res = await apiRequest(`/prescriptions/visit/${visit_id}`);
       return res.data;
     } catch (err) {
@@ -188,6 +188,14 @@ export const resourceService = {
       }
       throw err;
     }
+  },
+  async listPrescriptionsByPatient() {
+    const res = await apiRequest("/prescriptions/me", { method: "GET" });
+    return unwrap(res);
+  },
+  async getMyPrescription(id) {
+    const res = await apiRequest(`/prescriptions/me/${id}`, { method: "GET" });
+    return res && res.success ? res.data : res;
   },
   createPrescription: async (form, visit_id) => {
     const res = await apiRequest(`/prescriptions/?visit_id=${visit_id}`, {
@@ -218,16 +226,16 @@ export const resourceService = {
   },
 
   getReferralByVisit: async (visit_id) => {
-      try {
-        const res = await apiRequest(`/referrals/visit/${visit_id}`);
-        return res.data;
-      } catch (err) {
-        if (err.response && err.response.status === 404) {
-          return null;
-        }
-        throw err;
+    try {
+      const res = await apiRequest(`/referrals/visit/${visit_id}`);
+      return res.data;
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null;
       }
-    },
+      throw err;
+    }
+  },
 
   async createReferral(payload) {
     const res = await apiRequest(`/referrals/`, {
@@ -263,7 +271,7 @@ export const resourceService = {
       method: "POST",
       body: JSON.stringify({
         ...payload,
-        visit_id: Number(visit_id)
+        visit_id: Number(visit_id),
       }),
     });
     return res && res.success ? res.data : res;

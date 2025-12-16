@@ -20,6 +20,7 @@ const ReservationDetail = () => {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [visitDate, setVisitDate] = useState("");
+  const [visitTime, setVisitTime] = useState("");
   const [selectedNurse, setSelectedNurse] = useState("");
   const [visitNote, setVisitNote] = useState("");
 
@@ -114,6 +115,7 @@ const ReservationDetail = () => {
         method: "POST",
         body: JSON.stringify({
           visit_date: visitDate,
+          visit_time: visitTime,
           nurse_id: selectedNurse,
           visit_note: visitNote,
         }),
@@ -268,13 +270,13 @@ const ReservationDetail = () => {
             style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}
           >
             <div
-              className="bg-white p-4 rounded shadow"
-              style={{ width: "100%", maxWidth: "500px" }}
+                className="bg-white p-4 rounded shadow"
+                style={{width: "100%", maxWidth: "500px"}}
             >
               <div className="text-center mb-4">
                 <i
-                  className="bi bi-calendar-plus text-success"
-                  style={{ fontSize: "2.5rem" }}
+                    className="bi bi-calendar-plus text-success"
+                    style={{fontSize: "2.5rem"}}
                 ></i>
                 <h4 className="fw-bold mt-2">Create Visit</h4>
               </div>
@@ -282,59 +284,71 @@ const ReservationDetail = () => {
               <div className="mb-3">
                 <label className="form-label fw-bold">Visit Date</label>
                 <input
-                  type="date"
-                  className="form-control"
-                  value={visitDate}
-                  onChange={(e) => setVisitDate(e.target.value)}
-                  min={reservationDateStr}
-                  max={reservationDateStr}
+                    type="date"
+                    className="form-control"
+                    value={visitDate}
+                    onChange={(e) => setVisitDate(e.target.value)}
+                    min={reservationDateStr}
+                    max={reservationDateStr}
                 />
                 <div className="form-text">
                   Visit must be on the reservation date.
                 </div>
               </div>
+
+              <div className="mb-3">
+                <label className="form-label fw-bold">Visit Time</label>
+                <input
+                    type="time"
+                    className="form-control"
+                    value={visitTime}
+                    onChange={(e) => setVisitTime(e.target.value)}
+                    required
+                />
+              </div>
+
               <div className="mb-3">
                 <label className="form-label fw-bold">Nurse</label>
                 <select
-                  className="form-select"
-                  value={selectedNurse}
-                  onChange={(e) => setSelectedNurse(e.target.value)}
+                    className="form-select"
+                    value={selectedNurse}
+                    onChange={(e) => setSelectedNurse(e.target.value)}
                 >
                   <option value="">Select nurse</option>
                   {nurses.map((n) => (
-                    <option key={n.nurse_id} value={n.nurse_id}>
-                      {getNurseLabel(n.nurse_id)}
-                    </option>
+                      <option key={n.nurse_id} value={n.nurse_id}>
+                        {getNurseLabel(n.nurse_id)}
+                      </option>
                   ))}
                 </select>
               </div>
               <div className="mb-3">
                 <label className="form-label fw-bold">Visit Note</label>
                 <textarea
-                  className="form-control"
-                  rows={3}
-                  value={visitNote}
-                  onChange={(e) => setVisitNote(e.target.value)}
+                    className="form-control"
+                    rows={3}
+                    value={visitNote}
+                    onChange={(e) => setVisitNote(e.target.value)}
                 ></textarea>
               </div>
               <div className="d-flex gap-2">
                 <button
-                  className="btn btn-secondary flex-fill"
-                  onClick={() => setShowModal(false)}
+                    className="btn btn-secondary flex-fill"
+                    onClick={() => setShowModal(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="btn btn-success flex-fill"
-                  onClick={() => {
-                    if (visitDate !== reservationDateStr) {
-                      alert(
-                        "Visit must be on the same date as the reservation."
-                      );
-                      return;
-                    }
-                    handleCreateVisit();
-                  }}
+                    className="btn btn-success flex-fill"
+                    onClick={() => {
+                      if (visitDate !== reservationDateStr) {
+                        alert(
+                            "Visit must be on the same date as the reservation."
+                        );
+                        return;
+                      }
+                      handleCreateVisit();
+                    }}
                 >
                   Create Visit
                 </button>

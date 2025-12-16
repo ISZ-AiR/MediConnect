@@ -4,8 +4,13 @@ import Navbar from "../components/Navbar";
 import { resourceService } from "../services/resourceService";
 import { useEditableResource } from "../hooks/useEditableResource";
 import FormField from "../components/FormField";
+import { useAuth } from "../context/AuthContext";
 
 const ExaminationForm = () => {
+  const { user: authUser } = useAuth();
+  const rolePrefix = authUser?.role ? `/${authUser.role}` : "";
+  const pathVar = `${rolePrefix}/examinations`;
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { form, handleChange, submit, loading, error } = useEditableResource({
@@ -19,7 +24,7 @@ const ExaminationForm = () => {
     }),
     createFn: resourceService.createExamination,
     updateFn: resourceService.updateExamination,
-    onSuccess: () => navigate("/admin/examinations"),
+    onSuccess: () => navigate(pathVar),
   });
 
   return (
@@ -59,7 +64,7 @@ const ExaminationForm = () => {
           <button
             type="button"
             className="btn btn-link ms-2"
-            onClick={() => navigate("/admin/examinations")}
+            onClick={() => navigate(pathVar)}
           >
             Cancel
           </button>

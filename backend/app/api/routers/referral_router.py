@@ -1,12 +1,14 @@
+from datetime import date
+
+from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from models.doctor_model import Doctor
+from models.patient_model import Patient
+from models.referral_model import Referral
+from schemas.referral_schema import (ReferralCreate, ReferralModel,
+                                     ReferralUpdate)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from core.database import get_db
-from models.referral_model import Referral
-from models.patient_model import Patient
-from models.doctor_model import Doctor
-from schemas.referral_schema import ReferralCreate, ReferralModel, ReferralUpdate
-from datetime import date
 from sqlalchemy.orm import joinedload
 
 router = APIRouter(

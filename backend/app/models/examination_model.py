@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Text, Integer, String
-from sqlalchemy.orm import relationship
 from core.database import Base
+from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 
 class Examination(Base):

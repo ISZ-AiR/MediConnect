@@ -1,22 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, Form, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
-from typing import Annotated
-from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-from jose import jwt
-from sqlalchemy import select, and_
+from typing import Annotated
 
-from models.reservation_model import Reservation
-from models.patient_model import Patient
+from core import require_role_with_user
+from core.database import get_db
+from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
+from models.patient_model import Patient
 from models.receptionist_model import Receptionist
+from models.reservation_model import Reservation
 from models.user_model import User
-from schemas.reservation_schema import ReservationModel, ReservationCreate, ReservationUpdate
-from core import require_role_with_user
+from passlib.context import CryptContext
+from schemas.reservation_schema import (ReservationCreate, ReservationModel,
+                                        ReservationUpdate)
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session, aliased
 
 router = APIRouter(prefix="/reservation", tags=["Reservations"])
 
@@ -133,6 +134,100 @@ async def get_all_reservations(
     return reservations
 
 
+async def _get_detailed_reservations(
+    db: AsyncSession,
+    doctor_id: int | None = None,
+    nurse_id: int | None = None,
+    reservation_id: int | None = None
+):
+    doctor_user = aliased(User)
+    nurse_user = aliased(User)
+    patient_user = aliased(User)
+
+    stmt = (
+        select(
+            Reservation,
+            Doctor,
+            doctor_user,
+            Nurse,
+            nurse_user,
+            Patient,
+            patient_user
+        )
+        .join(Doctor, Doctor.doctor_id == Reservation.doctor_id)
+        .join(doctor_user, doctor_user.user_id == Doctor.user_id)
+        .outerjoin(Nurse, Nurse.nurse_id == Reservation.nurse_id)
+        .outerjoin(nurse_user, nurse_user.user_id == Nurse.user_id)
+        .join(Patient, Patient.patient_id == Reservation.patient_id)
+        .join(patient_user, patient_user.user_id == Patient.user_id)
+    )
+
+    if doctor_id is not None:
+        stmt = stmt.where(Doctor.doctor_id == doctor_id)
+    if nurse_id is not None:
+        stmt = stmt.where(Nurse.nurse_id == nurse_id)
+    if reservation_id is not None:
+        stmt = stmt.where(Reservation.reservation_id == reservation_id)
+
+    result = await db.execute(stmt)
+    rows = result.all()
+
+    output = []
+    for r, d, d_u, n, n_u, p, p_u in rows:
+        output.append({
+            "reservation_id": r.reservation_id,
+            "reservation_time": r.reservation_time,
+            "is_cancelled": r.is_cancelled,
+            "doctor": {
+                "doctor_id": d.doctor_id,
+                "first_name": d_u.first_name,
+                "last_name": d_u.last_name
+            },
+            "nurse": {
+                "nurse_id": n.nurse_id if n else None,
+                "first_name": n_u.first_name if n_u else None,
+                "last_name": n_u.last_name if n_u else None
+            },
+            "patient": {
+                "patient_id": p.patient_id,
+                "first_name": p_u.first_name,
+                "last_name": p_u.last_name
+            }
+        })
+    if reservation_id is not None:
+        return output[0] if output else None
+    return output
+
+# GET all detailed reservations
+@router.get("/detailed", description="Get all reservations with full details",
+            dependencies=[Depends(require_role_with_user(["admin", "receptionist"]))])
+async def get_all_detailed_reservations(db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_reservations(db)
+
+# GET detailed reservations for a doctor
+@router.get("/detailed/doctor/{doctor_id}",
+            description="Get all reservations for a doctor",
+            dependencies=[Depends(require_role_with_user(["doctor"]))])
+async def get_doctor_detailed_reservations(doctor_id: int, db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_reservations(db, doctor_id=doctor_id)
+
+# GET detailed reservations for a nurse
+@router.get("/detailed/nurse/{nurse_id}",
+            description="Get all reservations for a nurse",
+            dependencies=[Depends(require_role_with_user(["nurse"]))])
+async def get_nurse_detailed_reservations(nurse_id: int, db: AsyncSession = Depends(get_db)):
+    return await _get_detailed_reservations(db, nurse_id=nurse_id)
+
+# GET detailed reservation by ID
+@router.get("/detailed/{reservation_id}",
+            description="Get reservation by ID",
+            dependencies=[Depends(require_role_with_user(["admin", "receptionist"]))])
+async def get_detailed_reservation(reservation_id: int, db: AsyncSession = Depends(get_db)):
+    res = await _get_detailed_reservations(db, reservation_id=reservation_id)
+    if not res:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    return res
+
 @router.get("/me", response_model=list[ReservationModel], description="Get reservations for current patient.")
 async def get_my_reservations(
     db: AsyncSession = Depends(get_db),
@@ -146,6 +241,34 @@ async def get_my_reservations(
             status_code=404, detail="Patient record not found for current user.")
 
     result = await db.execute(select(Reservation).where(Reservation.patient_id == patient.patient_id))
+    reservations = result.scalars().all()
+    return reservations
+
+@router.get("/doctor/me", response_model=list[ReservationModel], description="Get reservations for current doctor")
+async def get_my_reservations_doctor(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["doctor"]))
+):
+    result = await db.execute(select(Doctor).where(Doctor.user_id == current_user.user_id))
+    doctor = result.scalar_one_or_none()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor record not found for current user.")
+
+    result = await db.execute(select(Reservation).where(Reservation.doctor_id == doctor.doctor_id))
+    reservations = result.scalars().all()
+    return reservations
+
+@router.get("/nurse/me", response_model=list[ReservationModel], description="Get reservations for current nurse")
+async def get_my_reservations_nurse(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["nurse"]))
+):
+    result = await db.execute(select(Nurse).where(Nurse.user_id == current_user.user_id))
+    nurse = result.scalar_one_or_none()
+    if not nurse:
+        raise HTTPException(status_code=404, detail="Nurse record not found for current user.")
+
+    result = await db.execute(select(Reservation).where(Reservation.nurse_id == nurse.nurse_id))
     reservations = result.scalars().all()
     return reservations
 

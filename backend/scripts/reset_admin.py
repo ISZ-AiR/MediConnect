@@ -6,13 +6,14 @@ Usage:
     python scripts/reset_admin.py
 """
 
-from app.models.user_model import User
+import asyncio
+import os
+import sys
+
 from app.core.database import async_session
+from app.models.user_model import User
 from passlib.context import CryptContext
 from sqlalchemy import select
-import asyncio
-import sys
-import os
 
 # Add parent directory to path to import from app
 sys.path.insert(0, os.path.abspath(

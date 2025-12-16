@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from datetime import date, time
+
+from pydantic import BaseModel, Field
+
 
 class ScheduleBase(BaseModel):
     doctor_id: int = Field(..., description="Doctor's ID")

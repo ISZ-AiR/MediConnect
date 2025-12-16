@@ -1,17 +1,18 @@
-from fastapi import APIRouter, HTTPException, Depends
+from core import require_role_with_user
+from core.database import get_db
+from fastapi import APIRouter, Depends, HTTPException
+from models.doctor_model import Doctor
+from models.nurse_model import Nurse
+from models.patient_model import Patient
+from models.reservation_model import Reservation
+from models.user_model import User
+from models.visit_model import Visit
+from passlib.hash import bcrypt
+from schemas.doctor_schema import (DoctorCreate, DoctorModel, DoctorUpdate,
+                                   DoctorUserModel)
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
-from models.doctor_model import Doctor
-from models.user_model import User
-from models.nurse_model import Nurse
-from models.reservation_model import Reservation
-from models.visit_model import Visit
-from models.patient_model import Patient
-from schemas.doctor_schema import DoctorCreate, DoctorModel, DoctorUpdate, DoctorUserModel
-from passlib.hash import bcrypt
-from core import require_role_with_user
 
 router = APIRouter(
     prefix="/doctor",

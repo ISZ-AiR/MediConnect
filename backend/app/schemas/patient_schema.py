@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
 from datetime import date
-from schemas.user_schema import UserBase
 from typing import Optional
+
+from pydantic import BaseModel, Field
+from schemas.user_schema import UserBase
 
 
 # ----- PATIENT -----

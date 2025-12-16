@@ -306,7 +306,7 @@ const PatientBooking = () => {
                         Available Time Slots
                       </label>
 
-                      <div className="d-flex flex-wrap gap-2">
+                      <div className="row g-2">
                         {timeSlots.length > 0 ? (
                           timeSlots.map((slot) => {
                             const hours = String(slot.getHours()).padStart(
@@ -320,27 +320,33 @@ const PatientBooking = () => {
                             const seconds = "00";
                             const localSlot = `${selectedDate}T${hours}:${minutes}:${seconds}`;
                             return (
-                              <button
+                              <div
                                 key={localSlot}
-                                type="button"
-                                className={`btn px-4 py-2 ${
-                                  selectedSlot === localSlot
-                                    ? "btn-primary"
-                                    : "btn-outline-primary"
-                                }`}
-                                onClick={() => setSelectedSlot(localSlot)}
+                                className="col-6 col-sm-4 col-md-3 col-lg-2"
                               >
-                                {slot.toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </button>
+                                <button
+                                  type="button"
+                                  className={`btn py-2 w-100 ${
+                                    selectedSlot === localSlot
+                                      ? "btn-primary"
+                                      : "btn-outline-primary"
+                                  }`}
+                                  onClick={() => setSelectedSlot(localSlot)}
+                                >
+                                  {slot.toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </button>
+                              </div>
                             );
                           })
                         ) : (
-                          <div className="alert alert-info border-0 w-100">
-                            <i className="bi bi-info-circle me-2"></i>
-                            No time slots available for this date.
+                          <div className="col-12">
+                            <div className="alert alert-info border-0 w-100 mb-0">
+                              <i className="bi bi-info-circle me-2"></i>
+                              No time slots available for this date.
+                            </div>
                           </div>
                         )}
                       </div>

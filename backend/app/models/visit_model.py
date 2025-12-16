@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Text, Integer, ForeignKey, Date
-from sqlalchemy.orm import relationship
 from core.database import Base
+from sqlalchemy import Column, Date, ForeignKey, Integer, Text, Time
+from sqlalchemy.orm import relationship
 
 
 class Visit(Base):
@@ -12,6 +12,7 @@ class Visit(Base):
         "reservations.reservation_id"), nullable=False)
     visit_note = Column(Text, nullable=False)
     visit_date = Column(Date, nullable=False)
+    visit_time = Column(Time, nullable=False)
 
     reservation = relationship("Reservation", back_populates="visit")
     nurse = relationship("Nurse", back_populates="visits")

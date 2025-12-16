@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Navbar from "./Navbar";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { saveAs } from "file-saver";
 
 // Generic scaffold for reports to reduce duplication across date range, doctor multi-select, export (PDF/Excel), table & charts.

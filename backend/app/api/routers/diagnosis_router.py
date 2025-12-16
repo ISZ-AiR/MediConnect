@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
+from fastapi import APIRouter, Depends, HTTPException
 from models.diagnosis_model import Diagnosis
+from models.disease_model import Disease
 from models.patient_model import Patient
 from models.visit_model import Visit
-from models.disease_model import Disease
-from schemas.diagnosis_schema import DiagnosisBase, DiagnosisModel, DiagnosisCreate, DiagnosisUpdate
-
+from schemas.diagnosis_schema import (DiagnosisBase, DiagnosisCreate,
+                                      DiagnosisModel, DiagnosisUpdate)
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 router = APIRouter(
     prefix="/diagnosis",

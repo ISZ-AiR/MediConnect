@@ -1,16 +1,17 @@
+from core import require_role_with_user
+from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from models.doctor_model import Doctor
+from models.patient_model import Patient
+from models.prescription_model import Prescription
+from models.reservation_model import Reservation
+from models.user_model import User
+from models.visit_model import Visit
+from schemas.prescription_schema import (PrescriptionBase, PrescriptionModel,
+                                         PrescriptionUpdate)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
-from core.database import get_db
-from models.prescription_model import Prescription
-from models.user_model import User
-from models.visit_model import Visit
-from models.patient_model import Patient
-from models.doctor_model import Doctor
-from models.reservation_model import Reservation
-from schemas.prescription_schema import PrescriptionBase, PrescriptionModel, PrescriptionUpdate
-from core import require_role_with_user
 
 router = APIRouter(
     prefix="/prescriptions",
@@ -76,6 +77,87 @@ async def list_prescriptions(db: AsyncSession = Depends(get_db),
         p.patient_pesel = f"{p.visit.reservation.patient.pesel}"
 
     return prescriptions
+
+
+@router.get("/me", response_model=list[PrescriptionModel],
+            description="Get all prescriptions for the logged-in patient",
+            dependencies=[Depends(require_role_with_user(["patient"]))])
+async def get_my_prescriptions(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
+    # Pobierz pacjenta powiązanego z current_user
+    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    # Pobierz wszystkie recepty dla jego wizyt
+    result = await db.execute(
+        select(Prescription)
+        .join(Visit, Prescription.visit_id == Visit.visit_id)
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .where(Reservation.patient_id == patient.patient_id)
+        .options(
+            joinedload(Prescription.visit)
+            .joinedload(Visit.reservation)
+            .joinedload(Reservation.doctor)
+            .joinedload(Doctor.user)
+        )
+    )
+    prescriptions = result.scalars().all()
+
+    for p in prescriptions:
+        p.visit_date = f"{p.visit.visit_date}"
+        p.doctor_user_id = p.visit.reservation.doctor.user.user_id
+        p.doctor_name = f"{p.visit.reservation.doctor.user.first_name} {p.visit.reservation.doctor.user.last_name}"
+        p.patient_name = f"{patient.user.first_name} {patient.user.last_name}"
+        p.patient_pesel = f"{patient.pesel}"
+
+    return prescriptions
+
+
+@router.get("/me/{prescription_id}", response_model=PrescriptionModel,
+            description="Get a specific prescription by ID for the logged-in patient",
+            dependencies=[Depends(require_role_with_user(["patient"]))])
+async def get_my_prescription_by_id(
+    prescription_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
+    # Pobierz pacjenta powiązanego z current_user
+    result = await db.execute(select(Patient).where(Patient.user_id == current_user.user_id))
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    # Pobierz receptę o podanym ID, jeśli należy do pacjenta
+    result = await db.execute(
+        select(Prescription)
+        .join(Visit, Prescription.visit_id == Visit.visit_id)
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .where(
+            Reservation.patient_id == patient.patient_id,
+            Prescription.prescription_id == prescription_id
+        )
+        .options(
+            joinedload(Prescription.visit)
+            .joinedload(Visit.reservation)
+            .joinedload(Reservation.doctor)
+            .joinedload(Doctor.user)
+        )
+    )
+    prescription = result.scalars().first()
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+
+    prescription.visit_date = f"{prescription.visit.visit_date}"
+    prescription.doctor_user_id = prescription.visit.reservation.doctor.user.user_id
+    prescription.doctor_name = f"{prescription.visit.reservation.doctor.user.first_name} {prescription.visit.reservation.doctor.user.last_name}"
+    prescription.patient_name = f"{patient.user.first_name} {patient.user.last_name}"
+    prescription.patient_pesel = f"{patient.pesel}"
+
+    return prescription
 
 
 @router.get("/{prescription_id}", response_model=PrescriptionModel)

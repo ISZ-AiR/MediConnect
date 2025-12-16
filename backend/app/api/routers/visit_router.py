@@ -1,18 +1,18 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload, aliased
+
+from core import require_role, require_role_with_user
 from core.database import get_db
-from models.visit_model import Visit
-from models.reservation_model import Reservation
-from models.user_model import User
-from models.patient_model import Patient
+from fastapi import APIRouter, Depends, HTTPException
 from models.doctor_model import Doctor
 from models.nurse_model import Nurse
+from models.patient_model import Patient
+from models.reservation_model import Reservation
+from models.user_model import User
+from models.visit_model import Visit
 from schemas.visit_schema import VisitBase, VisitModel, VisitUpdate
-from core import require_role_with_user, require_role
-
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased, joinedload
 
 router = APIRouter(prefix="/visits", tags=["Visits"])
 
@@ -41,6 +41,7 @@ async def create_visit(reservation_id: int, visit: VisitBase, db: AsyncSession =
         reservation_id=reservation_id,
         visit_note=visit.visit_note,
         visit_date=visit.visit_date,
+        visit_time=visit.visit_time,
         nurse_id=visit.nurse_id
     )
 
@@ -62,7 +63,7 @@ async def get_all_visits(db: AsyncSession = Depends(get_db)):
 
 
 async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
-                                nurse_id: int | None = None, visit_id: int | None = None):
+                               nurse_id: int | None = None, visit_id: int | None = None):
     doctor_user = aliased(User)
     nurse_user = aliased(User)
     patient_user = aliased(User)
@@ -104,6 +105,7 @@ async def _get_detailed_visits(db: AsyncSession, doctor_id: int | None = None,
         output.append({
             "visit_id": v.visit_id,
             "visit_date": v.visit_date,
+            "visit_time": v.visit_time,
             "visit_note": v.visit_note,
             "doctor": {
                 "doctor_id": d.doctor_id,
@@ -145,6 +147,7 @@ async def get_all_detailed_visits(db: AsyncSession = Depends(get_db)):
 async def get_doctor_detailed_visits(doctor_id: int, db: AsyncSession = Depends(get_db)):
     return await _get_detailed_visits(db, doctor_id=doctor_id, visit_id=None)
 
+
 @router.get(
     "/detailed/nurse/{nurse_id}",
     description="Get all visits with full details - per nurse",
@@ -171,6 +174,31 @@ async def get_my_visits(
     )
     visits = result.scalars().all()
     return visits
+
+
+@router.get("/me/{visit_id}", response_model=VisitModel, description="Get a specific visit for the logged-in patient", dependencies=[Depends(require_role_with_user(["patient"]))])
+async def get_my_visit(
+    visit_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role_with_user(["patient"]))
+):
+    """
+    Get a specific visit for the logged-in patient via reservation
+    """
+    result = await db.execute(
+        select(Visit)
+        .options(joinedload(Visit.reservation))
+        .join(Reservation, Visit.reservation_id == Reservation.reservation_id)
+        .join(Patient, Reservation.patient_id == Patient.patient_id)
+        .where(
+            Patient.user_id == current_user.user_id,
+            Visit.visit_id == visit_id
+        )
+    )
+    visit = result.scalar_one_or_none()
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit not found")
+    return visit
 
 
 @router.get("/{visit_id}", response_model=VisitModel)

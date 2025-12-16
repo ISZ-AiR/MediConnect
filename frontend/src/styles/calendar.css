@@ -1,0 +1,32 @@
+.fc .doctor-schedule {
+  background-color: #A5D6A7 !important;
+}
+
+.reservation-event {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.fc-day-sat, .fc-day-sun {
+  background-color: #f0f0f0 !important;
+}
+
+.fc-event {
+
+  background-color: rgba(7, 160, 255, 0.67) !important;
+  border: none !important;
+  color: #000 !important;
+}
+
+
+.fc .fc-daygrid-day-number {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}

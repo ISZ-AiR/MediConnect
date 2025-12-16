@@ -1,5 +1,6 @@
+from datetime import date, time
+
 from pydantic import BaseModel, Field
-from datetime import date
 
 # ----- VISIT -----
 
@@ -13,6 +14,7 @@ class VisitBase(BaseModel):
     visit_note: str = Field(...,
                             description="Notes and summary from the medical visit")
     visit_date: date = Field(..., description="Date when the visit took place")
+    visit_time: time = Field(..., description="Time the visit took place")
     nurse_id: int | None = Field(None, description="ID of the nurse assisting the visit")
 
 

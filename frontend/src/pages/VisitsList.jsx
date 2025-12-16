@@ -180,7 +180,7 @@ const VisitsList = () => {
                       <td>{(page - 1) * pageSize + idx + 1}</td>
                       <td>{v.visit_id}</td>
                       <td>{v.reservation.reservation_id}</td>
-                      <td>{v.visit_date}</td>
+                      <td>{v.visit_date + " " + v.visit_time}</td>
                       <td>{v.nurse.first_name} {v.nurse.last_name}</td>
                       <td>{v.doctor.first_name} {v.doctor.last_name}</td>
                       <td>{v.patient.first_name} {v.patient.last_name}</td>

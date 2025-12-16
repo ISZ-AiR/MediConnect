@@ -1,17 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
 
+import models
+from api import api_router
 from core.database import engine
 from core.init_db import create_tables
-
-from api import api_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-
-import models
-
-
 
 
 @asynccontextmanager

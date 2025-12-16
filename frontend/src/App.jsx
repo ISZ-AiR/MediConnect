@@ -62,6 +62,7 @@ import Examinations from "./pages/reports/Examinations";
 import DoctorAvailability from "./pages/reports/DoctorAvailability.jsx";
 import PatientRecordsList from "./pages/PatientRecordsList.jsx";
 import PatientRecordsDetail from "./pages/PatientRecordsDetail.jsx";
+import VisitsCalendar from "./pages/VisitsCalendar.jsx";
 
 function App() {
   return (
@@ -525,6 +526,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/patient/prescriptions/:id"
+              element={
+                <ProtectedRoute allowedRoles={["patient"]}>
+                  <PrescriptionDetail />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Placeholder routes for other roles - add components later */}
             <Route
@@ -532,6 +541,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["doctor"]}>
                   <DoctorDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/doctor/visits/calendar"
+              element={
+                <ProtectedRoute allowedRoles={["doctor"]}>
+                  <VisitsCalendar />
                 </ProtectedRoute>
               }
             />
@@ -719,7 +737,7 @@ function App() {
             <Route
               path="/doctor/examinations/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "doctor"]}>
                   <ExaminationForm />
                 </ProtectedRoute>
               }
@@ -730,6 +748,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["nurse"]}>
                   <NurseDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/nurse/visits/calendar"
+              element={
+                <ProtectedRoute allowedRoles={["nurse"]}>
+                  <VisitsCalendar />
                 </ProtectedRoute>
               }
             />
@@ -917,6 +944,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, ForeignKey, Date, Time, Boolean, String
-from sqlalchemy.orm import relationship
 from core.database import Base
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, Time
+from sqlalchemy.orm import relationship
+
 
 class Schedule(Base):
     __tablename__ = "schedules"
