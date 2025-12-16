@@ -41,18 +41,25 @@ const ReferralsList = () => {
     fetchReferrals();
   }, []);
 
-  const filteredReferrals = referrals.filter(r => {
-    const patientMatch = r.patient_name?.toLowerCase().includes(filterPatient.toLowerCase());
-    const doctorMatch = r.doctor_name?.toLowerCase().includes(filterDoctor.toLowerCase());
+  const filteredReferrals = referrals.filter((r) => {
+    const patientMatch = r.patient_name
+      ?.toLowerCase()
+      .includes(filterPatient.toLowerCase());
+    const doctorMatch = r.doctor_name
+      ?.toLowerCase()
+      .includes(filterDoctor.toLowerCase());
     const dateMatch = filterDate ? r.referral_date === filterDate : true;
     const mineMatch = filterMine ? r.doctor_user_id === user.user_id : true;
-    const completedMatch = filterCompleted === ""
-      ? true
-      : filterCompleted === "yes"
-      ? r.is_completed
-      : !r.is_completed;
+    const completedMatch =
+      filterCompleted === ""
+        ? true
+        : filterCompleted === "yes"
+        ? r.is_completed
+        : !r.is_completed;
 
-    return patientMatch && doctorMatch && dateMatch && mineMatch && completedMatch;
+    return (
+      patientMatch && doctorMatch && dateMatch && mineMatch && completedMatch
+    );
   });
 
   const totalPages = Math.ceil(filteredReferrals.length / PAGE_SIZE);
@@ -65,7 +72,7 @@ const ReferralsList = () => {
     if (!window.confirm("Delete this referral?")) return;
     try {
       await resourceService.deleteReferral(id);
-      setReferrals(prev => prev.filter(r => r.referral_id !== id));
+      setReferrals((prev) => prev.filter((r) => r.referral_id !== id));
     } catch (err) {
       console.error(err);
       alert("Failed to delete referral");
@@ -78,7 +85,10 @@ const ReferralsList = () => {
       <div className="container py-5">
         {/* Nagłówek */}
         <div className="text-center mb-4">
-          <i className="bi bi-card-checklist text-warning" style={{ fontSize: "3rem" }}></i>
+          <i
+            className="bi bi-card-checklist text-warning"
+            style={{ fontSize: "3rem" }}
+          ></i>
           <h2 className="fw-bold mt-3">Referrals</h2>
           <p className="text-muted">Manage all referrals</p>
         </div>
@@ -92,7 +102,10 @@ const ReferralsList = () => {
                 type="text"
                 className="form-control"
                 value={filterPatient}
-                onChange={(e) => { setFilterPatient(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setFilterPatient(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
             <div className="col-md-6">
@@ -101,7 +114,10 @@ const ReferralsList = () => {
                 type="text"
                 className="form-control"
                 value={filterDoctor}
-                onChange={(e) => { setFilterDoctor(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setFilterDoctor(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
           </div>
@@ -113,7 +129,10 @@ const ReferralsList = () => {
                 type="date"
                 className="form-control"
                 value={filterDate}
-                onChange={(e) => { setFilterDate(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setFilterDate(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
             <div className="col-md-6">
@@ -121,7 +140,10 @@ const ReferralsList = () => {
               <select
                 className="form-select"
                 value={filterCompleted}
-                onChange={(e) => { setFilterCompleted(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setFilterCompleted(e.target.value);
+                  setCurrentPage(1);
+                }}
               >
                 <option value="">All</option>
                 <option value="yes">Yes</option>
@@ -141,7 +163,10 @@ const ReferralsList = () => {
                     checked={filterMine}
                     onChange={(e) => setFilterMine(e.target.checked)}
                   />
-                  <label className="form-check-label fw-bold" htmlFor="mineCheck">
+                  <label
+                    className="form-check-label fw-bold"
+                    htmlFor="mineCheck"
+                  >
                     Only my referrals
                   </label>
                 </div>
@@ -155,7 +180,7 @@ const ReferralsList = () => {
           <div className="card-body">
             {loading ? (
               <div className="text-center py-5">
-                <div className="spinner-border text-warning" role="status"></div>
+                <div className="spinner-border text-warning"></div>
               </div>
             ) : paginated.length > 0 ? (
               <div className="table-responsive">
@@ -172,7 +197,7 @@ const ReferralsList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginated.map(r => (
+                    {paginated.map((r) => (
                       <tr key={r.referral_id}>
                         <td>{r.visit_id}</td>
                         <td>{r.examination_name || r.examination_id}</td>
@@ -189,7 +214,7 @@ const ReferralsList = () => {
                               View
                             </Link>
 
-                            {(r.doctor_user_id === user.user_id) && (
+                            {r.doctor_user_id === user.user_id && (
                               <>
                                 <Link
                                   to={`/${rolePrefix}/referrals/edit/${r.referral_id}`}
@@ -203,8 +228,8 @@ const ReferralsList = () => {
                                 >
                                   Delete
                                 </button>
-                            </>
-                          )}
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -220,16 +245,27 @@ const ReferralsList = () => {
             {totalPages > 1 && (
               <nav className="mt-3">
                 <ul className="pagination justify-content-center mb-0">
-                  <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                  <li
+                    className={`page-item ${
+                      currentPage === 1 ? "disabled" : ""
+                    }`}
+                  >
                     <button
                       className="page-link"
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
                     >
                       Previous
                     </button>
                   </li>
                   {Array.from({ length: totalPages }, (_, i) => (
-                    <li key={i} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
+                    <li
+                      key={i}
+                      className={`page-item ${
+                        currentPage === i + 1 ? "active" : ""
+                      }`}
+                    >
                       <button
                         className="page-link"
                         onClick={() => setCurrentPage(i + 1)}
@@ -238,10 +274,16 @@ const ReferralsList = () => {
                       </button>
                     </li>
                   ))}
-                  <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                  <li
+                    className={`page-item ${
+                      currentPage === totalPages ? "disabled" : ""
+                    }`}
+                  >
                     <button
                       className="page-link"
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
                     >
                       Next
                     </button>

@@ -182,10 +182,7 @@ const PrescriptionsList = () => {
           <div className="card-body">
             {loading ? (
               <div className="text-center py-5">
-                <div
-                  className="spinner-border text-warning"
-                  role="status"
-                ></div>
+                <div className="spinner-border text-warning"></div>
               </div>
             ) : paginated.length > 0 ? (
               <div className="table-responsive">

@@ -244,10 +244,8 @@ const SchedulesList = () => {
 
                 {/* Loading */}
                 {loading && (
-                  <div className="d-flex justify-content-center my-4">
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-warning"></div>
                   </div>
                 )}
 
@@ -259,7 +257,7 @@ const SchedulesList = () => {
                       <div key={date} className="mb-4">
                         <div className="d-flex align-items-center mb-3 bg-primary bg-opacity-10 p-2 rounded">
                           <i className="bi bi-calendar-event text-primary me-2 fs-5"></i>
-                          <h5 className="fw-semibold mb-0 text-primary">
+                          <h5 className="fw-semibold mb-0 text-white">
                             {new Date(date).toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",

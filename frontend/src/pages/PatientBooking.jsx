@@ -128,20 +128,14 @@ const PatientBooking = () => {
     }
   };
 
-  if (!patient) {
+  if (loading)
     return (
-      <div className="min-vh-100 bg-light">
-        <Navbar />
-        <div className="container py-5">
-          <div className="d-flex justify-content-center my-4">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        </div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
       </div>
     );
-  }
+
+  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
     <div className="min-vh-100 bg-light">

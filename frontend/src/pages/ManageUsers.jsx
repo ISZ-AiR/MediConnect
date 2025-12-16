@@ -175,9 +175,7 @@ const ManageUsers = () => {
         {/* Users Table */}
         {loading ? (
           <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
+            <div className="spinner-border text-warning"></div>
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="alert alert-info">No users found</div>

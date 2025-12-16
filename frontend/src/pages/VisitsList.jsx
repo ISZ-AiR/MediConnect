@@ -11,14 +11,21 @@ const VisitsList = () => {
   const [nurses, setNurses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({ doctor: "", nurse: "", startDate: "", endDate: "" });
+  const [filters, setFilters] = useState({
+    doctor: "",
+    nurse: "",
+    startDate: "",
+    endDate: "",
+  });
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
   const rolePrefix =
-  user?.role === "doctor" ? "/doctor" :
-  user?.role === "nurse" ? "/nurse" :
-  "/receptionist";
+    user?.role === "doctor"
+      ? "/doctor"
+      : user?.role === "nurse"
+      ? "/nurse"
+      : "/receptionist";
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,11 +37,15 @@ const VisitsList = () => {
         if (user?.role === "doctor") {
           const myDoctorRes = await apiRequest("/doctor/me");
           const myDoctor = myDoctorRes.data;
-          visitsRes = await apiRequest(`/visits/detailed/doctor/${myDoctor.doctor_id}`);
+          visitsRes = await apiRequest(
+            `/visits/detailed/doctor/${myDoctor.doctor_id}`
+          );
         } else if (user?.role === "nurse") {
           const myNurseRes = await apiRequest("/nurse/me");
           const myNurse = myNurseRes.data;
-          visitsRes = await apiRequest(`/visits/detailed/nurse/${myNurse.nurse_id}`);
+          visitsRes = await apiRequest(
+            `/visits/detailed/nurse/${myNurse.nurse_id}`
+          );
         } else {
           visitsRes = await apiRequest("/visits/detailed");
         }
@@ -44,7 +55,7 @@ const VisitsList = () => {
         // pobieranie listy doctorów i nurse (do filtrów)
         const [doctorsRes, nursesRes] = await Promise.all([
           apiRequest("/doctor"),
-          apiRequest("/nurse")
+          apiRequest("/nurse"),
         ]);
         setDoctors(doctorsRes.data || []);
         setNurses(nursesRes.data || []);
@@ -65,7 +76,7 @@ const VisitsList = () => {
 
     try {
       await apiRequest(`/visits/${visit_id}`, { method: "DELETE" });
-      setVisits(prev => prev.filter(v => v.visit_id !== visit_id));
+      setVisits((prev) => prev.filter((v) => v.visit_id !== visit_id));
     } catch (err) {
       console.error(err);
       alert("Failed to delete visit");
@@ -87,16 +98,10 @@ const VisitsList = () => {
   });
 
   const totalPages = Math.ceil(filteredVisits.length / pageSize);
-  const paginatedVisits = filteredVisits.slice((page - 1) * pageSize, page * pageSize);
-
-  if (loading)
-    return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-warning"></div>
-      </div>
-    );
-
-  if (error) return <div className="alert alert-danger">{error}</div>;
+  const paginatedVisits = filteredVisits.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
   return (
     <div className="min-vh-100 bg-light">
@@ -104,9 +109,18 @@ const VisitsList = () => {
       <div className="container py-5">
         <div className="card shadow-sm border-0 p-4 mb-4">
           <div className="text-center mb-3">
-            <i className="bi bi-calendar-check text-warning" style={{ fontSize: "3rem" }}></i>
-            <h2 className="fw-bold mt-2 mb-2">{user?.role === "doctor" ? "My Visits" : "Visits"}</h2>
-            <p className="text-muted">{user?.role === "doctor" ? "Visits assigned to you" : "Manage all visits"}</p>
+            <i
+              className="bi bi-calendar-check text-warning"
+              style={{ fontSize: "3rem" }}
+            ></i>
+            <h2 className="fw-bold mt-2 mb-2">
+              {user?.role === "doctor" ? "My Visits" : "Visits"}
+            </h2>
+            <p className="text-muted">
+              {user?.role === "doctor"
+                ? "Visits assigned to you"
+                : "Manage all visits"}
+            </p>
           </div>
 
           {/* Filtry */}
@@ -116,11 +130,16 @@ const VisitsList = () => {
               <select
                 className="form-select"
                 value={filters.doctor}
-                onChange={(e) => { setFilters({ ...filters, doctor: e.target.value }); setPage(1); }}
+                onChange={(e) => {
+                  setFilters({ ...filters, doctor: e.target.value });
+                  setPage(1);
+                }}
               >
                 <option value="">All</option>
-                {doctors.map(d => (
-                  <option key={d.doctor_id} value={d.user_id}>{d.first_name} {d.last_name}</option>
+                {doctors.map((d) => (
+                  <option key={d.doctor_id} value={d.user_id}>
+                    {d.first_name} {d.last_name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -130,11 +149,16 @@ const VisitsList = () => {
                 <select
                   className="form-select"
                   value={filters.nurse}
-                  onChange={(e) => { setFilters({ ...filters, nurse: e.target.value }); setPage(1); }}
+                  onChange={(e) => {
+                    setFilters({ ...filters, nurse: e.target.value });
+                    setPage(1);
+                  }}
                 >
                   <option value="">All</option>
-                  {nurses.map(n => (
-                    <option key={n.nurse_id} value={n.user_id}>{n.first_name} {n.last_name}</option>
+                  {nurses.map((n) => (
+                    <option key={n.nurse_id} value={n.user_id}>
+                      {n.first_name} {n.last_name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -145,7 +169,10 @@ const VisitsList = () => {
                 type="date"
                 className="form-control"
                 value={filters.startDate}
-                onChange={(e) => { setFilters({ ...filters, startDate: e.target.value }); setPage(1); }}
+                onChange={(e) => {
+                  setFilters({ ...filters, startDate: e.target.value });
+                  setPage(1);
+                }}
               />
             </div>
             <div className="flex-grow-1" style={{ minWidth: "200px" }}>
@@ -154,93 +181,120 @@ const VisitsList = () => {
                 type="date"
                 className="form-control"
                 value={filters.endDate}
-                onChange={(e) => { setFilters({ ...filters, endDate: e.target.value }); setPage(1); }}
+                onChange={(e) => {
+                  setFilters({ ...filters, endDate: e.target.value });
+                  setPage(1);
+                }}
               />
             </div>
           </div>
 
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Visit ID</th>
-                  <th>Reservation ID</th>
-                  <th>Date</th>
-                  <th>Nurse</th>
-                  <th>Doctor</th>
-                  <th>Patient</th>
-                  <th>Note</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedVisits.map((v, idx) => (
+          {loading && (
+            <div className="text-center py-5">
+              <div className="spinner-border text-warning"></div>
+            </div>
+          )}
+
+          {error && <div className="alert alert-danger">{error}</div>}
+
+          {!loading && !error && (
+            <div className="table-responsive">
+              <table className="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Visit ID</th>
+                    <th>Reservation ID</th>
+                    <th>Date</th>
+                    <th>Nurse</th>
+                    <th>Doctor</th>
+                    <th>Patient</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedVisits.map((v, idx) => (
                     <tr key={v.visit_id}>
                       <td>{(page - 1) * pageSize + idx + 1}</td>
                       <td>{v.visit_id}</td>
                       <td>{v.reservation.reservation_id}</td>
                       <td>{v.visit_date + " " + v.visit_time}</td>
-                      <td>{v.nurse.first_name} {v.nurse.last_name}</td>
-                      <td>{v.doctor.first_name} {v.doctor.last_name}</td>
-                      <td>{v.patient.first_name} {v.patient.last_name}</td>
+                      <td>
+                        {v.nurse.first_name} {v.nurse.last_name}
+                      </td>
+                      <td>
+                        {v.doctor.first_name} {v.doctor.last_name}
+                      </td>
+                      <td>
+                        {v.patient.first_name} {v.patient.last_name}
+                      </td>
                       <td>{v.visit_note || ""}</td>
                       <td>
                         {/* View dostępny dla wszystkich */}
                         <Link
-                            to={`${rolePrefix}/visits/${v.visit_id}`}
-                            className="btn btn-sm btn-outline-primary me-2"
+                          to={`${rolePrefix}/visits/${v.visit_id}`}
+                          className="btn btn-sm btn-outline-primary me-2"
                         >
                           View
                         </Link>
 
                         {/* Edit: aktywny dla doctor, receptionist i admin */}
-                        {["doctor", "receptionist", "admin"].includes(user?.role) ? (
-                            <Link
-                                to={`${rolePrefix}/visits/edit/${v.visit_id}`}
-                                className="btn btn-sm btn-outline-secondary me-2"
-                            >
-                              Edit
-                            </Link>
+                        {["doctor", "receptionist", "admin"].includes(
+                          user?.role
+                        ) ? (
+                          <Link
+                            to={`${rolePrefix}/visits/edit/${v.visit_id}`}
+                            className="btn btn-sm btn-outline-secondary me-2"
+                          >
+                            Edit
+                          </Link>
                         ) : (
-                            <button className="btn btn-sm btn-outline-secondary me-2" disabled>
-                              Edit
-                            </button>
+                          <button
+                            className="btn btn-sm btn-outline-secondary me-2"
+                            disabled
+                          >
+                            Edit
+                          </button>
                         )}
 
                         {/* Delete: tylko dla receptionist i admin */}
                         {["receptionist", "admin"].includes(user?.role) && (
-                            <button
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() => handleDelete(v.visit_id)}
-                            >
-                              Delete
-                            </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDelete(v.visit_id)}
+                          >
+                            Delete
+                          </button>
                         )}
                       </td>
                     </tr>
-                ))}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
 
-            {/* Paginacja */}
-            <div className="d-flex justify-content-between mt-3">
-              <button
+              {/* Paginacja */}
+              <div className="d-flex justify-content-between mt-3">
+                <button
                   className="btn btn-outline-secondary"
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-              >Previous
-              </button>
-              <span>Page {page} of {totalPages}</span>
-              <button
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+                <button
                   className="btn btn-outline-secondary"
                   disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
-              >Next
-              </button>
+                >
+                  Next
+                </button>
+              </div>
             </div>
-          </div>
-
+          )}
         </div>
       </div>
     </div>

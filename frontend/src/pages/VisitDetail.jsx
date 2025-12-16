@@ -24,7 +24,7 @@ const VisitDetail = () => {
     getPatientNameFromReservation,
     getPatientPESELFromReservation,
     getNurseName,
-    getDoctorNameFromReservation
+    getDoctorNameFromReservation,
   } = useVisitDetails(id, user?.role);
 
   const prescriptionsData = isDoctor ? prescriptions : [];
@@ -37,7 +37,7 @@ const VisitDetail = () => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      switch(type) {
+      switch (type) {
         case "prescriptions":
           await resourceService.deletePrescription(itemId);
           break;
@@ -58,11 +58,8 @@ const VisitDetail = () => {
 
   if (loading)
     return (
-      <div className="min-vh-100">
-        <Navbar />
-        <div className="container py-5 text-center">
-          <div className="spinner-border text-warning" role="status"></div>
-        </div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
       </div>
     );
 
@@ -102,33 +99,47 @@ const VisitDetail = () => {
               color="warning"
               isDoctor={isDoctor}
               isNurse={isNurse}
-
               onBack={() => navigate(`/${rolePrefix}/visits`)}
-
               onEdit={(section, itemId) => {
-                if (section === "prescriptions" || section === "referrals" || section === "diagnoses") {
+                if (
+                  section === "prescriptions" ||
+                  section === "referrals" ||
+                  section === "diagnoses"
+                ) {
                   if (!isDoctor) return;
                   if (section === "prescriptions")
-                    return navigate(`/${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`);
+                    return navigate(
+                      `/${rolePrefix}/prescriptions/edit/${visit.visit_id}/${itemId}`
+                    );
                   if (section === "referrals")
-                    return navigate(`/${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`);
+                    return navigate(
+                      `/${rolePrefix}/referrals/edit/${visit.visit_id}/${itemId}`
+                    );
                   if (section === "diagnoses")
-                    return navigate(`/${rolePrefix}/diagnosis/edit/${visit.visit_id}/${itemId}`);
+                    return navigate(
+                      `/${rolePrefix}/diagnosis/edit/${visit.visit_id}/${itemId}`
+                    );
                 } else {
-                  return navigate(`/${rolePrefix}/visits/edit/${visit.visit_id}`);
+                  return navigate(
+                    `/${rolePrefix}/visits/edit/${visit.visit_id}`
+                  );
                 }
               }}
-
               onAdd={(section) => {
                 if (!isDoctor) return;
                 if (section === "prescriptions")
-                  return navigate(`/${rolePrefix}/prescriptions/add/${visit.visit_id}`);
+                  return navigate(
+                    `/${rolePrefix}/prescriptions/add/${visit.visit_id}`
+                  );
                 if (section === "referrals")
-                  return navigate(`/${rolePrefix}/referrals/add/${visit.visit_id}`);
+                  return navigate(
+                    `/${rolePrefix}/referrals/add/${visit.visit_id}`
+                  );
                 if (section === "diagnoses")
-                  return navigate(`/${rolePrefix}/diagnosis/add/${visit.visit_id}`);
+                  return navigate(
+                    `/${rolePrefix}/diagnosis/add/${visit.visit_id}`
+                  );
               }}
-
               onDelete={handleDelete}
             />
           </div>
