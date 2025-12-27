@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, ForeignKey, Integer, Float, String, Text
 from sqlalchemy.orm import relationship
 from core.database import Base
 
@@ -11,5 +11,9 @@ class UserSettings(Base):
 
     theme = Column(String(10), default="light", nullable=False)
     background_url = Column(Text, nullable=True)
+
+    bg_opacity = Column(Float, default=0.85)
+    bg_blur = Column(Integer, default=10)
+    bg_brightness = Column(Float, default=1.0)
 
     user = relationship("User", back_populates="settings")

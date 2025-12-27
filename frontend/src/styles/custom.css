@@ -1,210 +1,189 @@
-/* Custom styles for MediConnect */
+/* ==========================================================================
+   MediConnect - Global Styles & Dynamic Glassmorphism
+   ========================================================================== */
 
 :root {
+  /* Standard Bootstrap Colors */
   --primary-color: #0d6efd;
   --secondary-color: #6c757d;
   --success-color: #198754;
   --info-color: #0dcaf0;
   --warning-color: #ffc107;
   --danger-color: #dc3545;
+
+  /* Variables controlled by React (ThemeContext) */
+  --app-bg-opacity: 0.85;
+  --app-bg-blur: 10px;
+  --app-bg-brightness: 1.0;
+
+  /* Tile Color Logic (RGB components for transparency manipulation) */
+  --card-rgb: 255, 255, 255; /* White for Light Mode */
+  --text-color: #212529;
 }
+
+/* Dark Mode - Changes the color base */
+[data-theme='dark'], .dark {
+  --card-rgb: 33, 37, 41; /* Dark Grey for Dark Mode */
+  --text-color: #f8f9fa;
+}
+
+/* ==========================================================================
+   Base & Typography
+   ========================================================================== */
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: var(--text-color);
+  min-height: 100vh;
+  margin: 0;
 }
 
-/* Navbar styles */
+/* IMPORTANT: This ensures that when a background is set,
+   all parent containers become transparent so the image shows through.
+*/
+body[style*="background-image"] {
+  background-attachment: fixed !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+body[style*="background-image"] #root,
+body[style*="background-image"] .min-vh-100 {
+  background-color: transparent !important;
+}
+
+/* The Dimming Overlay Layer */
+body[style*="background-image"]::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Creates dimming effect: 0 is dark, 1 is bright */
+  background-color: rgba(0, 0, 0, calc(1 - var(--app-bg-brightness)));
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Main Tile Styling (Glassmorphism)
+   ========================================================================== */
+
+body[style*="background-image"] .card,
+body[style*="background-image"] .navbar,
+body[style*="background-image"] .dropdown-menu,
+body[style*="background-image"] .card-header,
+body[style*="background-image"] .bg-white {
+  background-color: rgba(var(--card-rgb), var(--app-bg-opacity)) !important;
+  backdrop-filter: blur(var(--app-bg-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--app-bg-blur)) !important;
+
+  color: var(--text-color) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: background-color 0.3s ease, backdrop-filter 0.1s ease;
+}
+
+/* Prevent color stacking for nested elements */
+body[style*="background-image"] .card .card,
+body[style*="background-image"] .card .card-body {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+}
+
+/* ==========================================================================
+   Tables & Data Display
+   ========================================================================== */
+
+body[style*="background-image"] .table {
+  --bs-table-bg: transparent !important;
+  --bs-table-striped-bg: rgba(var(--card-rgb), 0.05) !important;
+  --bs-table-hover-bg: rgba(var(--card-rgb), 0.1) !important;
+  color: inherit !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body[style*="background-image"] thead.table-light,
+body[style*="background-image"] .table-light {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-color) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark table, .dark .table, .dark .table td, .dark .table th {
+  color: #f8f9fa !important;
+}
+
+.dark .text-muted {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ==========================================================================
+   Form Elements & UI
+   ========================================================================== */
+
+.dark .form-control, .dark .form-select {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.dark .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.dark .page-link {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ==========================================================================
+   Original MediConnect Utility Styles
+   ========================================================================== */
+
+.navbar-brand { font-size: 1.5rem; transition: transform 0.3s ease; }
+.navbar-brand:hover { transform: scale(1.05); }
+.nav-link { transition: color 0.3s ease; font-weight: 500; }
 .navbar {
-  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1050; /* Bootstrap standardowo używa 1030 dla navbara */
 }
 
-.navbar-brand {
-  font-size: 1.5rem;
-  transition: transform 0.3s ease;
+.dropdown-menu {
+  z-index: 9999 !important;
 }
 
-.navbar-brand:hover {
-  transform: scale(1.05);
-}
-
-.nav-link {
-  transition: color 0.3s ease;
-  font-weight: 500;
-}
-
-.nav-link:hover {
-  color: var(--primary-color) !important;
-}
-
-/* Card hover effects */
-.hover-shadow {
-  transition: all 0.3s ease-in-out;
-}
-
+.hover-shadow { transition: all 0.3s ease-in-out; }
 .hover-shadow:hover {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
   transform: translateY(-5px);
 }
 
-/* Button styles */
-.btn {
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
+.btn { transition: all 0.3s ease; font-weight: 500; }
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Hero section */
-.bg-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
-}
-
-/* Footer links */
-footer a {
-  transition: color 0.3s ease;
-}
-
-footer a:hover {
-  color: #fff !important;
-}
-
-/* Login page styles */
-.login-card {
-  border-radius: 1rem;
-  overflow: hidden;
-}
-
-.form-control:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-}
-
-.input-group .btn {
-  border-left: none;
-}
-
-.input-group .form-control:focus + .btn {
-  border-color: var(--primary-color);
-}
-
-/* Dashboard styles */
-.dashboard-card {
-  transition: all 0.3s ease;
-}
-
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Dropdown menu styles */
-.dropdown-menu {
-  border: none;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  border-radius: 0.5rem;
-}
-
-.dropdown-item {
-  transition: background-color 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background-color: rgba(13, 110, 253, 0.1);
-}
-
-/* Alert styles */
-.alert {
-  border: none;
-  border-radius: 0.5rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .display-4 {
-    font-size: 2.5rem;
-  }
-  
-  .display-5 {
-    font-size: 2rem;
-  }
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
+.dropdown-item { transition: background-color 0.2s ease; }
+.dark .dropdown-item { color: #f8f9fa !important; }
+.dark .dropdown-item:hover { background-color: rgba(255, 255, 255, 0.1); }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
+.badge { padding: 0.5rem 1rem; font-weight: 500; }
 
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 5px;
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+.dark .card-title, .dark .form-label {
+    color: #ffffff !important;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Loading spinner */
-.spinner-border {
-  vertical-align: middle;
-}
-
-/* Badge styles */
-.badge {
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-}
-
-/* Role selection radio buttons */
-.btn-check:checked + .btn-outline-primary {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.btn-check:checked + .btn-outline-success {
-  background-color: var(--success-color);
-  color: white;
-}
-
-.btn-check:checked + .btn-outline-info {
-  background-color: var(--info-color);
-  color: white;
-}
-
-.btn-check:checked + .btn-outline-warning {
-  background-color: var(--warning-color);
-  color: white;
-}
-
-/* Form sections */
-form hr {
-  margin: 2rem 0;
-  opacity: 0.1;
-}
-
-/* Required field indicator */
-.text-danger {
-  font-weight: bold;
-}
-
-/* Info alerts */
-.alert-info {
-  border-left: 4px solid var(--info-color);
-  background-color: rgba(13, 202, 240, 0.1);
-}
-

@@ -5,10 +5,13 @@ import { useAuth } from "./AuthContext";
 const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
-  const { user } = useAuth(); // Get user to check if logged in
+  const { user } = useAuth();
   const [theme, setTheme] = useState("light");
   const [backgroundUrl, setBackgroundUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const [bgOpacity, setBgOpacity] = useState(0.85);
+  const [bgBlur, setBgBlur] = useState(10);
+  const [bgBrightness, setBgBrightness] = useState(1.0);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -18,11 +21,14 @@ export const ThemeProvider = ({ children }) => {
       }
 
       try {
-        const response = await apiRequest("/settings/"); // Domyślnie GET
+        const response = await apiRequest("/settings/");
 
         if (response && response.success && response.data) {
           setTheme(response.data.theme || "light");
           setBackgroundUrl(response.data.background_url || "");
+          setBgOpacity(response.data.bg_opacity ?? 0.85);
+          setBgBlur(response.data.bg_blur ?? 10);
+          setBgBrightness(response.data.bg_brightness ?? 1.0);
         }
       } catch (error) {
         console.error("Failed to fetch user settings:", error);
@@ -34,15 +40,17 @@ export const ThemeProvider = ({ children }) => {
     fetchSettings();
   }, [user]);
 
-  // Apply visual changes to the DOM
   useEffect(() => {
     const root = window.document.documentElement;
 
-    // Manage CSS classes for theme
+    root.style.setProperty('--app-bg-opacity', bgOpacity);
+    root.style.setProperty('--app-bg-blur', `${bgBlur}px`);
+    root.style.setProperty('--app-bg-brightness', bgBrightness);
+
     root.classList.remove("light", "dark");
     root.classList.add(theme);
+    root.setAttribute("data-theme", theme);
 
-    // Manage Body background
     if (backgroundUrl) {
       document.body.style.backgroundImage = `url("${backgroundUrl}")`;
       document.body.style.backgroundSize = "cover";
@@ -51,27 +59,38 @@ export const ThemeProvider = ({ children }) => {
     } else {
       document.body.style.backgroundImage = "none";
     }
-  }, [theme, backgroundUrl]);
+  }, [theme, backgroundUrl, bgOpacity, bgBlur, bgBrightness]);
 
-  const updateSettings = async (newTheme, newBg) => {
+  const updateSettings = async (newTheme, newBg, newOpacity, newBlur, newBrightness) => {
     try {
       await apiRequest("/settings/", {
         method: "PATCH",
         body: JSON.stringify({
           theme: newTheme,
           background_url: newBg,
+          bg_opacity: newOpacity,
+          bg_blur: newBlur,
+          bg_brightness: newBrightness
         }),
       });
 
       setTheme(newTheme);
       setBackgroundUrl(newBg);
+      setBgOpacity(newOpacity);
+      setBgBlur(newBlur);
+      setBgBrightness(newBrightness);
     } catch (error) {
       console.error("Failed to update settings:", error);
+      throw error;
     }
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, backgroundUrl, updateSettings, loading }}>
+    <ThemeContext.Provider value={{
+      theme, backgroundUrl, bgOpacity, bgBlur, bgBrightness,
+      setBgOpacity, setBgBlur, setBgBrightness,
+      updateSettings, loading
+    }}>
       {children}
     </ThemeContext.Provider>
   );
