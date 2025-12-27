@@ -1,14 +1,7 @@
 import React from "react";
 import { statsService } from "../../services/statsService";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer,
 } from "recharts";
 import ReportScaffold from "../../components/ReportScaffold";
 
@@ -17,130 +10,121 @@ const DoctorWorkload = () => {
     await statsService.getDoctorWorkload(startDate, endDate);
 
   const renderTable = (rows) => (
-    <table className="table table-striped">
-      <thead>
-        <tr>
-          <th>Doctor</th>
-          <th>Reservations</th>
-          <th>Completed Visits</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((d) => {
-          const totalReservations = d.daily.reduce(
-            (sum, day) => sum + (day.reservations || 0),
-            0
-          );
-          const totalVisits = d.daily.reduce(
-            (sum, day) => sum + (day.visits || 0),
-            0
-          );
-          return (
-            <tr key={d.doctor_id}>
-              <td>
-                {d.doctor_id} - {d.first_name} {d.last_name}
-              </td>
-              <td>{totalReservations}</td>
-              <td>{totalVisits}</td>
+    <div className="card border-0 shadow-sm overflow-hidden mb-4">
+      <div className="card-header bg-white py-3 border-0">
+        <h5 className="mb-0 fw-bold text-dark">
+          <i className="bi bi-briefcase me-2 text-primary"></i>
+          Workload Statistics by Staff
+        </h5>
+      </div>
+      <div className="table-responsive">
+        <table className="table table-hover align-middle mb-0">
+          <thead className="bg-light text-uppercase small fw-bold text-muted">
+            <tr>
+              <th className="px-4 py-3 border-0">Doctor Name</th>
+              <th className="py-3 border-0 text-center">Total Reservations</th>
+              <th className="px-4 py-3 border-0 text-end">Completed Visits</th>
             </tr>
-          );
-        })}
-      </tbody>
-    </table>
+          </thead>
+          <tbody className="border-top-0">
+            {rows.map((d) => {
+              const totalRes = d.daily.reduce((sum, day) => sum + (day.reservations || 0), 0);
+              const totalVis = d.daily.reduce((sum, day) => sum + (day.visits || 0), 0);
+              return (
+                <tr key={d.doctor_id}>
+                  <td className="px-4 py-3">
+                    <div className="fw-bold text-dark">{d.first_name} {d.last_name}</div>
+                    <div className="small text-muted">ID: #{d.doctor_id}</div>
+                  </td>
+                  <td className="text-center">
+                    <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-medium">
+                      {totalRes}
+                    </span>
+                  </td>
+                  <td className="px-4 text-end">
+                    <span className="text-success fw-bold fs-6">{totalVis}</span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 
   const charts = [
     {
-      title: "Reservations vs Completed Visits (Daily)",
+      title: "Clinic-wide Activity (Daily)",
       render: (filtered) => {
         const dateMap = {};
         filtered.forEach((doc) => {
           doc.daily.forEach((day) => {
             if (!dateMap[day.date])
-              dateMap[day.date] = {
-                date: day.date,
-                reservations: 0,
-                visits: 0,
-              };
-            dateMap[day.date].reservations += day.reservations;
-            dateMap[day.date].visits += day.visits;
+              dateMap[day.date] = { date: day.date, res: 0, vis: 0 };
+            dateMap[day.date].res += day.reservations;
+            dateMap[day.date].vis += day.visits;
           });
         });
-        const chartData = Object.values(dateMap).sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
-        );
+        const chartData = Object.values(dateMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={chartData}
-              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="reservations" fill="#8884d8" name="Reservations" />
-              <Bar dataKey="visits" fill="#82ca9d" name="Completed Visits" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="card border-0 shadow-sm p-4 bg-white mb-4">
+            <h6 className="fw-bold mb-4 text-muted text-uppercase small">Daily Reservations vs Completions</h6>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }} />
+                <Legend iconType="circle" />
+                <Bar dataKey="res" name="Reservations" fill="#0d6efd" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="vis" name="Completed" fill="#198754" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         );
       },
     },
     {
-      title: "Reservations vs Completed Visits per Doctor",
+      title: "Performance by Doctor",
       render: (filtered) => {
-        const doctorChartData = filtered.map((d) => {
-          const totalReservations = d.daily.reduce(
-            (sum, day) => sum + (day.reservations || 0),
-            0
-          );
-          const totalVisits = d.daily.reduce(
-            (sum, day) => sum + (day.visits || 0),
-            0
-          );
-          return {
-            doctor: `${d.first_name} ${d.last_name}`,
-            reservations: totalReservations,
-            visits: totalVisits,
-          };
-        });
+        const doctorChartData = filtered.map((d) => ({
+          name: d.last_name,
+          res: d.daily.reduce((sum, day) => sum + (day.reservations || 0), 0),
+          vis: d.daily.reduce((sum, day) => sum + (day.visits || 0), 0),
+        }));
+
         return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={doctorChartData}
-              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="doctor" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="reservations" fill="#8884d8" name="Reservations" />
-              <Bar dataKey="visits" fill="#82ca9d" name="Completed Visits" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="card border-0 shadow-sm p-4 bg-white">
+            <h6 className="fw-bold mb-4 text-muted text-uppercase small">Doctor Comparison (Total)</h6>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={doctorChartData} margin={{ bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Legend iconType="circle" />
+                <Bar dataKey="res" name="Reservations" fill="#0d6efd" radius={[4, 4, 0, 0]} barSize={40} />
+                <Bar dataKey="vis" name="Completed" fill="#198754" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         );
       },
     },
   ];
 
   const buildExcelSheets = (all, { selectedDoctors }) => {
-    const filtered = selectedDoctors.length
-      ? all.filter((d) => selectedDoctors.includes(d.doctor_id))
-      : all;
-    const rows = filtered.map((d) => ({
-      Doctor: `${d.first_name} ${d.last_name}`,
-      Reservations: d.daily.reduce(
-        (sum, day) => sum + (day.reservations || 0),
-        0
-      ),
-      Completed_Visits: d.daily.reduce(
-        (sum, day) => sum + (day.visits || 0),
-        0
-      ),
-    }));
-    return [{ name: "Doctor Workload", rows }];
+    const filtered = selectedDoctors.length ? all.filter(d => selectedDoctors.includes(d.doctor_id)) : all;
+    return [{
+      name: "Doctor Workload",
+      rows: filtered.map(d => ({
+        Doctor: `${d.first_name} ${d.last_name}`,
+        Reservations: d.daily.reduce((sum, day) => sum + (day.reservations || 0), 0),
+        Completed_Visits: d.daily.reduce((sum, day) => sum + (day.visits || 0), 0),
+      }))
+    }];
   };
 
   return (
@@ -150,7 +134,7 @@ const DoctorWorkload = () => {
       renderTable={renderTable}
       charts={charts}
       buildExcelSheets={buildExcelSheets}
-      fileBase="doctor_workload_report"
+      fileBase="doctor_workload"
       includeDateRange
       includeDoctors
       getDoctorsFn={statsService.getDoctors}

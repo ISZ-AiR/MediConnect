@@ -1,14 +1,7 @@
 import React from "react";
 import { statsService } from "../../services/statsService";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer,
 } from "recharts";
 import ReportScaffold from "../../components/ReportScaffold";
 
@@ -17,85 +10,65 @@ const ReservationsSummary = () => {
     await statsService.getReservationsSummary(startDate, endDate);
 
   const renderTable = (rows) => (
-    <table className="table table-striped mb-4">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Total Reservations</th>
-          <th>Cancelled</th>
-          <th>Completed Visits</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows?.length ? (
-          rows
-            .filter((day) => day.total_reservations > 0)
-            .map((day) => (
+    <div className="card border-0 shadow-sm overflow-hidden mb-4">
+      <div className="card-header bg-white py-3 border-0">
+        <h5 className="mb-0 fw-bold"><i className="bi bi-table me-2 text-success"></i>Data Details</h5>
+      </div>
+      <div className="table-responsive">
+        <table className="table table-hover align-middle mb-0">
+          <thead className="bg-light text-uppercase small fw-bold text-muted">
+            <tr>
+              <th className="px-4 py-3">Date</th>
+              <th className="py-3">Total</th>
+              <th className="py-3 text-danger">Cancelled</th>
+              <th className="px-4 py-3 text-end text-success">Completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows?.filter(d => d.total_reservations > 0).map((day) => (
               <tr key={day.date}>
-                <td>{day.date}</td>
-                <td>{day.total_reservations}</td>
-                <td>{day.cancelled_reservations}</td>
-                <td>{day.completed_visits}</td>
+                <td className="px-4 fw-bold">{day.date}</td>
+                <td><span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">{day.total_reservations}</span></td>
+                <td className="text-danger">{day.cancelled_reservations}</td>
+                <td className="px-4 text-end text-success fw-bold">{day.completed_visits}</td>
               </tr>
-            ))
-        ) : (
-          <tr>
-            <td colSpan={4}>No data</td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 
   const charts = [
     {
-      title: "Reservations Overview",
-      render: (rows) => {
-        const chartData = rows.map((day) => ({
-          name: day.date,
-          total: day.total_reservations,
-          cancelled: day.cancelled_reservations,
-          completed: day.completed_visits,
-        }));
-        return (
+      title: "Activity Visualization",
+      render: (rows) => (
+        <div className="p-2">
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
+            <BarChart data={rows}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <XAxis dataKey="date" axisLine={false} tickLine={false} />
+              <YAxis axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 5px 15px rgba(0,0,0,0.1)'}} />
               <Legend />
-              <Bar dataKey="total" fill="#8884d8" />
-              <Bar dataKey="cancelled" fill="#ff4d4f" />
-              <Bar dataKey="completed" fill="#82ca9d" />
+              <Bar dataKey="total_reservations" name="Total" fill="#0d6efd" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="cancelled_reservations" name="Cancelled" fill="#dc3545" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="completed_visits" name="Completed" fill="#198754" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        );
-      },
-    },
-  ];
-
-  const buildExcelSheets = (all) => [
-    {
-      name: "Reservations Summary",
-      rows: all.map((r) => ({
-        Date: r.date,
-        Total_Reservations: r.total_reservations,
-        Cancelled_Reservations: r.cancelled_reservations,
-        Completed_Visits: r.completed_visits,
-      })),
-    },
+        </div>
+      )
+    }
   ];
 
   return (
     <ReportScaffold
-      title="Reservations Summary Report"
+      title="Reservations Summary"
       generate={generate}
       renderTable={renderTable}
       charts={charts}
-      buildExcelSheets={buildExcelSheets}
-      fileBase="reservations_summary_report"
-      includeDateRange
+      buildExcelSheets={(all) => [{ name: "Summary", rows: all }]}
+      fileBase="reservations_report"
     />
   );
 };

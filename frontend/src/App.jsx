@@ -127,6 +127,7 @@ function App() {
                   }
                 />
 
+
                 <Route
                   path="/admin/patients/:id"
                   element={

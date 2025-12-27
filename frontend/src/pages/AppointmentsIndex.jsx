@@ -152,327 +152,193 @@ const AppointmentsIndex = () => {
 
   if (error) return <div className="alert alert-danger">{error}</div>;
 
-  return (
+return (
     <div className="min-vh-100 bg-light">
       <Navbar />
       <div className="container py-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h1 className="display-6 mb-2">My Appointments</h1>
-            <p className="text-muted">
-              View and manage your appointments and medical visits
-            </p>
-          </div>
-          <Link to="/appointments/book" className="btn btn-primary">
-            <i className="bi bi-plus-circle me-2"></i>
-            Book New Appointment
-          </Link>
-        </div>
 
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            <i className="bi bi-exclamation-triangle me-2"></i>
-            {error}
-          </div>
-        )}
+        {/* Main Application Tile - Now including Header */}
+        <div className="card shadow-sm border-0 p-4 p-md-5 bg-white mb-5">
 
-        {/* Statistics Cards */}
-        <div className="row g-3 mb-4">
-          <div className="col-md-4">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body text-center">
-                <i className="bi bi-calendar-event text-primary fs-1 mb-2"></i>
-                <h3 className="mb-0">{upcomingReservations.length}</h3>
-                <p className="text-muted mb-0">Upcoming Appointments</p>
+          {/* Header section moved inside the tile */}
+          <div className="d-flex justify-content-between align-items-center mb-5 border-bottom pb-4">
+            <div>
+              <h1 className="display-6 fw-bold mb-1">My Appointments</h1>
+              <p className="text-muted mb-0">Manage your medical schedule in one place</p>
+            </div>
+            <Link to="/appointments/book" className="btn btn-primary px-4 shadow-sm">
+              <i className="bi bi-plus-circle me-2"></i>
+              Book New Appointment
+            </Link>
+          </div>
+
+          {/* Internal Statistics Grid */}
+          <div className="row g-4 mb-5">
+            <div className="col-md-4">
+              <div className="p-3 rounded-3 text-center border bg-light">
+                <i className="bi bi-calendar-event text-primary fs-2 mb-2"></i>
+                <h4 className="fw-bold mb-0">{upcomingReservations.length}</h4>
+                <small className="text-muted text-uppercase fw-semibold">Upcoming</small>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="p-3 rounded-3 text-center border bg-light">
+                <i className="bi bi-check-circle text-success fs-2 mb-2"></i>
+                <h4 className="fw-bold mb-0">{completedVisits.length}</h4>
+                <small className="text-muted text-uppercase fw-semibold">Completed</small>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="p-3 rounded-3 text-center border bg-light">
+                <i className="bi bi-archive text-secondary fs-2 mb-2"></i>
+                <h4 className="fw-bold mb-0">{pastReservations.length}</h4>
+                <small className="text-muted text-uppercase fw-semibold">History</small>
               </div>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body text-center">
-                <i className="bi bi-check-circle text-success fs-1 mb-2"></i>
-                <h3 className="mb-0">{completedVisits.length}</h3>
-                <p className="text-muted mb-0">Completed Visits</p>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body text-center">
-                <i className="bi bi-calendar-x text-secondary fs-1 mb-2"></i>
-                <h3 className="mb-0">{pastReservations.length}</h3>
-                <p className="text-muted mb-0">Past Reservations</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Tabs */}
-        <ul className="nav nav-tabs mb-4">
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "upcoming" ? "active" : ""}`}
-              onClick={() => setActiveTab("upcoming")}
-            >
-              <i className="bi bi-calendar-event me-2"></i>
-              Upcoming ({upcomingReservations.length})
-            </button>
-          </li>
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "visits" ? "active" : ""}`}
-              onClick={() => setActiveTab("visits")}
-            >
-              <i className="bi bi-clipboard-check me-2"></i>
-              Completed Visits ({completedVisits.length})
-            </button>
-          </li>
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "past" ? "active" : ""}`}
-              onClick={() => setActiveTab("past")}
-            >
-              <i className="bi bi-archive me-2"></i>
-              Past Reservations ({pastReservations.length})
-            </button>
-          </li>
-        </ul>
+          {/* Navigation Pills */}
+          <div className="d-flex justify-content-center mb-4">
+            <ul className="nav nav-pills bg-light p-1 rounded-pill border">
+              <li className="nav-item">
+                <button
+                  className={`nav-link rounded-pill px-4 ${activeTab === "upcoming" ? "active" : ""}`}
+                  onClick={() => setActiveTab("upcoming")}
+                >
+                  Upcoming
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link rounded-pill px-4 ${activeTab === "visits" ? "active" : ""}`}
+                  onClick={() => setActiveTab("visits")}
+                >
+                  Visits
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link rounded-pill px-4 ${activeTab === "past" ? "active" : ""}`}
+                  onClick={() => setActiveTab("past")}
+                >
+                  History
+                </button>
+              </li>
+            </ul>
+          </div>
 
-        {/* Tab Content */}
-        {activeTab === "upcoming" && (
-          <div>
-            {upcomingReservations.length === 0 ? (
-              <div className="card border-0 shadow-sm">
-                <div className="card-body text-center py-5">
-                  <i className="bi bi-calendar-x text-muted fs-1 mb-3"></i>
-                  <h5 className="text-muted">No upcoming appointments</h5>
-                  <p className="text-muted">
-                    Book your next appointment to see it here.
-                  </p>
-                  <Link
-                    to="/appointments/book"
-                    className="btn btn-primary mt-2"
-                  >
-                    Book Appointment
-                  </Link>
-                </div>
+          {/* List Content */}
+          <div className="mt-4">
+            {activeTab === "upcoming" && (
+              <div className="list-group list-group-flush">
+                {upcomingReservations.length === 0 ? (
+                  <div className="text-center py-5 border rounded bg-light">
+                    <i className="bi bi-calendar-x text-muted fs-1 mb-2"></i>
+                    <p className="text-muted mb-0">No upcoming appointments found.</p>
+                  </div>
+                ) : (
+                  upcomingReservations.map((res) => (
+                    <div key={res.reservation_id} className="list-group-item px-0 py-4 border-bottom bg-transparent">
+                      <div className="row align-items-center">
+                        <div className="col-md-3">
+                          <h6 className="mb-0 fw-bold">{formatDate(res.reservation_time)}</h6>
+                          <small className="text-muted">{new Date(res.reservation_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                        </div>
+                        <div className="col-md-4">
+                          <small className="text-muted d-block">Doctor</small>
+                          <span className="fw-semibold text-dark">{getDoctorName(res.doctor_id)}</span>
+                        </div>
+                        <div className="col-md-2">
+                          <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Upcoming</span>
+                        </div>
+                        <div className="col-md-3 text-end">
+                          <Link to={`/reservation/${res.reservation_id}`} className="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            View Details
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            ) : (
-              <div className="row g-3">
-                {upcomingReservations.map((reservation) => (
-                  <div key={reservation.reservation_id} className="col-12">
-                    <div className="card border-0 shadow-sm">
-                      <div className="card-body">
+            )}
+
+            {activeTab === "visits" && (
+              <div className="list-group list-group-flush">
+                {completedVisits.length === 0 ? (
+                  <div className="text-center py-5 border rounded bg-light">
+                    <i className="bi bi-clipboard-x text-muted fs-1 mb-2"></i>
+                    <p className="text-muted mb-0">No completed visits found.</p>
+                  </div>
+                ) : (
+                  completedVisits.map((visit) => {
+                    const res = reservations.find(r => r.reservation_id === visit.reservation_id);
+                    return (
+                      <div key={visit.visit_id} className="list-group-item px-0 py-4 border-bottom bg-transparent">
                         <div className="row align-items-center">
                           <div className="col-md-3">
-                            <div className="d-flex align-items-center">
-                              <i className="bi bi-calendar-event text-primary fs-3 me-3"></i>
-                              <div>
-                                <h6 className="mb-0">
-                                  {formatDate(reservation.reservation_time)}
-                                </h6>
-                                <small className="text-muted">
-                                  {new Date(
-                                    reservation.reservation_time
-                                  ).toLocaleTimeString("en-US", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </small>
-                              </div>
-                            </div>
+                            <h6 className="mb-0 fw-bold">{formatDate(visit.visit_date)}</h6>
+                            <small className="text-muted">ID: {visit.visit_id}</small>
                           </div>
-                          <div className="col-md-4">
-                            <div>
-                              <small className="text-muted d-block">
-                                Doctor
-                              </small>
-                              <strong>
-                                {getDoctorName(reservation.doctor_id)}
-                              </strong>
-                            </div>
+                          <div className="col-md-3 text-dark fw-semibold">
+                            {res ? getDoctorName(res.doctor_id) : "N/A"}
                           </div>
                           <div className="col-md-3">
-                            {getStatusBadge(reservation.reservation_time)}
+                            <small className="text-muted d-block">Nurse</small>
+                            <span className="text-dark">{getNurseName(visit.nurse_id)}</span>
                           </div>
-                          <div className="col-md-2 text-end">
-                            <Link
-                              to={`/reservation/${reservation.reservation_id}`}
-                              className="btn btn-sm btn-outline-primary"
-                            >
-                              View Details
+                          <div className="col-md-3 text-end">
+                            <Link to={`/patient/records/${visit.visit_id}`} className="btn btn-sm btn-outline-success rounded-pill px-3">
+                              Medical Record
                             </Link>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+
+            {activeTab === "past" && (
+              <div className="list-group list-group-flush">
+                {pastReservations.length === 0 ? (
+                  <div className="text-center py-5 border rounded bg-light">
+                    <i className="bi bi-archive text-muted fs-1 mb-2"></i>
+                    <p className="text-muted mb-0">Your history is empty.</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "visits" && (
-          <div>
-            {completedVisits.length === 0 ? (
-              <div className="card border-0 shadow-sm">
-                <div className="card-body text-center py-5">
-                  <i className="bi bi-clipboard-x text-muted fs-1 mb-3"></i>
-                  <h5 className="text-muted">No completed visits yet</h5>
-                  <p className="text-muted">
-                    Your completed medical visits will appear here.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="row g-3">
-                {completedVisits.map((visit) => {
-                  const reservation = reservations.find(
-                    (r) => r.reservation_id === visit.reservation_id
-                  );
-                  return (
-                    <div key={visit.visit_id} className="col-12">
-                      <div className="card border-0 shadow-sm">
-                        <div className="card-body">
-                          <div className="row align-items-center">
-                            <div className="col-md-3">
-                              <div className="d-flex align-items-center">
-                                <i className="bi bi-clipboard-check text-success fs-3 me-3"></i>
-                                <div>
-                                  <h6 className="mb-0">
-                                    {formatDate(visit.visit_date)}
-                                  </h6>
-                                  <small className="text-muted">
-                                    Visit ID: {visit.visit_id}
-                                  </small>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-md-3">
-                              <div>
-                                <small className="text-muted d-block">
-                                  Doctor
-                                </small>
-                                <strong>
-                                  {reservation
-                                    ? getDoctorName(reservation.doctor_id)
-                                    : "N/A"}
-                                </strong>
-                              </div>
-                            </div>
-                            <div className="col-md-3">
-                              <div>
-                                <small className="text-muted d-block">
-                                  Nurse
-                                </small>
-                                <strong>{getNurseName(visit.nurse_id)}</strong>
-                              </div>
-                            </div>
-                            <div className="col-md-3 text-end">
-                              <Link
-                                to={`/patient/records/${visit.visit_id}`}
-                                className="btn btn-sm btn-outline-success"
-                              >
-                                View Medical Record
-                              </Link>
-                            </div>
+                ) : (
+                  pastReservations.map((res) => {
+                    const hasVisit = visitReservationIds.has(res.reservation_id);
+                    return (
+                      <div key={res.reservation_id} className="list-group-item px-0 py-4 border-bottom bg-transparent">
+                        <div className="row align-items-center">
+                          <div className="col-md-3 text-muted">
+                            {formatDate(res.reservation_time)}
+                          </div>
+                          <div className="col-md-4 fw-semibold text-dark">
+                            {getDoctorName(res.doctor_id)}
+                          </div>
+                          <div className="col-md-3">
+                            {hasVisit ?
+                              <span className="badge bg-light text-success border border-success-subtle">Completed</span> :
+                              <span className="badge bg-light text-secondary border">Expired</span>
+                            }
+                          </div>
+                          <div className="col-md-2 text-end">
+                            <Link to={`/reservation/${res.reservation_id}`} className="btn btn-sm btn-link text-decoration-none">
+                              Details
+                            </Link>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
-        )}
-
-        {activeTab === "past" && (
-          <div>
-            {pastReservations.length === 0 ? (
-              <div className="card border-0 shadow-sm">
-                <div className="card-body text-center py-5">
-                  <i className="bi bi-archive text-muted fs-1 mb-3"></i>
-                  <h5 className="text-muted">No past reservations</h5>
-                  <p className="text-muted">
-                    Your appointment history will appear here.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="row g-3">
-                {pastReservations.map((reservation) => {
-                  const hasVisit = visitReservationIds.has(
-                    reservation.reservation_id
-                  );
-                  return (
-                    <div key={reservation.reservation_id} className="col-12">
-                      <div className="card border-0 shadow-sm">
-                        <div className="card-body">
-                          <div className="row align-items-center">
-                            <div className="col-md-3">
-                              <div className="d-flex align-items-center">
-                                <i
-                                  className={`bi ${
-                                    hasVisit
-                                      ? "bi-check-circle-fill text-success"
-                                      : "bi-calendar-x text-secondary"
-                                  } fs-3 me-3`}
-                                ></i>
-                                <div>
-                                  <h6 className="mb-0">
-                                    {formatDate(reservation.reservation_time)}
-                                  </h6>
-                                  <small className="text-muted">
-                                    {new Date(
-                                      reservation.reservation_time
-                                    ).toLocaleTimeString("en-US", {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
-                                  </small>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-md-4">
-                              <div>
-                                <small className="text-muted d-block">
-                                  Doctor
-                                </small>
-                                <strong>
-                                  {getDoctorName(reservation.doctor_id)}
-                                </strong>
-                              </div>
-                            </div>
-                            <div className="col-md-3">
-                              {hasVisit ? (
-                                <span className="badge bg-success">
-                                  <i className="bi bi-check-circle me-1"></i>
-                                  Visit Completed
-                                </span>
-                              ) : (
-                                <span className="badge bg-secondary">Past</span>
-                              )}
-                            </div>
-                            <div className="col-md-2 text-end">
-                              <Link
-                                to={`/reservation/${reservation.reservation_id}`}
-                                className="btn btn-sm btn-outline-secondary"
-                              >
-                                View Details
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

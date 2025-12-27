@@ -226,165 +226,178 @@ export default function ReportScaffold({
   };
 
   return (
-    <div className="min-vh-100 bg-light">
-      <Navbar />
-      <div className="container py-5">
-        <div className="row mb-4">
-          <div className="col-12">
-            <h1 className="display-5 fw-bold">{title}</h1>
-          </div>
-        </div>
-        <div className="card mb-4 p-4">
-          <h5 className="mb-3">Select Filters</h5>
-          <div className="row g-3 align-items-end">
-            {includeDateRange && (
-              <>
-                <div className="col-md-2">
-                  <label className="form-label">Start Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label">End Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-            {includeDoctors && (
-              <div className="col-md-4" ref={dropdownRef}>
-                <label className="form-label">Doctors</label>
-                <div className="dropdown">
-                  <button
-                    className="btn btn-outline-secondary w-100 text-start"
-                    type="button"
-                    onClick={() => setDropdownOpen((p) => !p)}
-                  >
-                    {selectedDoctors.length === 0 ||
-                    selectedDoctors.length === doctorsList.length
-                      ? "All"
-                      : `${selectedDoctors.length} selected`}
-                  </button>
-                  {dropdownOpen && (
-                    <div
-                      className="dropdown-menu show p-3"
-                      style={{ maxHeight: 240, overflowY: "auto" }}
-                    >
-                      <div className="form-check mb-2">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="select-all"
-                          checked={
-                            selectedDoctors.length === doctorsList.length &&
-                            doctorsList.length > 0
-                          }
-                          onChange={toggleAllDoctors}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="select-all"
-                        >
-                          All
-                        </label>
-                      </div>
-                      {doctorsList.length === 0 ? (
-                        <div>Loading doctors...</div>
-                      ) : (
-                        doctorsList.map((doc) => (
-                          <div key={doc.doctor_id} className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id={`doc-${doc.doctor_id}`}
-                              checked={selectedDoctors.includes(doc.doctor_id)}
-                              onChange={() => toggleDoctor(doc.doctor_id)}
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor={`doc-${doc.doctor_id}`}
-                            >
-                              {doc.doctor_id} - {doc.first_name} {doc.last_name}
-                            </label>
-                          </div>
-                        ))
-                      )}
+      <div className="min-vh-100 bg-light">
+        <Navbar/>
+        <div className="container py-5">
+          <div className="row mb-4">
+            <div className="col-12">
+              {/* Zamiast zwykłego h1, dajemy elegancki kafelek */}
+              <div className="card border-0 shadow-sm">
+                <div className="card-body p-4">
+                  <div className="d-flex align-items-center">
+                    <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
+                      <i className="bi bi-file-earmark-bar-graph text-primary fs-2"></i>
                     </div>
-                  )}
+                    <div>
+                      <h1 className="display-6 fw-bold text-dark mb-1">{title}</h1>
+                      <p className="text-muted mb-0">Analytics and reporting module</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div
-              className={
-                includeDoctors
-                  ? "col-md-4 d-flex gap-2"
-                  : includeDateRange
-                  ? "col-md-8 d-flex gap-2"
-                  : "col-md-4 d-flex gap-2"
-              }
-            >
-              <button className="btn btn-primary" onClick={generateReport}>
-                Generate
-              </button>
-              <div className="dropdown">
-                <button
-                  className="btn btn-secondary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Export
-                </button>
-                <ul className="dropdown-menu">
-                  <li>
-                    <button className="dropdown-item" onClick={exportPDF}>
-                      PDF
-                    </button>
-                  </li>
-                  <li>
-                    <button className="dropdown-item" onClick={exportExcel}>
-                      Excel
-                    </button>
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
-        </div>
-        <div ref={reportRef}>
-          {loading && <p>Loading...</p>}
-          {error && <div className="alert alert-danger">{error}</div>}
-          {!loading &&
-            !error &&
-            (!data || (Array.isArray(data) && data.length === 0)) && (
-              <p>No data</p>
-            )}
-          {!loading &&
-            !error &&
-            data &&
-            renderTable &&
-            renderTable(filteredData, ctx)}
-          {!loading &&
-            !error &&
-            charts &&
-            charts.length > 0 &&
-            charts.map((c, i) => (
-              <div key={i} className="card p-3 mt-4">
-                <h5>{c.title}</h5>
-                {c.render(filteredData, ctx)}
+          <div className="card mb-4 p-4">
+            <h5 className="mb-3">Select Filters</h5>
+            <div className="row g-3 align-items-end">
+              {includeDateRange && (
+                  <>
+                    <div className="col-md-2">
+                      <label className="form-label">Start Date</label>
+                      <input
+                          type="date"
+                          className="form-control"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label">End Date</label>
+                      <input
+                          type="date"
+                          className="form-control"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                      />
+                    </div>
+                  </>
+              )}
+              {includeDoctors && (
+                  <div className="col-md-4" ref={dropdownRef}>
+                    <label className="form-label">Doctors</label>
+                    <div className="dropdown">
+                      <button
+                          className="btn btn-outline-secondary w-100 text-start"
+                          type="button"
+                          onClick={() => setDropdownOpen((p) => !p)}
+                      >
+                        {selectedDoctors.length === 0 ||
+                        selectedDoctors.length === doctorsList.length
+                            ? "All"
+                            : `${selectedDoctors.length} selected`}
+                      </button>
+                      {dropdownOpen && (
+                          <div
+                              className="dropdown-menu show p-3"
+                              style={{maxHeight: 240, overflowY: "auto"}}
+                          >
+                            <div className="form-check mb-2">
+                              <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id="select-all"
+                                  checked={
+                                      selectedDoctors.length === doctorsList.length &&
+                                      doctorsList.length > 0
+                                  }
+                                  onChange={toggleAllDoctors}
+                              />
+                              <label
+                                  className="form-check-label"
+                                  htmlFor="select-all"
+                              >
+                                All
+                              </label>
+                            </div>
+                            {doctorsList.length === 0 ? (
+                                <div>Loading doctors...</div>
+                            ) : (
+                                doctorsList.map((doc) => (
+                                    <div key={doc.doctor_id} className="form-check">
+                                      <input
+                                          className="form-check-input"
+                                          type="checkbox"
+                                          id={`doc-${doc.doctor_id}`}
+                                          checked={selectedDoctors.includes(doc.doctor_id)}
+                                          onChange={() => toggleDoctor(doc.doctor_id)}
+                                      />
+                                      <label
+                                          className="form-check-label"
+                                          htmlFor={`doc-${doc.doctor_id}`}
+                                      >
+                                        {doc.doctor_id} - {doc.first_name} {doc.last_name}
+                                      </label>
+                                    </div>
+                                ))
+                            )}
+                          </div>
+                      )}
+                    </div>
+                  </div>
+              )}
+              <div
+                  className={
+                    includeDoctors
+                        ? "col-md-4 d-flex gap-2"
+                        : includeDateRange
+                            ? "col-md-8 d-flex gap-2"
+                            : "col-md-4 d-flex gap-2"
+                  }
+              >
+                <button className="btn btn-primary" onClick={generateReport}>
+                  Generate
+                </button>
+                <div className="dropdown">
+                  <button
+                      className="btn btn-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                  >
+                    Export
+                  </button>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <button className="dropdown-item" onClick={exportPDF}>
+                        PDF
+                      </button>
+                    </li>
+                    <li>
+                      <button className="dropdown-item" onClick={exportExcel}>
+                        Excel
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            ))}
+            </div>
+          </div>
+          <div ref={reportRef}>
+            {loading && <p>Loading...</p>}
+            {error && <div className="alert alert-danger">{error}</div>}
+            {!loading &&
+                !error &&
+                (!data || (Array.isArray(data) && data.length === 0)) && (
+                    <p>No data</p>
+                )}
+            {!loading &&
+                !error &&
+                data &&
+                renderTable &&
+                renderTable(filteredData, ctx)}
+            {!loading &&
+                !error &&
+                charts &&
+                charts.length > 0 &&
+                charts.map((c, i) => (
+                    <div key={i} className="card p-3 mt-4">
+                      <h5>{c.title}</h5>
+                      {c.render(filteredData, ctx)}
+                    </div>
+                ))}
+          </div>
         </div>
       </div>
-    </div>
   );
 }
 
@@ -393,10 +406,10 @@ ReportScaffold.propTypes = {
   generate: PropTypes.func.isRequired,
   renderTable: PropTypes.func,
   charts: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      render: PropTypes.func.isRequired,
-    })
+      PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        render: PropTypes.func.isRequired,
+      })
   ),
   buildExcelSheets: PropTypes.func,
   fileBase: PropTypes.string,

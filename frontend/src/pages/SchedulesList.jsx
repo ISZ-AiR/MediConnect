@@ -154,7 +154,7 @@ const SchedulesList = () => {
                 </div>
 
                 {/* Filters Section */}
-                <div className="bg-light border rounded p-4 mb-4">
+                <div className="border rounded p-4 mb-4">
                   <div className="d-flex align-items-center mb-3">
                     <i className="bi bi-funnel-fill text-primary me-2 fs-5"></i>
                     <h5 className="fw-bold mb-0">Filter Schedules</h5>
@@ -177,7 +177,7 @@ const SchedulesList = () => {
                   <div className="row g-3">
                     {/* Start Date */}
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold text-secondary small mb-2 d-block">
+                      <label className="form-label fw-semibold text-dark small mb-2 d-block">
                         <i className="bi bi-calendar2-event me-1"></i>
                         Start Date
                       </label>
@@ -193,7 +193,7 @@ const SchedulesList = () => {
 
                     {/* End Date */}
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold text-secondary small mb-2 d-block">
+                      <label className="form-label fw-semibold text-dark small mb-2 d-block">
                         <i className="bi bi-calendar2-event me-1"></i>
                         End Date
                       </label>
@@ -209,7 +209,7 @@ const SchedulesList = () => {
 
                     {/* Doctor */}
                     <div className="col-12">
-                      <label className="form-label fw-semibold text-secondary small">
+                      <label className="form-label fw-semibold text-dark small">
                         <i className="bi bi-person-badge me-1"></i>
                         Doctor
                       </label>
@@ -257,7 +257,7 @@ const SchedulesList = () => {
                       <div key={date} className="mb-4">
                         <div className="d-flex align-items-center mb-3 bg-primary bg-opacity-10 p-2 rounded">
                           <i className="bi bi-calendar-event text-primary me-2 fs-5"></i>
-                          <h5 className="fw-semibold mb-0 text-white">
+                          <h5 className="fw-semibold mb-0 text-dark">
                             {new Date(date).toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",
@@ -287,11 +287,11 @@ const SchedulesList = () => {
                                   <div className="d-flex align-items-center text-muted small">
                                     <i className="bi bi-clock me-2"></i>
                                     <span>
-                                      <strong className="text-dark">
+                                      <strong className="text-muted">
                                         {s.start_time}
                                       </strong>
                                       <i className="bi bi-arrow-right mx-2"></i>
-                                      <strong className="text-dark">
+                                      <strong className="text-muted">
                                         {s.end_time}
                                       </strong>
                                     </span>
