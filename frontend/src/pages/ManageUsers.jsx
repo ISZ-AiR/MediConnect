@@ -195,29 +195,85 @@ const ManageUsers = () => {
 
       {/* Edit Modal Overlay */}
       {showEditModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 1060, backdropFilter: "blur(4px)" }} onClick={() => setShowEditModal(false)}>
-          <div className="bg-white rounded-4 shadow-lg p-4 w-100 overflow-auto" style={{ maxWidth: "550px", maxHeight: "90vh" }} onClick={(e) => e.stopPropagation()}>
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 1060,
+            backdropFilter: "blur(4px)"
+          }}
+          onClick={() => setShowEditModal(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') setShowEditModal(false); }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close modal"
+        >
+          <div
+            className="rounded-4 shadow-lg p-4 w-100 overflow-auto border border-white border-opacity-10"
+            style={{
+              maxWidth: "550px",
+              maxHeight: "90vh",
+              backgroundColor: "var(--card-bg, #ffffff)",
+              color: "var(--text-color, #212529)",
+              backdropFilter: "blur(10px)"
+            }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h4 className="fw-bold mb-0 text-dark">Edit User</h4>
-              <button className="btn-close" onClick={() => setShowEditModal(false)}></button>
+              <h4 className="fw-bold mb-0">Edit User</h4>
+              <button
+                className="btn-close"
+                style={{ filter: "var(--close-button-filter, none)" }}
+                onClick={() => setShowEditModal(false)}
+              ></button>
             </div>
+
             <form onSubmit={handleEditSubmit}>
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="form-label fw-bold small">First Name</label>
-                  <input type="text" name="first_name" className="form-control" value={editForm.first_name} onChange={handleEditChange} required />
+                  <label className="form-label fw-bold small opacity-75">First Name</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    className="form-control bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.first_name}
+                    onChange={handleEditChange}
+                    required
+                  />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-bold small">Last Name</label>
-                  <input type="text" name="last_name" className="form-control" value={editForm.last_name} onChange={handleEditChange} required />
+                  <label className="form-label fw-bold small opacity-75">Last Name</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    className="form-control bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.last_name}
+                    onChange={handleEditChange}
+                    required
+                  />
                 </div>
                 <div className="col-12">
-                  <label className="form-label fw-bold small">Email</label>
-                  <input type="email" name="email" className="form-control" value={editForm.email} onChange={handleEditChange} required />
+                  <label className="form-label fw-bold small opacity-75">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-control bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.email}
+                    onChange={handleEditChange}
+                    required
+                  />
                 </div>
                 <div className="col-12">
-                  <label className="form-label fw-bold small">Role</label>
-                  <select name="role" className="form-select" value={editForm.role} onChange={handleEditChange} required>
+                  <label className="form-label fw-bold small opacity-75">Role</label>
+                  <select
+                    name="role"
+                    className="form-select bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.role}
+                    onChange={handleEditChange}
+                    required
+                  >
                     <option value="admin">Admin</option>
                     <option value="doctor">Doctor</option>
                     <option value="nurse">Nurse</option>
@@ -226,8 +282,8 @@ const ManageUsers = () => {
                   </select>
                 </div>
               </div>
-              <div className="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                <button type="button" className="btn btn-light rounded-pill px-4" onClick={() => setShowEditModal(false)}>Cancel</button>
+              <div className="mt-4 pt-3 border-top border-opacity-10 d-flex justify-content-end gap-2">
+                <button type="button" className="btn btn-light bg-opacity-10 rounded-pill px-4" onClick={() => setShowEditModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary rounded-pill px-4 shadow-sm">Save Changes</button>
               </div>
             </form>
