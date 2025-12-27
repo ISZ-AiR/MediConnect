@@ -187,3 +187,68 @@ body[style*="background-image"] .table-light {
 .dark .card-title, .dark .form-label {
     color: #ffffff !important;
 }
+
+body[style*="background-image"] thead.table-light,
+body[style*="background-image"] .table-light,
+.dark .table-light,
+[data-theme='dark'] .table-light {
+  background-color: rgba(var(--card-rgb), 0.2) !important;
+  color: var(--text-color) !important;
+  border-bottom: 2px solid rgba(var(--card-rgb), 0.3) !important;
+}
+
+.dark .table thead th,
+[data-theme='dark'] .table thead th {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+}
+
+
+.dark .badge.bg-primary.bg-opacity-10 {
+  background-color: rgba(13, 110, 253, 0.2) !important;
+  color: #3d8bfd !important;
+}
+
+.card:has(.dropdown),
+.card:has(input[type="date"]) {
+  z-index: 1020 !important;
+}
+
+.dropdown-menu {
+  z-index: 9999 !important;
+}
+
+.report-scaffold-filters,
+.card.mb-4.p-4 {
+  position: relative;
+  z-index: 10;
+}
+
+div[ref="reportRef"],
+.card.border-0.shadow-sm {
+  position: relative;
+  z-index: 1;
+}
+
+.card .table th {
+  color: var(--text-color) !important;
+  border-color: rgba(var(--card-rgb), 0.1) !important;
+}
+
+
+.fw-bold, .fw-semibold, h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color) !important;
+}
+
+.opacity-75, .small, .text-muted {
+  color: var(--text-color) !important;
+  opacity: 0.7 !important;
+}
+
+.dark .table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.list-group-item {
+  background-color: transparent !important;
+}

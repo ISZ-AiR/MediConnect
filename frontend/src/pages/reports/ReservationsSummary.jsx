@@ -11,26 +11,35 @@ const ReservationsSummary = () => {
 
   const renderTable = (rows) => (
     <div className="card border-0 shadow-sm overflow-hidden mb-4">
-      <div className="card-header bg-white py-3 border-0">
-        <h5 className="mb-0 fw-bold"><i className="bi bi-table me-2 text-success"></i>Data Details</h5>
+      <div className="card-header py-3 border-0">
+        <h5 className="mb-0 fw-bold">
+          <i className="bi bi-table me-2 text-success"></i>
+          Data Details
+        </h5>
       </div>
       <div className="table-responsive">
         <table className="table table-hover align-middle mb-0">
-          <thead className="bg-light text-uppercase small fw-bold text-muted">
+          <thead className="table-light text-uppercase small fw-bold">
             <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="py-3">Total</th>
-              <th className="py-3 text-danger">Cancelled</th>
-              <th className="px-4 py-3 text-end text-success">Completed</th>
+              <th className="px-4 py-3 border-0">Date</th>
+              <th className="py-3 border-0">Total</th>
+              <th className="py-3 border-0 text-danger">Cancelled</th>
+              <th className="px-4 py-3 border-0 text-end text-success">Completed</th>
             </tr>
           </thead>
           <tbody>
             {rows?.filter(d => d.total_reservations > 0).map((day) => (
               <tr key={day.date}>
                 <td className="px-4 fw-bold">{day.date}</td>
-                <td><span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">{day.total_reservations}</span></td>
+                <td>
+                  <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
+                    {day.total_reservations}
+                  </span>
+                </td>
                 <td className="text-danger">{day.cancelled_reservations}</td>
-                <td className="px-4 text-end text-success fw-bold">{day.completed_visits}</td>
+                <td className="px-4 text-end text-success fw-bold">
+                  {day.completed_visits}
+                </td>
               </tr>
             ))}
           </tbody>

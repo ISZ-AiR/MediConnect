@@ -11,15 +11,15 @@ const DoctorWorkload = () => {
 
   const renderTable = (rows) => (
     <div className="card border-0 shadow-sm overflow-hidden mb-4">
-      <div className="card-header bg-white py-3 border-0">
-        <h5 className="mb-0 fw-bold text-dark">
+      <div className="card-header py-3 border-0">
+        <h5 className="mb-0 fw-bold">
           <i className="bi bi-briefcase me-2 text-primary"></i>
           Workload Statistics by Staff
         </h5>
       </div>
       <div className="table-responsive">
         <table className="table table-hover align-middle mb-0">
-          <thead className="bg-light text-uppercase small fw-bold text-muted">
+          <thead className="table-light text-uppercase small fw-bold">
             <tr>
               <th className="px-4 py-3 border-0">Doctor Name</th>
               <th className="py-3 border-0 text-center">Total Reservations</th>
@@ -33,8 +33,8 @@ const DoctorWorkload = () => {
               return (
                 <tr key={d.doctor_id}>
                   <td className="px-4 py-3">
-                    <div className="fw-bold text-dark">{d.first_name} {d.last_name}</div>
-                    <div className="small text-muted">ID: #{d.doctor_id}</div>
+                    <div className="fw-bold">{d.first_name} {d.last_name}</div>
+                    <div className="small opacity-75">ID: #{d.doctor_id}</div>
                   </td>
                   <td className="text-center">
                     <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-medium">

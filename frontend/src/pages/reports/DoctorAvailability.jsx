@@ -46,31 +46,35 @@ const DoctorAvailabilityReport = () => {
 
   const renderTable = (rows) => (
     <div className="card border-0 shadow-sm overflow-hidden mb-4">
-      <div className="card-header bg-white py-3 border-0">
-        <h5 className="mb-0 fw-bold text-dark">
+      <div className="card-header py-3 border-0">
+        <h5 className="mb-0 fw-bold">
           <i className="bi bi-person-check me-2 text-primary"></i>
           Staff Capacity Overview
         </h5>
       </div>
       <div className="table-responsive">
         <table className="table table-hover align-middle mb-0">
-          <thead className="bg-light text-uppercase small fw-bold text-muted">
+          <thead className="table-light text-uppercase small fw-bold">
             <tr>
-              <th className="px-4 py-3">Doctor</th>
-              <th className="py-3">Specialization</th>
-              <th className="py-3 text-center">Total Hours</th>
-              <th className="py-3 text-center text-danger">Reserved</th>
-              <th className="px-4 py-3 text-end text-success">Available</th>
+              <th className="px-4 py-3 border-0">Doctor</th>
+              <th className="py-3 border-0 text-center">Specialization</th>
+              <th className="py-3 border-0 text-center">Total Hours</th>
+              <th className="py-3 border-0 text-center text-danger">Reserved</th>
+              <th className="px-4 py-3 border-0 text-end text-success">Available</th>
             </tr>
           </thead>
           <tbody className="border-top-0">
             {rows.map((d) => (
               <tr key={d.doctor_id}>
                 <td className="px-4 py-3">
-                  <div className="fw-bold text-dark">{d.doctor_name}</div>
-                  <div className="small text-muted">{d.total_days} scheduled days</div>
+                  <div className="fw-bold">{d.doctor_name}</div>
+                  <div className="small opacity-75">{d.total_days} scheduled days</div>
                 </td>
-                <td><span className="badge bg-light text-dark border">{d.specialization}</span></td>
+                <td className="text-center">
+                  <span className="badge bg-secondary bg-opacity-10 text-secondary border-0">
+                    {d.specialization}
+                  </span>
+                </td>
                 <td className="text-center fw-bold">{d.total_hours.toFixed(1)}h</td>
                 <td className="text-center text-danger">{d.reserved_hours.toFixed(1)}h</td>
                 <td className="px-4 text-end">
