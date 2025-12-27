@@ -218,6 +218,8 @@ const ManageUsers = () => {
               backdropFilter: "blur(10px)"
             }}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
           >

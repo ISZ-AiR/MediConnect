@@ -90,6 +90,9 @@ const Settings = () => {
                             <div
                                 className={`p-3 rounded border cursor-pointer d-flex align-items-center ${draftTheme === 'light' ? 'border-primary bg-primary bg-opacity-10' : ''}`}
                                 onClick={() => setDraftTheme('light')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setDraftTheme('light'); }}
                                 style={{cursor: 'pointer'}}
                             >
                               <i className="bi bi-sun-fill fs-3 me-3 text-warning"></i>
@@ -102,6 +105,9 @@ const Settings = () => {
                             <div
                                 className={`p-3 rounded border cursor-pointer d-flex align-items-center ${draftTheme === 'dark' ? 'border-primary bg-primary bg-opacity-10' : ''}`}
                                 onClick={() => setDraftTheme('dark')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setDraftTheme('dark'); }}
                                 style={{cursor: 'pointer'}}
                             >
                               <i className="bi bi-moon-stars-fill fs-3 me-3 text-info"></i>
@@ -149,6 +155,9 @@ const Settings = () => {
                                   <div
                                       onClick={() => setDraftBg(bg.url)}
                                       className="position-relative rounded overflow-hidden shadow-sm"
+                                      role="button"
+                                      tabIndex={0}
+                                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setDraftBg(bg.url); }}
                                       style={{
                                         height: '100px',
                                         background: bg.url ? `url(${bg.url}) center/cover` : '#dee2e6',
