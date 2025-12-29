@@ -28,6 +28,13 @@ const PatientRegister = () => {
   };
 
   const validateForm = () => {
+    const today = new Date();
+    const birthDate = new Date(formData.birth_date);
+
+    if (birthDate > today) {
+      setError("Birth date cannot be later than today");
+      return false;
+    }
     if (
       !formData.first_name ||
       !formData.last_name ||
@@ -253,6 +260,7 @@ const PatientRegister = () => {
                         name="birth_date"
                         value={formData.birth_date}
                         onChange={handleChange}
+                        max={new Date().toISOString().split("T")[0]}
                         disabled={loading}
                         required
                       />
