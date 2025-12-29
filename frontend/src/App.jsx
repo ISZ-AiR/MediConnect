@@ -64,6 +64,7 @@ import PatientRecordsList from "./pages/PatientRecordsList.jsx";
 import PatientRecordsDetail from "./pages/PatientRecordsDetail.jsx";
 import VisitsCalendar from "./pages/VisitsCalendar.jsx";
 import {ThemeProvider} from "./context/ThemeContext.jsx";
+import UnderConstruction from "./pages/UnderConstruction.jsx";
 
 function App() {
   return (
@@ -977,6 +978,9 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                <Route path="/messages" element={<UnderConstruction />} />
+
 
                 <Route
                   path="/reports/reservations-summary"
