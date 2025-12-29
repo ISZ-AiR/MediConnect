@@ -8,6 +8,22 @@ const DoctorForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const DOCTOR_SPECIALIZATIONS = [
+    "Cardiologist",
+    "Dermatologist",
+    "Endocrinologist",
+    "Family Medicine",
+    "Gastroenterologist",
+    "Gynecologist",
+    "Neurologist",
+    "Orthopedist",
+    "Pediatrician",
+    "Psychiatrist",
+    "Radiologist",
+    "Surgeon",
+  ];
+
+
   // Stabilne wartości początkowe
   const initialValues = useMemo(() => ({
     first_name: "",
@@ -137,14 +153,20 @@ const DoctorForm = () => {
               <div className="row g-4 mb-5">
                 <div className="col-md-6">
                   <label className="form-label fw-bold small">Specialization</label>
-                  <input
+                  <select
                     className="form-control bg-light border-0 py-2"
                     name="specialization"
-                    placeholder="e.g. Cardiology"
                     value={form.specialization}
                     onChange={handleChange}
                     required
-                  />
+                  >
+                    <option value="">-- Select specialization --</option>
+                    {DOCTOR_SPECIALIZATIONS.map((spec) => (
+                      <option key={spec} value={spec}>
+                        {spec}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-md-6">
                   <label className="form-label fw-bold small">License Number</label>
