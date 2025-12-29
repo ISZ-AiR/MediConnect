@@ -13,7 +13,7 @@ const UnderConstruction = () => {
         <h2 className="fw-bold mb-3">Messages</h2>
         <p className="text-muted mb-4">
           This feature is currently under construction.
-          Please contact the medical staff by phone or try again later.
+          Try again later.
         </p>
 
         <Link to="/" className="btn btn-primary rounded-pill px-4">
