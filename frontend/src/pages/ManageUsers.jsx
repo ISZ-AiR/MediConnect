@@ -8,43 +8,28 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Modal
+  // Modal State
   const [showEditModal, setShowEditModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [editForm, setEditForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    role: "",
-    specialization: "",
-    license_number: "",
-    pesel: "",
-    birth_date: "",
+    first_name: "", last_name: "", email: "", phone: "",
+    role: "", specialization: "", license_number: "", pesel: "", birth_date: "",
   });
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteUserId, setDeleteUserId] = useState(null);
-
-  // Filters
+  // Filters State
   const [filters, setFilters] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    role: "",
+    first_name: "", last_name: "", email: "", role: "",
   });
 
-  // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const data = await usersService.getAllUsers(); // backendowe pola
-        setUsers(data);
-        setFilteredUsers(data);
+        const data = await usersService.getAllUsers();
+        setUsers(data || []);
+        setFilteredUsers(data || []);
         setError(null);
       } catch (err) {
-        console.error(err);
         setError("Failed to load users");
       } finally {
         setLoading(false);
@@ -53,7 +38,6 @@ const ManageUsers = () => {
     fetchUsers();
   }, []);
 
-  // Filters
   useEffect(() => {
     const filtered = users.filter((u) =>
       Object.keys(filters).every((key) =>
@@ -68,29 +52,19 @@ const ManageUsers = () => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Edit
   const handleEditClick = (user) => {
     setEditUser(user);
-
-    const newForm = {
+    setEditForm({
       first_name: user.first_name || "",
       last_name: user.last_name || "",
       email: user.email || "",
       phone: user.phone || "",
       role: user.role || "",
-    };
-
-    if (user.role === "patient") {
-      newForm.pesel = user.pesel || "";
-      newForm.birth_date = user.birth_date || "";
-    }
-
-    if (user.role === "doctor") {
-      newForm.specialization = user.specialization || "";
-      newForm.license_number = user.license_number || "";
-    }
-
-    setEditForm(newForm);
+      pesel: user.pesel || "",
+      birth_date: user.birth_date || "",
+      specialization: user.specialization || "",
+      license_number: user.license_number || "",
+    });
     setShowEditModal(true);
   };
 
@@ -103,13 +77,9 @@ const ManageUsers = () => {
     e.preventDefault();
     try {
       const updated = await usersService.updateUser(editUser.user_id, editForm);
-      setUsers((prev) =>
-        prev.map((u) => (u.user_id === editUser.user_id ? updated : u))
-      );
+      setUsers((prev) => prev.map((u) => (u.user_id === editUser.user_id ? updated : u)));
       setShowEditModal(false);
-      setEditUser(null);
     } catch (err) {
-      console.error(err);
       alert("Failed to update user");
     }
   };
@@ -118,262 +88,210 @@ const ManageUsers = () => {
     <div className="min-vh-100 bg-light">
       <Navbar />
       <div className="container py-5">
-        <h1 className="display-6 fw-bold mb-4">Manage Users</h1>
 
-        {error && <div className="alert alert-danger">{error}</div>}
-
-        {/* Filters */}
-        <div className="row g-3 mb-3">
-          <div className="col-md-3">
-            <input
-              type="text"
-              name="first_name"
-              value={filters.first_name}
-              onChange={handleFilterChange}
-              className="form-control"
-              placeholder="Filter by first name"
-            />
-          </div>
-          <div className="col-md-3">
-            <input
-              type="text"
-              name="last_name"
-              value={filters.last_name}
-              onChange={handleFilterChange}
-              className="form-control"
-              placeholder="Filter by last name"
-            />
-          </div>
-          <div className="col-md-3">
-            <input
-              type="text"
-              name="email"
-              value={filters.email}
-              onChange={handleFilterChange}
-              className="form-control"
-              placeholder="Filter by email"
-            />
-          </div>
-          <div className="col-md-3">
-            <select
-              name="role"
-              value={filters.role}
-              onChange={handleFilterChange}
-              className="form-select"
-            >
-              <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="doctor">Doctor</option>
-              <option value="nurse">Nurse</option>
-              <option value="patient">Patient</option>
-              <option value="receptionist">Receptionist</option>
-              <option value="manager">Manager</option>
-            </select>
+        {/* Header Section */}
+        <div className="card border-0 shadow-sm mb-4">
+          <div className="card-body p-4">
+            <div className="d-flex align-items-center">
+              <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
+                <i className="bi bi-people-fill text-primary fs-2"></i>
+              </div>
+              <div>
+                <h1 className="display-6 fw-bold text-dark mb-1">User Management</h1>
+                <p className="text-muted mb-0">Manage system roles and personal data</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Users Table */}
-        {loading ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        ) : filteredUsers.length === 0 ? (
-          <div className="alert alert-info">No users found</div>
-        ) : (
-          <div className="table-responsive shadow-sm rounded">
-            <table className="table table-hover align-middle mb-0 bg-white">
-              <thead className="table-light">
-                <tr>
-                  <th>Email</th>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Phone</th>
-                  <th className="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u) => (
-                  <tr key={u.user_id}>
-                    <td>{u.email}</td>
-                    <td>
-                      {u.first_name} {u.last_name}
-                    </td>
-                    <td>{u.role}</td>
-                    <td>{u.phone || "-"}</td>
-                    <td className="text-end">
-                      <button
-                        className="btn btn-sm btn-primary me-2"
-                        onClick={() => handleEditClick(u)}
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {/* Main Content Card */}
+        <div className="card border-0 shadow-sm bg-white">
+          <div className="card-body p-4 p-md-5">
 
-        {/* Edit Modal */}
-        {showEditModal && (
-          <div
-            className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}
-          >
-            <div
-              className="bg-white rounded shadow-lg p-4 w-100"
-              style={{
-                maxWidth: "500px",
-                transform: "translateY(-10%)",
-              }}
-              role="dialog"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setShowEditModal(false);
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h5 className="mb-3">Edit User</h5>
-              <form onSubmit={handleEditSubmit}>
-                {/* Pola wspólne */}
-                <div className="mb-3">
-                  <label className="form-label">First Name</label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    className="form-control"
-                    value={editForm.first_name}
-                    onChange={handleEditChange}
-                    required
-                  />
+            {/* Filters */}
+            <div className="mb-4">
+              <div className="d-flex align-items-center mb-3">
+                <i className="bi bi-funnel text-primary me-2 fs-5"></i>
+                <h5 className="fw-bold mb-0 text-dark">Quick Filters</h5>
+              </div>
+              <div className="row g-3">
+                <div className="col-md-3">
+                  <label className="form-label small fw-bold text-dark">First Name</label>
+                  <input type="text" name="first_name" value={filters.first_name} onChange={handleFilterChange} className="form-control bg-light border-0" placeholder="Filter..." />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Last Name</label>
-                  <input
-                    type="text"
-                    name="last_name"
-                    className="form-control"
-                    value={editForm.last_name}
-                    onChange={handleEditChange}
-                    required
-                  />
+                <div className="col-md-3">
+                  <label className="form-label small fw-bold text-dark">Last Name</label>
+                  <input type="text" name="last_name" value={filters.last_name} onChange={handleFilterChange} className="form-control bg-light border-0" placeholder="Filter..." />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    className="form-control"
-                    value={editForm.email}
-                    onChange={handleEditChange}
-                    required
-                  />
+                <div className="col-md-3">
+                  <label className="form-label small fw-bold text-dark">Email</label>
+                  <input type="text" name="email" value={filters.email} onChange={handleFilterChange} className="form-control bg-light border-0" placeholder="Filter..." />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Phone</label>
-                  <input
-                    type="text"
-                    name="phone"
-                    className="form-control"
-                    value={editForm.phone || ""}
-                    onChange={handleEditChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Role</label>
-                  <select
-                    name="role"
-                    value={editForm.role}
-                    className="form-select"
-                    onChange={handleEditChange}
-                    required
-                  >
-                    <option value="">Select role</option>
+                <div className="col-md-3">
+                  <label className="form-label small fw-bold text-dark">Role</label>
+                  <select name="role" value={filters.role} onChange={handleFilterChange} className="form-select bg-light border-0">
+                    <option value="">All Roles</option>
                     <option value="admin">Admin</option>
                     <option value="doctor">Doctor</option>
                     <option value="nurse">Nurse</option>
                     <option value="patient">Patient</option>
                     <option value="receptionist">Receptionist</option>
-                    <option value="manager">Manager</option>
                   </select>
                 </div>
-
-                {/* Pola pacjenta */}
-                {editForm.role === "patient" && (
-                  <>
-                    <div className="mb-3">
-                      <label className="form-label">PESEL</label>
-                      <input
-                        type="text"
-                        name="pesel"
-                        className="form-control"
-                        value={editForm.pesel || ""}
-                        onChange={handleEditChange}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Birth Date</label>
-                      <input
-                        type="date"
-                        name="birth_date"
-                        className="form-control"
-                        value={editForm.birth_date || ""}
-                        onChange={handleEditChange}
-                        required
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* Pola lekarza */}
-                {editForm.role === "doctor" && (
-                  <>
-                    <div className="mb-3">
-                      <label className="form-label">Specialization</label>
-                      <input
-                        type="text"
-                        name="specialization"
-                        className="form-control"
-                        value={editForm.specialization || ""}
-                        onChange={handleEditChange}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">License Number</label>
-                      <input
-                        type="text"
-                        name="license_number"
-                        className="form-control"
-                        value={editForm.license_number || ""}
-                        onChange={handleEditChange}
-                        required
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div className="d-flex justify-content-end">
-                  <button
-                    type="button"
-                    className="btn btn-secondary me-2"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    Save Changes
-                  </button>
-                </div>
-              </form>
+              </div>
             </div>
+
+            {/* Table Area */}
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary"></div>
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-5 bg-light rounded-3 border border-dashed">
+                <p className="text-muted mb-0">No users found matching your criteria.</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle border-top">
+                  <thead className="text-uppercase small fw-bold text-muted">
+                    <tr>
+                      <th className="py-3 border-0">User Details</th>
+                      <th className="py-3 border-0">Role</th>
+                      <th className="py-3 border-0">Contact</th>
+                      <th className="py-3 border-0 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((u) => (
+                      <tr key={u.user_id}>
+                        <td className="py-3">
+                          <div className="fw-bold text-dark">{u.first_name} {u.last_name}</div>
+                          <div className="small text-muted">{u.email}</div>
+                        </td>
+                        <td className="py-3">
+                          <span className={`badge rounded-pill px-3 py-2 ${
+                            u.role === 'admin' ? 'bg-danger-subtle text-danger' :
+                            u.role === 'doctor' ? 'bg-primary-subtle text-primary' :
+                            u.role === 'patient' ? 'bg-success-subtle text-success' : 'bg-light text-dark'
+                          }`}>
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="py-3 small text-dark">{u.phone || "-"}</td>
+                        <td className="py-3 text-end">
+                          <button className="btn btn-sm btn-white border shadow-sm rounded-pill px-3" onClick={() => handleEditClick(u)}>
+                            <i className="bi bi-pencil-square me-1"></i> Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Edit Modal Overlay */}
+      {showEditModal && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 1060,
+            backdropFilter: "blur(4px)"
+          }}
+          onClick={() => setShowEditModal(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') setShowEditModal(false); }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close modal"
+        >
+          <div
+            className="rounded-4 shadow-lg p-4 w-100 overflow-auto border border-white border-opacity-10"
+            style={{
+              maxWidth: "550px",
+              maxHeight: "90vh",
+              backgroundColor: "var(--card-bg, #ffffff)",
+              color: "var(--text-color, #212529)",
+              backdropFilter: "blur(10px)"
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h4 className="fw-bold mb-0">Edit User</h4>
+              <button
+                className="btn-close"
+                style={{ filter: "var(--close-button-filter, none)" }}
+                onClick={() => setShowEditModal(false)}
+              ></button>
+            </div>
+
+            <form onSubmit={handleEditSubmit}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold small opacity-75">First Name</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    className="form-control bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.first_name}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-bold small opacity-75">Last Name</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    className="form-control bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.last_name}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-bold small opacity-75">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-control bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.email}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-bold small opacity-75">Role</label>
+                  <select
+                    name="role"
+                    className="form-select bg-light bg-opacity-10 border-opacity-25"
+                    value={editForm.role}
+                    onChange={handleEditChange}
+                    required
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="patient">Patient</option>
+                    <option value="receptionist">Receptionist</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-top border-opacity-10 d-flex justify-content-end gap-2">
+                <button type="button" className="btn btn-light bg-opacity-10 rounded-pill px-4" onClick={() => setShowEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary rounded-pill px-4 shadow-sm">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

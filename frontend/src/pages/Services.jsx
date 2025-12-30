@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 
 const Services = () => {
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-light d-flex flex-column">
       <Navbar />
       <div className="container py-5">
         <h1 className="display-6">Services</h1>
@@ -18,7 +18,9 @@ const Services = () => {
           <li className="mb-2">• Medical Examinations</li>
         </ul>
       </div>
-      <Footer />
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 };

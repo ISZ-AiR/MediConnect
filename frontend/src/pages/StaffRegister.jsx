@@ -24,6 +24,20 @@ const StaffRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  const DOCTOR_SPECIALIZATIONS = [
+    "Cardiologist",
+    "Dermatologist",
+    "Endocrinologist",
+    "Family Medicine",
+    "Gastroenterologist",
+    "Gynecologist",
+    "Neurologist",
+    "Orthopedist",
+    "Pediatrician",
+    "Psychiatrist",
+    "Radiologist",
+    "Surgeon",
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -427,17 +441,20 @@ const StaffRegister = () => {
                             Specialization{" "}
                             <span className="text-danger">*</span>
                           </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="specialization"
+                          <select
+                            className="form-control bg-light border-0 py-2"
                             name="specialization"
-                            placeholder="e.g., Cardiology"
-                            value={formData.specialization}
+                            value={form.specialization}
                             onChange={handleChange}
-                            disabled={loading}
-                            required={formData.role === "doctor"}
-                          />
+                            required
+                          >
+                            <option value="">-- Select specialization --</option>
+                            {DOCTOR_SPECIALIZATIONS.map((spec) => (
+                              <option key={spec} value={spec}>
+                                {spec}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         <div className="col-md-6 mb-3">

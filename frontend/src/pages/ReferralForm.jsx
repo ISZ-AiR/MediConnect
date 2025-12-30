@@ -61,7 +61,6 @@ const ReferralForm = () => {
         // Pobierz listę badań
         const exams = await resourceService.listExaminations();
         setExaminations(exams);
-
       } catch (err) {
         console.error("Referral load error:", err);
         setError("Failed to load data");
@@ -75,7 +74,7 @@ const ReferralForm = () => {
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -110,30 +109,33 @@ const ReferralForm = () => {
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-vh-100 bg-light">
-        <Navbar />
-        <div className="container py-5 text-center">
-          <div className="spinner-border text-warning" role="status" />
-        </div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
       </div>
     );
-  }
 
   return (
     <div className="min-vh-100 bg-light">
       <Navbar />
       <div className="container py-5">
         <div className="card shadow-sm border-0 p-5 text-center">
-          <i className="bi bi-file-earmark-medical text-warning" style={{ fontSize: "3rem" }}></i>
-          <h2 className="fw-bold mt-3 mb-3">{isEdit ? "Edit Referral" : "Add Referral"}</h2>
+          <i
+            className="bi bi-file-earmark-medical text-warning"
+            style={{ fontSize: "3rem" }}
+          ></i>
+          <h2 className="fw-bold mt-3 mb-3">
+            {isEdit ? "Edit Referral" : "Add Referral"}
+          </h2>
 
           {error && <div className="alert alert-danger">{error}</div>}
 
           <div className="text-start mt-4">
             <div className="mb-3">
-              <label htmlFor="examination_id" className="form-label">Examination</label>
+              <label htmlFor="examination_id" className="form-label">
+                Examination
+              </label>
               <select
                 id="examination_id"
                 name="examination_id"
@@ -143,7 +145,7 @@ const ReferralForm = () => {
                 required
               >
                 <option value="">Select Examination</option>
-                {examinations.map(exam => (
+                {examinations.map((exam) => (
                   <option key={exam.examination_id} value={exam.examination_id}>
                     {exam.name}
                   </option>

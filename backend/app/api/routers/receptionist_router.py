@@ -48,15 +48,30 @@ async def create_receptionist(receptionist: ReceptionistCreate, db: AsyncSession
 
 
 # ----- READ ALL -----
-@router.get("/", response_model=list[ReceptionistModel])
+@router.get("/", response_model=list[dict])  # Zmieniamy na list[dict]
 async def get_all_receptionists(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role_with_user(["admin"]))
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(require_role_with_user(["admin"]))
 ):
-    """Get a list of all receptionists (admin only)."""
-    result = await db.execute(select(Receptionist))
-    receptionists = result.scalars().all()
-    return receptionists
+    """Get a list of all receptionists with user data."""
+    result = await db.execute(
+        select(Receptionist, User)
+        .join(User, User.user_id == Receptionist.user_id)
+    )
+    rows = result.all()
+
+    receptionists_data = []
+    for receptionist, user in rows:
+        receptionists_data.append({
+            "receptionist_id": receptionist.receptionist_id,
+            "user_id": receptionist.user_id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "phone": user.phone
+        })
+
+    return receptionists_data
 
 
 # ----- READ ONE -----

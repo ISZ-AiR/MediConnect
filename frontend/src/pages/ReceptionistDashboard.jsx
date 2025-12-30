@@ -9,17 +9,37 @@ const ReceptionistDashboard = () => {
     <div className="min-vh-100 bg-light">
       <Navbar />
       <div className="container py-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h1 className="display-5 fw-bold">Receptionist Dashboard</h1>
-            <p className="text-muted">Welcome, {user?.email}</p>
+{/* Receptionist Header Tile */}
+        <div className="card border-0 shadow-sm mb-5">
+          <div className="card-body p-4 p-md-5 bg-white rounded-3">
+            <div className="row align-items-center">
+              <div className="col-md-8">
+                <div className="d-flex align-items-center">
+                  <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
+                    <i className="bi bi-person-workspace text-primary fs-1"></i>
+                  </div>
+                  <div>
+                    <h1 className="display-6 fw-bold text-dark mb-1">Receptionist Dashboard</h1>
+                    <p className="text-muted mb-0">
+                      Welcome back, <span className="fw-semibold text-primary">{user?.email}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                <span className="badge bg-primary px-3 rounded-pill mt-1">
+                      <i className="bi bi-shield-lock me-2"></i>
+                  {user?.role || 'Receptionist'}
+                    </span>
+              </div>
+            </div>
           </div>
         </div>
         <div className="row g-4">
           {/* Reservations */}
 
           <div className="col-md-3">
-            <div className="card border-0 shadow-sm h-100">
+          <div className="card border-0 shadow-sm h-100">
               <div className="card-body text-center p-4">
                 <i className="bi bi-calendar-check text-primary fs-1 mb-3"></i>
                 <h5 className="card-title">Reservations</h5>

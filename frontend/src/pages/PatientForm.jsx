@@ -6,8 +6,22 @@ import { useEditableResource } from "../hooks/useEditableResource";
 import FormField from "../components/FormField";
 
 const PatientForm = () => {
-const { id } = useParams();
-const navigate = useNavigate();
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+const validateBirthDate = () => {
+  if (!form.birth_date) return true;
+
+  const today = new Date();
+  const birthDate = new Date(form.birth_date);
+
+  if (birthDate > today) {
+    alert("Birth date cannot be later than today");
+    return false;
+  }
+
+  return true;
+};
 
 // Stabilne funkcje dla hooka
 const stableLoadFn = useCallback(async (pid) => {
@@ -102,7 +116,7 @@ return ( <div className="min-vh-100 bg-light"> <Navbar /> <div className="contai
                   <FormField name="pesel" label="PESEL" value={form.pesel} onChange={handleChange} className="mb-3"/>
                 </div>
                 <div className="col-md-6">
-                  <FormField type="date" name="birth_date" label="Birth Date" value={form.birth_date} onChange={handleChange} className="mb-3"/>
+                  <FormField type="date" name="birth_date" label="Birth Date" value={form.birth_date} onChange={handleChange} inputProps={{max: new Date().toISOString().split("T")[0],}} required className="mb-3"/>
                 </div>
               </div>
 

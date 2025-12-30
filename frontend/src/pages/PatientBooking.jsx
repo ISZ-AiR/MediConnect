@@ -26,6 +26,8 @@ const PatientBooking = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  const [error, setError] = useState(null);
+
   // Load patient
   useEffect(() => {
     (async () => {
@@ -128,20 +130,14 @@ const PatientBooking = () => {
     }
   };
 
-  if (!patient) {
+  if (loading)
     return (
-      <div className="min-vh-100 bg-light">
-        <Navbar />
-        <div className="container py-5">
-          <div className="d-flex justify-content-center my-4">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        </div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
       </div>
     );
-  }
+
+  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
     <div className="min-vh-100 bg-light">
@@ -183,7 +179,7 @@ const PatientBooking = () => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
-                  <div className="bg-light border rounded p-4 mb-4">
+                  <div className="mb-4">
                     {/* Specialization */}
                     <div className="mb-4">
                       <label className="form-label fw-semibold text-secondary small mb-2 d-block">
@@ -191,18 +187,18 @@ const PatientBooking = () => {
                         Doctor Specialization *
                       </label>
                       <Typeahead
-                        id="specialization"
-                        labelKey={(o) => o}
-                        options={specializations}
-                        placeholder="Select or type specialization..."
-                        onChange={(selected) => {
-                          setSpecialization(selected[0] || "");
-                          setFormDoctor("");
-                          setSelectedDate("");
-                          setSelectedSlot("");
-                        }}
-                        selected={specialization ? [specialization] : []}
-                        clearButton
+                          id="specialization"
+                          labelKey={(o) => o}
+                          options={specializations}
+                          placeholder="Select or type specialization..."
+                          onChange={(selected) => {
+                            setSpecialization(selected[0] || "");
+                            setFormDoctor("");
+                            setSelectedDate("");
+                            setSelectedSlot("");
+                          }}
+                          selected={specialization ? [specialization] : []}
+                          clearButton
                       />
                     </div>
 
@@ -213,81 +209,81 @@ const PatientBooking = () => {
                         Doctor *
                       </label>
                       <Typeahead
-                        id="doctor"
-                        labelKey={(d) => `${d.first_name} ${d.last_name}`}
-                        options={filteredDoctors}
-                        placeholder={
-                          specialization
-                            ? "Select or type doctor name..."
-                            : "Please select specialization first"
-                        }
-                        onChange={(selected) => {
-                          const val = selected[0]?.doctor_id || "";
-                          setFormDoctor(val);
-                          setSelectedDate("");
-                          setSelectedSlot("");
-                        }}
-                        selected={
-                          formDoctor
-                            ? filteredDoctors.filter(
-                                (d) => d.doctor_id === Number(formDoctor)
-                              )
-                            : []
-                        }
-                        clearButton
-                        disabled={!specialization}
+                          id="doctor"
+                          labelKey={(d) => `${d.first_name} ${d.last_name}`}
+                          options={filteredDoctors}
+                          placeholder={
+                            specialization
+                                ? "Select or type doctor name..."
+                                : "Please select specialization first"
+                          }
+                          onChange={(selected) => {
+                            const val = selected[0]?.doctor_id || "";
+                            setFormDoctor(val);
+                            setSelectedDate("");
+                            setSelectedSlot("");
+                          }}
+                          selected={
+                            formDoctor
+                                ? filteredDoctors.filter(
+                                    (d) => d.doctor_id === Number(formDoctor)
+                                )
+                                : []
+                          }
+                          clearButton
+                          disabled={!specialization}
                       />
                     </div>
 
                     {/* Date */}
                     {formDoctor && (
-                      <div className="mb-4">
-                        <label className="form-label fw-semibold text-secondary small mb-2 d-block">
-                          <i className="bi bi-calendar-event me-1"></i>
-                          Select Date *
-                        </label>
-                        <DatePicker
-                          selected={
-                            selectedDate
-                              ? new Date(selectedDate + "T00:00:00")
-                              : null
-                          }
-                          onChange={(date) => {
-                            if (date) {
-                              const year = date.getFullYear();
-                              const month = String(
-                                date.getMonth() + 1
-                              ).padStart(2, "0");
-                              const day = String(date.getDate()).padStart(
-                                2,
-                                "0"
-                              );
-                              setSelectedDate(`${year}-${month}-${day}`);
-                              setSelectedSlot("");
-                            }
-                          }}
-                          includeDates={schedules
-                            .filter(
-                              (s) => Number(s.doctor_id) === Number(formDoctor)
-                            )
-                            .map(
-                              (s) => new Date(s.schedule_date + "T00:00:00")
-                            )}
-                          dateFormat="dd-MM-yyyy"
-                          placeholderText="Select available date..."
-                          className="form-control"
-                          minDate={new Date()}
-                        />
-                        {formDoctor &&
-                          schedules.filter(
-                            (s) => Number(s.doctor_id) === Number(formDoctor)
-                          ).length === 0 && (
-                            <small className="text-muted d-block mt-2">
-                              <i className="bi bi-info-circle me-1"></i>
-                              No schedules available for this doctor
-                            </small>
-                          )}
-                      </div>
+                        <div className="mb-4">
+                          <label className="form-label fw-semibold text-secondary small mb-2 d-block">
+                            <i className="bi bi-calendar-event me-1"></i>
+                            Select Date *
+                          </label>
+                          <DatePicker
+                              selected={
+                                selectedDate
+                                    ? new Date(selectedDate + "T00:00:00")
+                                    : null
+                              }
+                              onChange={(date) => {
+                                if (date) {
+                                  const year = date.getFullYear();
+                                  const month = String(
+                                      date.getMonth() + 1
+                                  ).padStart(2, "0");
+                                  const day = String(date.getDate()).padStart(
+                                      2,
+                                      "0"
+                                  );
+                                  setSelectedDate(`${year}-${month}-${day}`);
+                                  setSelectedSlot("");
+                                }
+                              }}
+                              includeDates={schedules
+                                  .filter(
+                                      (s) => Number(s.doctor_id) === Number(formDoctor)
+                                  )
+                                  .map(
+                                      (s) => new Date(s.schedule_date + "T00:00:00")
+                                  )}
+                              dateFormat="dd-MM-yyyy"
+                              placeholderText="Select available date..."
+                              className="form-control"
+                              minDate={new Date()}
+                          />
+                          {formDoctor &&
+                              schedules.filter(
+                                  (s) => Number(s.doctor_id) === Number(formDoctor)
+                              ).length === 0 && (
+                                  <small className="text-muted d-block mt-2">
+                                    <i className="bi bi-info-circle me-1"></i>
+                                    No schedules available for this doctor
+                                  </small>
+                              )}
+                        </div>
                     )}
 
                     <div className="mt-3">

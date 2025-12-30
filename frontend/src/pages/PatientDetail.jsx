@@ -51,9 +51,8 @@ const PatientDetail = () => {
 
   if (loading)
     return (
-      <div className="min-vh-100">
-        <Navbar />
-        <div className="container py-5">Loading...</div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
       </div>
     );
 

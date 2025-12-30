@@ -2,25 +2,32 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
+  const { theme } = useTheme();
 
-  return (
-    <div className="min-vh-100 bg-light">
+return (
+    <div className="min-vh-100">
       <Navbar />
 
       <div className="container py-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h1 className="display-5 fw-bold">Doctor Dashboard</h1>
-            <p className="text-muted">Welcome, {user?.email}</p>
-          </div>
-          <div>
-            <span className="badge bg-success fs-6">
-              <i className="bi bi-person-badge me-2"></i>
-              Doctor
-            </span>
+
+        <div className="card border-0 shadow-sm mb-4">
+          <div className="card-body p-4 d-flex justify-content-between align-items-center">
+            <div>
+              <h1 className="display-6 fw-bold mb-1">Doctor Dashboard</h1>
+              <p className={`mb-0 ${theme === 'dark' ? 'text-light opacity-75' : 'text-muted'}`}>
+                Welcome back, <span className="fw-semibold text-primary">{user?.email}</span>
+              </p>
+            </div>
+            <div className="text-end">
+              <span className="badge bg-success bg-opacity-75 p-2 px-3 fs-6 shadow-sm">
+                <i className="bi bi-person-badge me-2"></i>
+                Doctor Role
+              </span>
+            </div>
           </div>
         </div>
 

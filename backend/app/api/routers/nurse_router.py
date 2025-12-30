@@ -7,6 +7,7 @@ from passlib.hash import bcrypt
 from schemas.nurse_schema import NurseCreate, NurseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 router = APIRouter(
     prefix="/nurse",
@@ -59,15 +60,29 @@ async def get_my_nurse(
     return nurse
 
 
-@router.get("/", response_model=list[NurseModel])
+@router.get("/", response_model=list[dict])
 async def get_all_nurses(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role_with_user(
-        ["admin", "receptionist", "patient", "doctor", "nurse"]))
+    current_user: User = Depends(require_role_with_user(["admin", "receptionist", "patient", "doctor", "nurse"]))
 ):
-    result = await db.execute(select(Nurse))
-    nurses = result.scalars().all()
+    result = await db.execute(
+        select(Nurse, User)
+        .join(User, User.user_id == Nurse.user_id)
+    )
+    rows = result.all()
+
+    nurses = []
+    for nurse, user in rows:
+        nurses.append({
+            "nurse_id": nurse.nurse_id,
+            "user_id": nurse.user_id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "phone": user.phone
+        })
     return nurses
+
 
 
 @router.get("/{nurse_id}", response_model=NurseModel)

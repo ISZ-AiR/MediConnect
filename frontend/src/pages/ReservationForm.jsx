@@ -167,7 +167,12 @@ const ReservationForm = () => {
     }
   }, [form.doctor_id, selectedDate, schedules]);
 
-  if (loadingDropdowns) return <p>Loading form...</p>;
+  if (loadingDropdowns)
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
+      </div>
+    );
 
   return (
     <div className="min-vh-100 bg-light">

@@ -167,8 +167,8 @@ const ReservationsList = () => {
           </div>
           {/* Table */}
           {loading && (
-            <div className="text-center">
-              <div className="spinner-border text-primary" role="status"></div>
+            <div className="text-center py-5">
+              <div className="spinner-border text-warning"></div>
             </div>
           )}
           {error && <div className="alert alert-danger">{error}</div>}

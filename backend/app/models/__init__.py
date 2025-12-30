@@ -9,4 +9,5 @@ from .referral_model import Referral
 from .reservation_model import Reservation
 from .schedule_model import Schedule
 from .user_model import User
+from .user_settings_model import UserSettings
 from .visit_model import Visit

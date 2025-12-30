@@ -82,7 +82,14 @@ const ScheduleChart = () => {
     })
     .filter(Boolean);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
+      </div>
+    );
+
+  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
     <div style={{ width: "100%", height: 600 }}>

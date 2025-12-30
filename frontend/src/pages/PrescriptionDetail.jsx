@@ -48,11 +48,8 @@ const PrescriptionDetail = () => {
 
   if (loading)
     return (
-      <div className="min-vh-100 bg-light">
-        <Navbar />
-        <div className="container py-5 text-center">
-          <div className="spinner-border text-warning" role="status" />
-        </div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-warning"></div>
       </div>
     );
 

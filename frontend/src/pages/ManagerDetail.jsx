@@ -42,7 +42,11 @@ const ManagerDetail = () => {
       <Navbar />
       <div className="container py-5">
         <h2 className="mb-4">Manager Details</h2>
-        {loading && <div className="spinner-border" role="status" />}
+        {loading && (
+          <div className="text-center py-5">
+            <div className="spinner-border text-warning"></div>
+          </div>
+        )}
         {error && <div className="alert alert-danger">{error}</div>}
         {!loading && !error && item && (
           <div className="card">
